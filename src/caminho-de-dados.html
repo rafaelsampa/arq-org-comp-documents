@@ -1,0 +1,2575 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Caminho de Dados MIPS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Quadro branco do professor: azul = dados, vermelho = controle, âmbar = registrador escrito no ciclo */
+:root{
+  --bg:#e9edf2; --panel:#fbfcfd; --ink:#18202e; --muted:#566072; --faint:#a3adbb; --line:#c4cbd5; --rule:#d8dde5;
+  --data:#1d4ed8; --data-soft:rgba(29,78,216,.10); --ctrl:#c0303b; --ctrl-soft:rgba(192,48,59,.09);
+  --write:#a86b12; --write-soft:rgba(214,150,40,.16); --on-ctrl:#ffffff; --go:#14803c;
+  --f-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1218; --panel:#151a22; --ink:#e3e7ee; --muted:#98a1b0; --faint:#5a6474; --line:#333b48; --rule:#252c37;
+  --data:#7fa4ff; --data-soft:rgba(127,164,255,.12); --ctrl:#ff7a83; --ctrl-soft:rgba(255,122,131,.10);
+  --write:#f2b84b; --write-soft:rgba(242,184,75,.13); --on-ctrl:#151a22; --go:#4ade80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1218; --panel:#151a22; --ink:#e3e7ee; --muted:#98a1b0; --faint:#5a6474; --line:#333b48; --rule:#252c37;
+  --data:#7fa4ff; --data-soft:rgba(127,164,255,.12); --ctrl:#ff7a83; --ctrl-soft:rgba(255,122,131,.10);
+  --write:#f2b84b; --write-soft:rgba(242,184,75,.13); --on-ctrl:#151a22; --go:#4ade80; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-sans);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.page{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-cond);text-wrap:balance;margin:0;letter-spacing:.005em}
+h1{font-size:clamp(28px,4vw,40px);font-weight:700;line-height:1.05}
+h2{font-size:19px;font-weight:600}
+h3{font-size:15px;font-weight:600}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);max-width:62ch;margin-top:6px}
+
+.top{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;justify-content:space-between}
+.times{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px 14px}
+.times .eyebrow{width:100%}
+.times label{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:13px}
+.times input{width:58px;font:inherit;font-family:var(--f-mono);padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+
+.tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:4px;width:max-content;max-width:100%}
+.tab{font:600 15px var(--f-cond);padding:8px 18px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--panel)}
+.tab:focus-visible,.chip:focus-visible,.pill:focus-visible,.btn:focus-visible{outline:2px solid var(--data);outline-offset:2px}
+
+.picker{display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 13px var(--f-mono);padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--data);background:var(--data);color:var(--panel)}
+.asm{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.asm input{flex:1 1 260px;min-width:0;font:500 16px var(--f-mono);padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.asm input:focus{outline:none;border-color:var(--data)}
+.asm .cls{font:500 13px var(--f-mono);color:var(--muted)}
+.asm .err{color:var(--ctrl);font-size:13px}
+
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:12px}
+.diagram{padding:10px 10px 6px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll svg{display:block;width:100%;min-width:920px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;padding:8px 8px 4px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.hwnote{margin:6px 8px 4px;padding:8px 12px;border-left:3px solid var(--data);background:var(--data-soft);border-radius:0 6px 6px 0;font-size:13px;color:var(--ink);max-width:110ch}
+.hwnote b{font-weight:600}
+.sw{display:inline-block;width:22px;height:0;border-top:3px solid var(--data)}
+.sw.off{border-top:2px solid var(--line)}
+.sw.ctl{border-top:2px dashed var(--ctrl)}
+.sw.wr{width:14px;height:12px;border:2px solid var(--write);background:var(--write-soft);border-radius:2px}
+
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px}
+@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel .sub{color:var(--muted);font-size:13.5px}
+
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font:500 12.5px var(--f-sans);padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;text-align:left}
+.pill b{font-family:var(--f-mono);font-weight:600;margin-right:4px}
+.pill[aria-pressed="true"]{background:var(--data-soft);border-color:var(--data);color:var(--ink)}
+.btn{font:600 13px var(--f-sans);padding:6px 12px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:var(--panel);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+
+.explain{border-left:3px solid var(--data);padding:2px 0 2px 12px;display:flex;flex-direction:column;gap:6px}
+.explain .rtl{font:500 14px var(--f-mono);color:var(--data)}
+.explain .unit{font-size:12.5px;color:var(--muted)}
+
+.timeline{display:flex;height:44px;border-radius:7px;overflow:hidden;border:1px solid var(--rule);background:var(--bg)}
+.seg{display:flex;flex-direction:column;justify-content:center;align-items:center;font:500 11.5px var(--f-mono);color:var(--ink);border-right:1px solid var(--panel);min-width:0;overflow:hidden;white-space:nowrap;background:var(--data-soft)}
+.seg.cur{background:var(--data);color:var(--panel)}
+.seg.idle{background:repeating-linear-gradient(135deg,transparent 0 5px,var(--rule) 5px 7px);color:var(--muted)}
+.seg small{font-size:10px;opacity:.85}
+.tline-cap{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13px;color:var(--muted)}
+.tline-cap strong{color:var(--ink);font-family:var(--f-mono);font-weight:600}
+
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:5px 6px;text-align:center;border-bottom:1px solid var(--rule);white-space:nowrap}
+th{font:600 11px var(--f-mono);color:var(--muted);letter-spacing:.02em}
+td:first-child,th:first-child{text-align:left}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tr.cur td{background:var(--data-soft)}
+tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--data);font-weight:600}
+.v1{color:var(--ctrl);font-weight:600}
+.v0{color:var(--muted)}
+.vx{color:var(--faint)}
+.new{font:600 9.5px var(--f-mono);color:var(--write);border:1px solid var(--write);border-radius:4px;padding:0 3px;margin-left:3px}
+
+.fields{display:flex;border:1px solid var(--ink);border-radius:6px;overflow:hidden}
+.fld{display:flex;flex-direction:column;align-items:center;padding:6px 3px;border-right:1px solid var(--ink);min-width:0;gap:1px}
+.fld:last-child{border-right:0}
+.fld .n{font:600 12px var(--f-cond)}
+.fld .r{font:400 10px var(--f-mono);color:var(--muted)}
+.fld .b{font:500 12px var(--f-mono);word-break:break-all;text-align:center;color:var(--data)}
+.fld .d{font:400 11px var(--f-mono);color:var(--muted)}
+.vals{display:flex;flex-wrap:wrap;gap:8px 14px}
+.vals label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.vals input{width:132px;font:500 13px var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.wires td{text-align:left}
+.wires td.bin{color:var(--data);letter-spacing:.02em}
+.wires td.w{color:var(--muted)}
+.wires td.nm{font-family:var(--f-sans);font-weight:600}
+.note{font-size:12.5px;color:var(--muted)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two label{display:flex;flex-direction:column;gap:4px}
+textarea.small{min-height:120px}
+.query{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.q{border:1px solid var(--rule);border-radius:9px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.q label{font:600 13px var(--f-sans);display:flex;align-items:center;gap:8px}
+.q input{width:72px;font:500 14px var(--f-mono);padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.q .btn{align-self:flex-start}
+.qa{font-size:13.5px}
+.qa b{font-family:var(--f-mono);font-weight:600}
+.trace tbody tr{cursor:pointer}
+.trace td,.trace th{text-align:left}
+.sigs{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:4px 10px}
+.sigs span{display:flex;justify-content:space-between;gap:6px;border-bottom:1px solid var(--rule);padding:2px 0;font-size:12px}
+.sigs i{font-style:normal;font-family:var(--f-mono);color:var(--muted)}
+.sigs b{font-family:var(--f-mono)}
+.trace tbody tr:hover td,.trace tbody tr:focus td{background:var(--data-soft)}
+.err{color:var(--ctrl);font-size:13px}
+.conf{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;max-width:95ch}
+.conf li{font-size:14px}
+.prog{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:18px}
+@media (max-width:820px){.prog{grid-template-columns:minmax(0,1fr)}}
+textarea{width:100%;min-height:220px;font:500 13.5px/1.55 var(--f-mono);padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tot{border:1px solid var(--rule);border-radius:9px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.tot .k{font:600 12px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tot .v{font:700 26px var(--f-cond);font-variant-numeric:tabular-nums}
+.tot .f{font:400 12.5px var(--f-mono);color:var(--muted)}
+
+.animbar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:4px 6px 10px;border-bottom:1px solid var(--rule);margin-bottom:6px}
+.animbar .opt{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted)}
+.animbar select{font:500 12.5px var(--f-sans);padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.animbar .clock{margin-left:auto;font:600 12.5px var(--f-mono);color:var(--go);font-variant-numeric:tabular-nums}
+.animbar .msg{flex-basis:100%;font-size:13.5px;min-height:1.5em}
+.orb .core{fill:var(--go)}
+.orb .ring{fill:none;stroke:var(--go);stroke-width:2}
+.orb text{font:600 10px var(--f-mono);fill:var(--go);paint-order:stroke;stroke:var(--panel);stroke-width:3.5px;stroke-linejoin:round}
+.comp.act .sh,.comp.on.act .sh,.comp.write.act .sh{stroke:var(--go);stroke-width:3}
+.badge.flash rect{animation:bflash .65s ease-in-out 2}
+.cw-trunk{fill:none;stroke:var(--ctrl);stroke-width:2.6;opacity:.3;stroke-linejoin:round}
+.cw-own{fill:none;stroke:var(--ctrl);stroke-width:1.2;stroke-dasharray:4 3;opacity:.8;stroke-linejoin:round}
+.cw.v1 .cw-own{stroke-width:2.2;stroke-dasharray:none;opacity:1}
+.cw.vx .cw-own{stroke:var(--faint);stroke-dasharray:1.5 3;opacity:1}
+.cw-hl{fill:none;stroke:var(--ctrl);stroke-width:5;opacity:0;stroke-linecap:round;stroke-linejoin:round}
+.cw.hl .cw-hl{opacity:.32}
+.cw.flash .cw-own{animation:cflash .65s ease-in-out 2}
+@keyframes cflash{50%{stroke-width:3.6;opacity:1}}
+.badge{cursor:default}
+svg.noctrl .cw-trunk,svg.noctrl .cw-own:not(.tail),svg.noctrl .cw-hl:not(.tail),svg.noctrl .ctl-label{display:none}
+.lbl.ctl{fill:var(--ctrl)}
+.wire.ctl .w-base{stroke:var(--ctrl);opacity:.5;stroke-dasharray:4 3}
+.wire.ctl.on .w-base{stroke:var(--ctrl);opacity:1;stroke-dasharray:none;stroke-width:2.2}
+.wire.ctl.on.z .w-base{stroke-dasharray:4 3;stroke-width:1.4}
+.tag rect{fill:var(--panel);stroke:var(--data);stroke-width:1.1}
+.tag text{font:600 9.5px var(--f-mono);fill:var(--data)}
+.tag.n rect{stroke-dasharray:3 2}
+.tag.n text{fill:var(--ink)}
+.tag.w rect{stroke:var(--write)}
+.tag.w text{fill:var(--write)}
+.tag.c rect{stroke:var(--ctrl)}
+.tag.c text{fill:var(--ctrl)}
+.lupa-btn{cursor:pointer}
+.lupa-btn rect{fill:var(--panel);stroke:var(--ink);stroke-width:1.2}
+.lupa-btn circle,.lupa-btn path{fill:none;stroke:var(--ink);stroke-width:1.4}
+.lupa-btn text{font:600 9.5px var(--f-sans);fill:var(--ink)}
+.lupa-btn:hover rect,.lupa-btn:focus-visible rect{fill:var(--data-soft);stroke:var(--data)}
+.lupa-btn:focus{outline:none}
+dialog.lupa{width:min(1040px,calc(100vw - 24px));max-height:calc(100vh - 24px);border:1px solid var(--rule);border-radius:12px;background:var(--panel);color:var(--ink);padding:16px;overflow:auto}
+dialog.lupa::backdrop{background:rgba(10,14,20,.55)}
+.lupa-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.lupa .scroll svg{min-width:780px}
+.lupa-notes{margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.lz text{font-family:var(--f-mono);font-size:10px;fill:var(--muted)}
+.lz .t{fill:var(--ink);font-weight:600;font-family:var(--f-sans);font-size:12px}
+.lz .sh{fill:var(--panel);stroke:var(--faint);stroke-width:1.3}
+.lz .w{fill:none;stroke:var(--line);stroke-width:1}
+.lz .fan{fill:none;stroke:var(--line);stroke-width:.8;opacity:.6}
+.lz .on{stroke:var(--data);stroke-width:2;opacity:1}
+.lz .ign{stroke:var(--data);stroke-width:1.4;stroke-dasharray:4 3;opacity:.8}
+.lz .wr{stroke:var(--write);stroke-width:2;opacity:1}
+.lz .c1{stroke:var(--ctrl);stroke-width:2}
+.lz .c0{stroke:var(--ctrl);stroke-width:1.2;stroke-dasharray:4 3}
+.lz .row{fill:var(--panel);stroke:var(--rule);stroke-width:1}
+.lz .row.r{stroke:var(--data);stroke-width:1.8}
+.lz .row.ri{stroke:var(--data);stroke-width:1.3;stroke-dasharray:3 2}
+.lz .row.d{stroke:var(--write);stroke-width:2;fill:var(--write-soft)}
+.lz .row.d.r{stroke:var(--data)}
+.lz .rn{fill:var(--faint)}
+.lz .rv{fill:var(--ink)}
+.lz .rq{fill:var(--faint)}
+.lz .vOn{fill:var(--data);font-weight:600}
+.lz .vWr{fill:var(--write);font-weight:600}
+.lz .vCt{fill:var(--ctrl);font-weight:600}
+.lz .dot{fill:var(--line)}
+.lz .dot.wr{fill:var(--write)}
+.lz .dot.c{fill:var(--ctrl)}
+.lz .cell{fill:var(--panel);stroke:var(--rule);stroke-width:1}
+.lz .cell.r{stroke:var(--data);stroke-width:1.6}
+.lz .cell.ri{stroke:var(--data);stroke-width:1.3;stroke-dasharray:3 2}
+.lz .cell.d{stroke:var(--write);stroke-width:1.8;fill:var(--write-soft)}
+.lz .ct{font-size:11px;fill:var(--ink)}
+.lz .warn{fill:var(--ctrl);font-weight:600}
+.lz .tri{fill:var(--panel);stroke:var(--faint);stroke-width:1.3}
+.lz .tri.on{stroke:var(--data);stroke-width:1.8}
+@keyframes bflash{50%{stroke-width:3.5;stroke:var(--go)}}
+/* SVG */
+svg text{font-family:var(--f-mono)}
+.w-base{fill:none;stroke:var(--line);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.w-flow{fill:none;stroke:none;stroke-width:1.3;stroke-dasharray:2 16;stroke-linecap:round;opacity:.8}
+.wire.on .w-base{stroke:var(--data);stroke-width:2.5}
+.wire.now .w-flow{stroke:var(--panel);animation:flow 1.1s linear infinite}
+.wire.now .w-base{stroke-width:3.4}
+@keyframes flow{to{stroke-dashoffset:-18}}
+@media (prefers-reduced-motion:reduce){.wire.now .w-flow{animation:none;stroke:none}}
+.dot{fill:var(--line)}
+.dot.on{fill:var(--data)}
+.comp .sh{fill:var(--panel);stroke:var(--faint);stroke-width:1.4}
+.comp text{fill:var(--faint)}
+.comp.on .sh{stroke:var(--ink);stroke-width:1.8}
+.comp.on text{fill:var(--ink)}
+.comp.write .sh{stroke:var(--write);stroke-width:2.6;fill:var(--write-soft)}
+.comp .t1{font:600 12.5px var(--f-cond)}
+.comp .t2{font-size:9.5px}
+.comp .op{font:700 13px var(--f-mono);fill:var(--data)}
+.lbl{font-size:9.5px;fill:var(--muted)}
+.lbl.bits{fill:var(--faint);font-size:9px}
+.badge rect{fill:var(--panel);stroke:var(--ctrl);stroke-width:1.2}
+.badge text{font-size:10px;fill:var(--ctrl);font-weight:500}
+.badge.v1 rect{fill:var(--ctrl)}
+.badge.v1 text{fill:var(--on-ctrl);font-weight:600}
+.badge.vx rect{stroke:var(--faint);stroke-dasharray:3 2}
+.badge.vx text{fill:var(--faint)}
+.badge.v0{opacity:.75}
+.stub{fill:none;stroke:var(--ctrl);stroke-width:1.2;stroke-dasharray:3 3}
+.wtag{font:600 9px var(--f-mono);fill:var(--write)}
+.fsm circle{fill:var(--panel);stroke:var(--faint);stroke-width:1.4}
+.fsm .n{font:600 12px var(--f-mono);fill:var(--faint)}
+.fsm .c{font-size:10px;fill:var(--faint)}
+.fsm line,.fsm path{stroke:var(--line);stroke-width:1.3;fill:none}
+.fsm .new circle{stroke-dasharray:4 3}
+.fsm .exc circle{stroke:var(--ctrl);stroke-dasharray:1.5 3}
+.fsm .exc .n{fill:var(--ctrl)}
+.fsm .on circle{stroke:var(--data);stroke-width:2}
+.fsm .on .n,.fsm .on .c{fill:var(--ink)}
+.fsm .cur circle{fill:var(--data)}
+.fsm .cur .n{fill:var(--panel)}
+.fsm .eon{stroke:var(--data);stroke-width:2.2}
+.fsm .el{font-size:9px;fill:var(--muted)}
+table.eqs td{font-family:var(--f-mono);text-align:left}
+table.eqs td:nth-child(odd){font-family:var(--f-sans);font-weight:600}
+</style>
+
+<div class="page">
+  <header class="top">
+    <div>
+      <p class="eyebrow">Arquitetura e Organização de Computadores II · UNICAP</p>
+      <h1>Caminho de Dados MIPS</h1>
+      <p class="lede">Escolha uma instrução e veja quais fios conduzem, o valor de cada sinal de controle e quanto tempo cada etapa custa, no monociclo e no multiciclo.</p>
+    </div>
+    <div class="times">
+      <span class="eyebrow">Tempos das unidades (ns)</span>
+      <label for="tM">Memória <input id="tM" type="number" min="0" step="0.5" value="2"></label>
+      <label for="tR">Registradores <input id="tR" type="number" min="0" step="0.5" value="1"></label>
+      <label for="tA">ULA <input id="tA" type="number" min="0" step="0.5" value="2"></label>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabMono" role="tab" aria-selected="true">Monociclo</button>
+    <button class="tab" id="tabMulti" role="tab" aria-selected="false">Multiciclo</button>
+  </div>
+
+  <section class="picker">
+    <div class="chips" id="chips"></div>
+    <div class="asm">
+      <input id="asm" type="text" spellcheck="false" autocomplete="off" value="add $t0, $t1, $t2" aria-label="Instrução em assembly">
+      <span class="cls" id="clsInfo"></span>
+      <span class="err" id="asmErr" hidden></span>
+    </div>
+  </section>
+
+  <section id="viewMono" class="page">
+    <div class="card diagram">
+      <div class="scroll"><svg id="svgMono" viewBox="0 0 1110 640" role="img" aria-label="Caminho de dados monociclo"></svg></div>
+      <div class="legend">
+        <span><i class="sw"></i>valor que afeta o resultado desta instrução</span>
+        <span><i class="sw off"></i>valor presente no fio, mas ignorado nesta instrução</span>
+        <span><svg width="30" height="14" viewBox="0 0 30 14" aria-hidden="true"><path d="M2,10 H10 A5,5 0 0 1 20,10 H28" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15,1 V14" stroke="currentColor" stroke-width="1.6"/></svg>fio pula: cruza sem conectar</span>
+        <span><svg width="16" height="14" viewBox="0 0 16 14" aria-hidden="true"><path d="M1,7 H15 M8,7 V14" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="7" r="3" fill="currentColor"/></svg>bolinha: fios conectados</span>
+        <span><i class="sw ctl"></i>etiqueta do sinal (cheia = 1, contorno = 0, tracejada = X)</span>
+        <span><svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true"><path d="M1,5 H29" stroke="var(--ctrl)" stroke-width="2.2"/></svg>fio de controle = 1</span>
+        <span><svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true"><path d="M1,5 H29" stroke="var(--ctrl)" stroke-width="1.2" stroke-dasharray="4 3"/></svg>fio de controle = 0</span>
+        <span><svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true"><path d="M1,5 H29" stroke="var(--faint)" stroke-width="1.2" stroke-dasharray="1.5 3"/></svg>fio de controle = X</span>
+        <span><svg width="44" height="14" viewBox="0 0 44 14" aria-hidden="true"><rect x="1" y="1" width="42" height="12" rx="3" fill="none" stroke="var(--ink)" stroke-dasharray="3 2"/><text x="22" y="10" text-anchor="middle" font-size="8.5" font-family="var(--f-mono)" fill="currentColor">nº $t1</text></svg>número do registrador (5 bits), não o valor</span>
+        <span><svg width="44" height="14" viewBox="0 0 44 14" aria-hidden="true"><rect x="1" y="1" width="42" height="12" rx="3" fill="none" stroke="var(--data)"/><text x="22" y="10" text-anchor="middle" font-size="8.5" font-family="var(--f-mono)" fill="var(--data)">0x…</text></svg>valor que passa no fio</span>
+      </div>
+      <p class="hwnote"><b>Fios de controle.</b> Saem da U.C. pelo feixe vermelho (cada sinal é um fio separado; o feixe é só desenho agrupado). Passe o mouse numa etiqueta para destacar o caminho daquele sinal. O funct [5-0] é dado da instrução, não controle: ele entra na U.C. da ULA junto com o ALUOp, e a U.C. da ULA gera o controle de 3 bits da ULA. O botão "ver" no banco abre a lupa.</p>
+      <p class="hwnote"><b>Como ler o destaque.</b> No hardware nada "acende": todo fio carrega algum valor em todo ciclo. Os 32 bits da instrução chegam a todos os destinos sempre. Num tipo R, o campo [15-0] passa pela extensão de sinal mesmo assim; num LW, o [5-0] chega à U.C. da ULA mesmo assim. Quem decide qual valor conta são os sinais de controle (muxes, RegWrite, MemWrite, MemRead). O azul marca só os caminhos cujo valor chega ao resultado; o tronco da instrução fica azul até o último campo usado.</p>
+    </div>
+    <div class="grid">
+      <article class="card panel">
+        <div><h2>Passo a passo dentro do ciclo</h2><p class="sub">No monociclo tudo acontece num ciclo só. As fases mostram a ordem em que o sinal atravessa as unidades.</p></div>
+        <div class="pills" id="monoPhases"></div>
+        <div class="explain" id="monoExplain"></div>
+        <div>
+          <div class="timeline" id="monoTimeline"></div>
+          <div class="tline-cap" id="monoTcap" style="margin-top:8px"></div>
+        </div>
+        <div class="tbl-wrap"><table id="monoTimes"></table></div>
+      </article>
+      <article class="card panel">
+        <div><h2>Sinais de controle</h2><p class="sub">Tabela do quadro, com a linha da instrução atual marcada.</p></div>
+        <div class="tbl-wrap"><table id="monoSig"></table></div>
+        <p class="note">* ALUOp livre. O padrão fixo do professor é só 000 (lw/sw, soma), 001 (beq/bne, subtração) e 010 (tipo-R, usa o funct). Para ANDi, ORi, SLTi e LUi você escolhe qualquer código ainda não usado e declara na resposta; ele mesmo já usou 011 e 100 para o ORi em aulas diferentes.</p>
+        <div><h3>U.C. da ULA</h3><p class="sub" id="aluNote"></p></div>
+        <div class="tbl-wrap"><table id="aluTbl"></table></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="viewMulti" class="page" hidden>
+    <div class="card diagram">
+      <div class="scroll"><svg id="svgMulti" viewBox="0 0 1110 640" role="img" aria-label="Caminho de dados multiciclo"></svg></div>
+      <div class="legend">
+        <span><i class="sw"></i>fio usado neste ciclo</span>
+        <span><svg width="30" height="14" viewBox="0 0 30 14" aria-hidden="true"><path d="M2,10 H10 A5,5 0 0 1 20,10 H28" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15,1 V14" stroke="currentColor" stroke-width="1.6"/></svg>fio pula: cruza sem conectar</span>
+        <span><svg width="16" height="14" viewBox="0 0 16 14" aria-hidden="true"><path d="M1,7 H15 M8,7 V14" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="7" r="3" fill="currentColor"/></svg>bolinha: fios conectados</span>
+        <span><i class="sw wr"></i>registrador escrito no fim do ciclo</span>
+        <span><i class="sw ctl"></i>sinal da U.C. (cheio = 1, contorno = 0, tracejado = X)</span>
+      </div>
+    </div>
+    <div class="grid">
+      <article class="card panel">
+        <div><h2>Ciclo a ciclo</h2><p class="sub">Cada ciclo usa no máximo uma unidade lenta. O resultado fica guardado em IR, MDR, A, B ou ALUOut para o próximo ciclo.</p></div>
+        <div class="pills" id="multiSteps"></div>
+        <div class="explain" id="multiExplain"></div>
+        <div>
+          <div class="timeline" id="multiTimeline"></div>
+          <div class="tline-cap" id="multiTcap" style="margin-top:8px"></div>
+        </div>
+        <div class="tbl-wrap"><table id="multiCycles"></table></div>
+      </article>
+      <article class="card panel">
+        <div><h2>Máquina de estados</h2><p class="sub">0 a 9 são os do slide 50. 10 e 11 (pontilhados em vermelho) são as exceções dos slides 69-70. 12 a 16 (tracejados) são os que precisam ser criados para tipo-I aritmético, BNE, LB e SB.</p></div>
+        <div class="scroll"><svg id="svgFsm" viewBox="0 0 640 380" style="min-width:520px" role="img" aria-label="Máquina de estados da unidade de controle"></svg></div>
+        <div><h3>Sinais em cada ciclo desta instrução</h3></div>
+        <div class="tbl-wrap"><table id="multiSig"></table></div>
+        <div><h3>Equações da U.C. (slides 51 e 54)</h3><p class="sub">Cada sinal = OU dos estados em que ele vale 1. Só os estados 0 a 9 do slide, com ALUOp em 2 bits como na PLA. 10 estados cabem em 4 bits (S3 S2 S1 S0).</p></div>
+        <div class="tbl-wrap"><table class="eqs">
+          <thead><tr><th>Sinal</th><th>Estados</th><th>Sinal</th><th>Estados</th></tr></thead>
+          <tbody>
+            <tr><td>PCWrite</td><td>S0 + S9</td><td>ALUSrcA</td><td>S2 + S6 + S8</td></tr>
+            <tr><td>PCWriteCond</td><td>S8</td><td>ALUSrcB1</td><td>S1 + S2</td></tr>
+            <tr><td>IorD</td><td>S3 + S5</td><td>ALUSrcB0</td><td>S0 + S1</td></tr>
+            <tr><td>MemRead</td><td>S0 + S3</td><td>ALUOp1</td><td>S6</td></tr>
+            <tr><td>MemWrite</td><td>S5</td><td>ALUOp0</td><td>S8</td></tr>
+            <tr><td>IRWrite</td><td>S0</td><td>PCSource1</td><td>S9</td></tr>
+            <tr><td>MemToReg</td><td>S4</td><td>PCSource0</td><td>S8</td></tr>
+            <tr><td>RegDst</td><td>S7</td><td>RegWrite</td><td>S4 + S7</td></tr>
+          </tbody>
+        </table></div>
+        <p class="note">Próximo estado (slide 51): vai para 0 a partir de S4, S5, S7, S8, S9; vai para 1 a partir de S0; vai para 2 a partir de S1 com Op = lw ou sw; vai para 9 a partir de S1 com Op = j. Atenção: o slide 51 escreve IorD = estado0 + estado5, mas no estado 0 IorD = 0 (o endereço vem do PC). O certo é S3 + S5, como na própria FSM do slide 50.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="card panel" id="bits">
+    <div><h2>Bits e valores nos fios</h2><p class="sub">O que a questão de "conjuntos de bits" pede: a instrução codificada e o valor que passa em cada fio do monociclo. Preencha os valores dos registradores (hex) para ver ULA, endereço e próximo PC.</p></div>
+    <div class="fields" id="fields"></div>
+    <div class="vals" id="vals">
+      <label for="vPC">PC (hex)<input id="vPC" value="FA000000" spellcheck="false"></label>
+      <label for="vRs" id="lRs">valor de Rs (hex)<input id="vRs" value="8AFF0000" spellcheck="false"></label>
+      <label for="vRt" id="lRt">valor de Rt (hex)<input id="vRt" value="00000019" spellcheck="false"></label>
+      <label for="vMem" id="lMem">lido da memória (hex)<input id="vMem" value="0000000C" spellcheck="false"></label>
+    </div>
+    <div class="tbl-wrap"><table class="wires" id="wireTbl"></table></div>
+    <p class="note" id="bitsNote"></p>
+  </section>
+
+  <section class="card panel" id="simSec">
+    <div><h2>Simulador de programa</h2><p class="sub">Cole o código inteiro, com rótulos. O simulador executa seguindo os desvios, numera os ciclos como no quadro ([1-4], [5-8]...) e responde o que acontece no ciclo N. Clique numa linha da execução para abrir a instrução no diagrama com os valores daquele momento.</p></div>
+    <div class="prog">
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <label for="code" class="note">Exemplo do quadro: laço VOLTA/FIM com memória a partir de $a0</label>
+        <textarea id="code" spellcheck="false">addi $t0, $zero, 10
+addi $t1, $zero, 15
+lui  $a0, 0x8000
+addi $a0, $a0, 0x0000
+lw   $s1, 4($a0)
+VOLTA: beq $t0, $s1, FIM
+sw   $t1, 4($a0)
+lw   $s1, 8($a0)
+j    VOLTA
+FIM:</textarea>
+        <div class="two">
+          <label for="memInit" class="note">Memória inicial (endereço hex: valor)<textarea id="memInit" class="small" spellcheck="false">80000000: 5
+80000004: 8
+80000008: 10
+8000000C: 12
+80000010: 22</textarea></label>
+          <label for="regInit" class="note">Registradores iniciais (opcional)<textarea id="regInit" class="small" spellcheck="false" placeholder="$s2 = 4&#10;$t3 = 0x10"></textarea></label>
+        </div>
+        <p class="err" id="simErr" hidden></p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="totals" id="totals"></div>
+        <div class="query">
+          <div class="q">
+            <label for="qMono">Ciclo do monociclo nº <input id="qMono" type="number" min="1" value="10"></label>
+            <div id="qMonoOut"></div>
+          </div>
+          <div class="q">
+            <label for="qMulti">Ciclo do multiciclo nº <input id="qMulti" type="number" min="1" value="21"></label>
+            <div id="qMultiOut"></div>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table id="progTbl" class="trace"></table></div>
+        <div id="finalState" class="note"></div>
+      </div>
+    </div>
+  </section>
+  <section class="card panel" id="confirm">
+    <div><h2>Pontos a confirmar com o professor</h2><p class="sub">O que segue o quadro e os slides está na página como ele faz. Abaixo está o que tive que supor ou que muda de prova para prova.</p></div>
+    <ul class="conf">
+      <li><b>ALUOp de 3 bits (confirmado em sala).</b> Fixos: 000 lw/sw (soma), 001 beq/bne (subtração), 010 tipo-R (usa o funct). Os de ANDi, ORi, SLTi e LUi são livres: a página usa 011, 100, 101 e 110, mas qualquer código não usado vale se você declarar na resposta. Nas provas de 2016 e 2017 a questão traz a própria tabela de 2 bits; aí vale a do enunciado.</li>
+      <li><b>ALUOp no multiciclo.</b> Mostrei com 3 bits para ficar igual ao monociclo. Nos slides e na correção da prova de 2018 aparece com 2 bits (ALUOp1, ALUOp0).</li>
+      <li><b>LUI.</b> Os 4 ciclos vêm do quadro. O ALUOp 110 é um código livre; o que falta confirmar é como a ULA faz o imm &lt;&lt; 16, que ele não mostrou.</li>
+      <li><b>LB.</b> O sinal LByte, o seletor de byte (8 → 32) depois da memória e o estado 15 são proposta minha, no mesmo estilo do NBranch. No multiciclo o byte é escolhido antes do MDR porque, no estado 4, o ALUOut já não guarda mais o endereço. A ordem dos bytes segue o MARS (little-endian).</li>
+      <li><b>SB.</b> Mesma ideia do LB: o sinal SByte diz à memória para gravar só Rt[7-0] no byte escolhido por End.[1-0], e o estado 16 substitui o estado 5. Também é proposta minha.</li>
+      <li><b>BNE no multiciclo.</b> O nome PCWriteCondNE e o estado 14 são meus. No quadro ele só escreveu A = B / A ≠ B ao lado da lógica do PC.</li>
+      <li><b>Números dos estados novos.</b> Os slides usam 0 a 9 para as instruções e 10 e 11 para as exceções (slide 70), então os novos começam no 12: 12 e 13 tipo-I, 14 BNE, 15 LB, 16 SB. A numeração é minha; na prova, declare a sua. Se juntar tudo (exceções + os 5 novos) dá 17 estados, que não cabem nos 4 bits S3-S0. Crie só os estados das instruções que a questão pede.</li>
+      <li><b>Exceções (slides 67-71, não animadas).</b> Estado 10 = instrução indefinida (vem do 1 quando o Op não é conhecido), IntCausa = 0. Estado 11 = overflow (vem do 7, sinal da ULA), IntCausa = 1. Os dois fazem: CausaEsc, ALUSrcA = 0, ALUSrcB = 01, ALUOp = 01 (subtração, 001 em 3 bits), EPCEsc → EPC ← PC − 4 (o PC já foi somado no estado 0, por isso a ULA desconta 4); PCEsc com FontePC = 11 → PC ← C000 0000. Depois voltam ao 0. O slide 67 também cita endereços vetorados (C000 0000 indefinida, C000 0020 overflow), mas o caminho de dados do slide 71 usa um só endereço, C000 0000, e a causa fica no registrador Causa.</li>
+      <li><b>Erros nos slides.</b> Slide 46 diz "IorD = 1 (PC &lt;-- ALUOut)": o certo é endereço da memória ← ALUOut, o PC não muda. Slide 51 diz IorD = estado0 + estado5: o certo é S3 + S5.</li>
+      <li><b>andi / ori.</b> O diagrama dele só tem extensão de sinal, então usei extensão de sinal. No MIPS real elas estendem com zeros.</li>
+      <li><b>Tempos no monociclo.</b> J = só M e BEQ = M + R + ULA seguem o exemplo do slide (DvI = 2, DvC = 5). Somadores e muxes contam 0 ns, como nas provas.</li>
+      <li><b>a1, a2, b1… c3.</b> A posição desses rótulos muda de prova para prova. A tabela de bits mostra cada fio pelo nome do diagrama; confira no desenho da questão qual fio é qual letra.</li>
+    </ul>
+  </section>
+</div>
+
+<dialog id="lupa" class="lupa" aria-labelledby="lupaTitle">
+  <div class="lupa-head"><div><p class="eyebrow">Lupa · instrução atual</p><h2 id="lupaTitle"></h2></div><button class="btn ghost" id="lupaClose" type="button">Fechar</button></div>
+  <div class="scroll"><svg id="lupaSvg" viewBox="0 0 900 600" role="img" aria-label="Interior do componente"></svg></div>
+  <ul class="lupa-notes" id="lupaNotes"></ul>
+  <p class="note" id="lupaDisc" style="margin-top:10px"></p>
+</dialog>
+<script>
+const NS = "http://www.w3.org/2000/svg";
+function E(tag, attrs, parent, text) {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = text;
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function d(points) { return "M" + points.map(p => p.join(",")).join(" L"); }
+function h(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
+
+const T = { M: 2, R: 1, A: 2 };
+function tv(u) { if (u === "M") return T.M; if (u === "R") return T.R; if (u === "A") return T.A; return 0; }
+function fmt(n) { return (Math.round(n * 100) / 100).toString().replace(".", ","); }
+
+const REGNAMES = ["zero","at","v0","v1","a0","a1","a2","a3","t0","t1","t2","t3","t4","t5","t6","t7","s0","s1","s2","s3","s4","s5","s6","s7","t8","t9","k0","k1","gp","sp","fp","ra"];
+const OPS = {
+  add:{cls:"R",op:0,funct:32,sym:"+"}, sub:{cls:"R",op:0,funct:34,sym:"−"}, and:{cls:"R",op:0,funct:36,sym:"AND"},
+  or:{cls:"R",op:0,funct:37,sym:"OR"}, slt:{cls:"R",op:0,funct:42,sym:"SLT"},
+  lw:{cls:"LW",op:35,sym:"+"}, lb:{cls:"LB",op:32,sym:"+"}, sw:{cls:"SW",op:43,sym:"+"}, sb:{cls:"SB",op:40,sym:"+"}, beq:{cls:"BEQ",op:4,sym:"−"}, bne:{cls:"BNE",op:5,sym:"−"},
+  addi:{cls:"ADDI",op:8,sym:"+"}, andi:{cls:"ANDI",op:12,sym:"AND"}, ori:{cls:"ORI",op:13,sym:"OR"}, slti:{cls:"SLTI",op:10,sym:"SLT"}, lui:{cls:"LUI",op:15,sym:"<<16"},
+  j:{cls:"J",op:2,sym:""}
+};
+const FUNCT_CTL = { 32:"010", 34:"110", 36:"000", 37:"001", 42:"111" };
+const CHIPS = [
+  ["Tipo-R","add $t0, $t1, $t2"], ["LW","lw $s0, 4($t0)"], ["LB","lb $t1, 2($t0)"], ["SW","sw $t2, 8($t0)"], ["SB","sb $t2, 3($t0)"], ["BEQ","beq $t1, $t2, 8"],
+  ["BNE","bne $t1, $t2, 8"], ["ADDi","addi $t2, $t0, 8"], ["ANDi","andi $t2, $t0, 8"], ["ORi","ori $t2, $t0, 8"],
+  ["SLTi","slti $t2, $t0, 8"], ["LUi","lui $a0, 0x8000"], ["J","j 0x00400018"]
+];
+function group(cls) { if (cls === "LB") return "LW"; if (cls === "SB") return "SW"; if (cls === "ADDI" || cls === "ANDI" || cls === "ORI" || cls === "SLTI" || cls === "LUI") return "I"; if (cls === "BNE") return "BEQ"; return cls; }
+
+/* ---------- Parser ---------- */
+function regOf(tok) {
+  let t = tok.trim().replace(/^\$/, "");
+  if (/^\d+$/.test(t)) { const n = parseInt(t, 10); if (n < 32) return n; }
+  if (t === "0") return 0;
+  const i = REGNAMES.indexOf(t);
+  if (i >= 0) return i;
+  throw new Error("registrador desconhecido: " + tok.trim());
+}
+function numOf(tok) {
+  const t = tok.trim().replace(/[:_\s]/g, "");
+  if (/^-?0x[0-9a-f]+$/i.test(t)) { if (t[0] === "-") return -parseInt(t.slice(1), 16); return parseInt(t, 16); }
+  if (/^-?\d+$/.test(t)) return parseInt(t, 10);
+  throw new Error("número inválido: " + tok.trim());
+}
+function parse(text) {
+  let s = text.toLowerCase().replace(/#.*$/, "").trim().replace(/^[a-z_]\w*:\s*/, "");
+  const m = s.match(/^([a-z]+)\s*(.*)$/);
+  if (!m) throw new Error("escreva uma instrução, ex.: add $t0, $t1, $t2");
+  const mn = m[1];
+  const info = OPS[mn];
+  if (!info) throw new Error("instrução não suportada: " + mn);
+  const a = m[2].split(",").map(x => x.trim()).filter(Boolean);
+  const p = { mn, cls: info.cls, op: info.op, rs: 0, rt: 0, rd: 0, shamt: 0, funct: 0, imm: 0, target: 0, sym: info.sym };
+  function need(n) { if (a.length !== n) throw new Error(mn + " precisa de " + n + " operandos"); }
+  function imm16(v) { if (v < -32768 || v > 65535) throw new Error("imediato fora de 16 bits"); return v & 0xFFFF; }
+  if (info.cls === "R") { need(3); p.rd = regOf(a[0]); p.rs = regOf(a[1]); p.rt = regOf(a[2]); p.funct = info.funct; }
+  else if (info.cls === "LW" || info.cls === "SW" || info.cls === "LB" || info.cls === "SB") {
+    need(2); p.rt = regOf(a[0]);
+    const mm = a[1].match(/^(-?(?:0x[0-9a-f]+|\d+))?\s*\(\s*(\$?\w+)\s*\)$/);
+    if (!mm) throw new Error("formato: " + mn + " $rt, desloc($rs)");
+    let off = 0; if (mm[1]) off = numOf(mm[1]);
+    p.imm = imm16(off); p.rs = regOf(mm[2]);
+  }
+  else if (info.cls === "BEQ" || info.cls === "BNE") { need(3); p.rs = regOf(a[0]); p.rt = regOf(a[1]); p.imm = imm16(numOf(a[2])); }
+  else if (info.cls === "J") { need(1); p.target = (numOf(a[0]) >>> 2) & 0x3FFFFFF; }
+  else if (info.cls === "LUI") { need(2); p.rt = regOf(a[0]); p.rs = 0; p.imm = imm16(numOf(a[1])); }
+  else { need(3); p.rt = regOf(a[0]); p.rs = regOf(a[1]); p.imm = imm16(numOf(a[2])); }
+  let w;
+  if (info.cls === "R") w = (p.op << 26) | (p.rs << 21) | (p.rt << 16) | (p.rd << 11) | (p.shamt << 6) | p.funct;
+  else if (info.cls === "J") w = (p.op << 26) | p.target;
+  else w = (p.op << 26) | (p.rs << 21) | (p.rt << 16) | p.imm;
+  p.word = w >>> 0;
+  return p;
+}
+function aluCtl(p) {
+  if (p.cls === "R") return FUNCT_CTL[p.funct];
+  if (p.cls === "BEQ" || p.cls === "BNE") return "110";
+  if (p.cls === "ANDI") return "000";
+  if (p.cls === "ORI") return "001";
+  if (p.cls === "SLTI") return "111";
+  if (p.cls === "J") return "XXX";
+  if (p.cls === "LUI") return "LUI";
+  return "010";
+}
+
+/* ---------- Monociclo: dados ---------- */
+const MSIG_COLS = ["RegDst","ALUSrc","RegWrite","MemToReg","Branch","NBranch","DVI","MemRead","MemWrite","ALUOp","LByte","SByte"];
+const MSIG = {
+  R:   ["1","0","1","0","0","0","0","0","0","010","X","X"],
+  LW:  ["0","1","1","1","0","0","0","1","0","000","0","X"],
+  SW:  ["X","1","0","X","0","0","0","0","1","000","X","0"],
+  SB:  ["X","1","0","X","0","0","0","0","1","000","X","1"],
+  BEQ: ["X","0","0","X","1","0","0","0","0","001","X","X"],
+  BNE: ["X","0","0","X","0","1","0","0","0","001","X","X"],
+  ADDI:["0","1","1","0","0","0","0","0","0","000","X","X"],
+  ANDI:["0","1","1","0","0","0","0","0","0","011","X","X"],
+  ORI: ["0","1","1","0","0","0","0","0","0","100","X","X"],
+  SLTI:["0","1","1","0","0","0","0","0","0","101","X","X"],
+  LUI: ["0","1","1","0","0","0","0","0","0","110","X","X"],
+  LB:  ["0","1","1","1","0","0","0","1","0","000","1","X"],
+  J:   ["X","X","0","X","X","X","1","X","0","XXX","X","X"]
+};
+const MSIG_ROWS = [["R","Tipo-R"],["LW","LOAD"],["LB","LB *"],["SW","STORE"],["SB","SB *"],["BEQ","BEQ"],["BNE","BNE"],["ADDI","ADDi"],["ANDI","ANDi"],["ORI","ORi"],["SLTI","SLTi"],["LUI","LUi *"],["J","J"]];
+const FREE_OP = { ANDI: 1, ORI: 1, SLTI: 1, LUI: 1 };
+function msig(cls) { const o = {}; MSIG_COLS.forEach((c, i) => { o[c] = MSIG[cls][i]; }); return o; }
+
+const PHASE = { 1:{n:"Busca",u:"M"}, 2:{n:"Decodifica e lê registradores",u:"R"}, 3:{n:"ULA",u:"A"}, 4:{n:"Memória de dados",u:"M"}, 5:{n:"Escreve no registrador",u:"R"} };
+const MPHASES = { R:[1,2,3,5], LW:[1,2,3,4,5], SW:[1,2,3,4], BEQ:[1,2,3], I:[1,2,3,5], J:[1,2] };
+
+const MW = {
+  pc_im:[[70,335],[110,335]], pc_add:[[90,335],[90,65],[150,65]], four:[[122,115],[150,115]],
+  pc4:[[200,90],[660,90]], pc4_jhi:[[430,90],[430,35]], pc4_addb:[[660,90],[660,125],[690,125]], pc4_mux:[[660,90],[900,90]],
+  ibus:[[240,345],[280,345]], bus:[[280,35],[280,600]], bus_up:[[280,345],[280,35]], bus_dn:[[280,345],[280,600]],
+  j26:[[280,35],[292,35]], jaddr:[[368,35],[990,35]],
+  op:[[280,165],[385,165]], rs:[[280,320],[430,320]], rt_a:[[280,355],[320,355]], rt_b:[[320,355],[430,355]],
+  rt_mux:[[320,355],[320,395],[350,395]], rd:[[280,435],[350,435]], wr:[[372,415],[430,415]],
+  imm:[[280,540],[468,540]], funct:[[280,600],[730,600],[730,584]],
+  rd1:[[580,330],[700,330]], rd2_a:[[580,430],[610,430]], rd2_alu:[[610,430],[640,430]],
+  rd2_mem:[[610,430],[610,500],[815,500],[815,480],[830,480]],
+  se_a:[[532,540],[595,540],[595,470]], se_mux:[[595,470],[640,470]], se_shift:[[595,470],[595,190],[604,190]],
+  sh_addb:[[656,190],[675,190],[675,175],[690,175]], addb_mux:[[740,150],[870,150],[870,130],[900,130]],
+  mux_alu:[[662,450],[680,450],[680,440],[700,440]], aluctrl:[[730,536],[730,447]],
+  alu_out:[[780,390],[805,390]], alu_addr:[[805,390],[830,390]], alu_bypass_a:[[805,390],[805,560],[1000,560]], alu_bypass_b:[[1000,560],[1052,560],[1052,440],[1065,440]],
+  memrd_a:[[950,400],[965,400]], memrd_w:[[965,400],[1028,400]], memrd_b:[[965,400],[965,470],[975,470]],
+  byte_out:[[1000,454],[1000,428],[1028,428]], addr_b:[[1000,560],[1000,486]], lb_out:[[1048,412],[1058,412],[1058,400],[1065,400]],
+  wb:[[1087,420],[1098,420],[1098,625],[400,625],[400,455],[430,455]],
+  zero:[[780,345],[795,345],[795,218],[820,218]], nzero:[[795,246],[814,246]],
+  and1_out:[[846,212],[860,212],[860,227],[872,227]], and2_out:[[846,252],[860,252],[860,243],[872,243]],
+  pcsrc:[[898,235],[911,235],[911,145]], mux1_mux2:[[922,110],[990,110]],
+  next:[[1012,72],[1045,72],[1045,8],[14,8],[14,335],[30,335]]
+};
+const MDOTS = [[90,335,"pc_add"],[660,90,"pc4_addb pc4_mux"],[430,90,"pc4_jhi"],[430,35,"pc4_jhi"],[320,355,"rt_mux rt_b"],
+  [610,430,"rd2_alu rd2_mem"],[595,470,"se_mux se_shift"],[805,390,"alu_addr alu_bypass_a"],[965,400,"memrd_w memrd_b"],[1000,560,"addr_b alu_bypass_b"],[795,246,"nzero"],
+  [280,165,"op"],[280,320,"rs"],[280,355,"rt_a"],[280,435,"rd"],[280,540,"imm"],[280,600,"funct"],[280,345,"ibus"]];
+
+const FETCH = { pc_im:1, ibus:1, pc_add:1, four:1, pc4:1, op:2 };
+const SEQ = { pc4_mux:9, mux1_mux2:9, next:9 };
+const MWIRES = {
+  R: Object.assign({}, FETCH, SEQ, { rs:2, rt_a:2, rt_b:2, rd:2, wr:2, funct:2, rd1:2, rd2_a:2, rd2_alu:3, mux_alu:3, aluctrl:3, alu_out:3, alu_bypass_a:5, alu_bypass_b:5, wb:5 }),
+  LW: Object.assign({}, FETCH, SEQ, { rs:2, rt_a:2, rt_mux:2, wr:2, imm:2, se_a:2, rd1:2, se_mux:3, mux_alu:3, aluctrl:3, alu_out:3, alu_addr:4, memrd_a:4, memrd_w:4, lb_out:5, wb:5 }),
+  LB: Object.assign({}, FETCH, SEQ, { rs:2, rt_a:2, rt_mux:2, wr:2, imm:2, se_a:2, rd1:2, se_mux:3, mux_alu:3, aluctrl:3, alu_out:3, alu_addr:4, alu_bypass_a:4, addr_b:4, memrd_a:4, memrd_b:4, byte_out:4, lb_out:5, wb:5 }),
+  SW: Object.assign({}, FETCH, SEQ, { rs:2, rt_a:2, rt_b:2, imm:2, se_a:2, rd1:2, rd2_a:2, se_mux:3, mux_alu:3, aluctrl:3, alu_out:3, alu_addr:4, rd2_mem:4 }),
+  BEQ: Object.assign({}, FETCH, SEQ, { pc4_addb:1, rs:2, rt_a:2, rt_b:2, imm:2, se_a:2, rd1:2, rd2_a:2, se_shift:2, sh_addb:2, rd2_alu:3, mux_alu:3, aluctrl:3, zero:3, and1_out:3, addb_mux:3, pcsrc:3 }),
+  BNE: Object.assign({}, FETCH, SEQ, { pc4_addb:1, rs:2, rt_a:2, rt_b:2, imm:2, se_a:2, rd1:2, rd2_a:2, se_shift:2, sh_addb:2, rd2_alu:3, mux_alu:3, aluctrl:3, zero:3, nzero:3, and2_out:3, addb_mux:3, pcsrc:3 }),
+  I: Object.assign({}, FETCH, SEQ, { rs:2, rt_a:2, rt_mux:2, wr:2, imm:2, se_a:2, rd1:2, se_mux:3, mux_alu:3, aluctrl:3, alu_out:3, alu_bypass_a:5, alu_bypass_b:5, wb:5 }),
+  J: Object.assign({}, FETCH, { pc4_jhi:1, j26:2, jaddr:2, next:9 })
+};
+const BUS_UP = { rs: 320, op: 165, j26: 35 };
+const BUS_DN = { rt_a: 355, rd: 435, imm: 540, funct: 600 };
+function busExtent(wmap) {
+  let top = 345, bot = 345;
+  for (const id in BUS_UP) { if (wmap[id] && BUS_UP[id] < top) top = BUS_UP[id]; }
+  for (const id in BUS_DN) { if (wmap[id] && BUS_DN[id] > bot) bot = BUS_DN[id]; }
+  return { top, bot };
+}
+for (const k in MWIRES) {
+  const e = busExtent(MWIRES[k]);
+  if (e.top < 345) MWIRES[k].bus_up = 1;
+  if (e.bot > 345) MWIRES[k].bus_dn = 1;
+}
+function setBus(D, wmap) {
+  const e = busExtent(wmap);
+  const up = "M280,345 L280," + e.top, dn = "M280,345 L280," + e.bot;
+  D.wires.bus_up._base.setAttribute("d", up); D.wires.bus_up._flow.setAttribute("d", up);
+  D.wires.bus_dn._base.setAttribute("d", dn); D.wires.bus_dn._flow.setAttribute("d", dn);
+}
+const MCOMPS = {
+  R:{PC:1,IM:1,ADD4:1,UC:2,REG:2,MUXRD:2,MUXALU:3,ALU:3,ALUC:3,MUXMR:5,MUXPC:9,MUXJ:9},
+  LW:{PC:1,IM:1,ADD4:1,UC:2,REG:2,MUXRD:2,SE:2,MUXALU:3,ALU:3,ALUC:3,DM:4,MUXLB:5,MUXMR:5,MUXPC:9,MUXJ:9},
+  LB:{PC:1,IM:1,ADD4:1,UC:2,REG:2,MUXRD:2,SE:2,MUXALU:3,ALU:3,ALUC:3,DM:4,BYTE:4,MUXLB:5,MUXMR:5,MUXPC:9,MUXJ:9},
+  SW:{PC:1,IM:1,ADD4:1,UC:2,REG:2,SE:2,MUXALU:3,ALU:3,ALUC:3,DM:4,MUXPC:9,MUXJ:9},
+  BEQ:{PC:1,IM:1,ADD4:1,UC:2,REG:2,SE:2,SH2:2,ADDB:2,MUXALU:3,ALU:3,ALUC:3,GATES:3,MUXPC:9,MUXJ:9},
+  I:{PC:1,IM:1,ADD4:1,UC:2,REG:2,MUXRD:2,SE:2,MUXALU:3,ALU:3,ALUC:3,MUXMR:5,MUXPC:9,MUXJ:9},
+  J:{PC:1,IM:1,ADD4:1,UC:2,JSH:2,MUXJ:9}
+};
+
+function monoText(p, ph) {
+  const s = msig(p.cls);
+  const g = group(p.cls);
+  const opb = p.op.toString(2).padStart(6, "0");
+  if (ph === 1) return { rtl: "IR = M.I.[PC] ;  PC + 4", t: "O PC manda o endereço para a Memória de Instruções, que devolve os 32 bits da instrução. Em paralelo, o somador de cima já calcula PC + 4." };
+  if (g === "R") {
+    if (ph === 2) return { rtl: "lê Rs, Rt ;  Rd → mux RegDst", t: "Op [31-26] = " + opb + " chega na U.C., que liga os sinais. Rs [25-21] e Rt [20-16] são lidos do banco. Rd [15-11] passa pelo mux RegDst (RegDst = 1) e fica esperando na entrada de escrita." };
+    if (ph === 3) return { rtl: "ULA: Rs " + p.sym + " Rt", t: "ALUSrc = 0: a ULA recebe Saída Rs e Saída Rt. ALUOp = 010 manda a U.C. da ULA olhar o funct [5-0] para escolher a operação (aqui " + aluCtl(p) + ")." };
+    return { rtl: "Rd ← resultado ;  PC ← PC + 4", t: "MemToReg = 0: o resultado da ULA passa por baixo da Memória de Dados e volta para Ent. dados. RegWrite = 1 grava em Rd na borda do clock. Branch = 0 e DVI = 0, então PC ← PC + 4." };
+  }
+  if (p.cls === "LB") {
+    if (ph === 2) return { rtl: "lê Rs ;  Rt → mux RegDst ;  imm 16→32", t: "Op = 100000 (32). Igual ao LW: Rs é a base, Rt é o destino (RegDst = 0) e o deslocamento passa pela extensão de sinal." };
+    if (ph === 3) return { rtl: "ULA: Rs + deslocamento", t: "ALUSrc = 1, ALUOp = 000: a ULA soma e gera o endereço do byte. Ele não precisa ser múltiplo de 4." };
+    if (ph === 4) return { rtl: "lê M.D. ;  End.[1-0] escolhe o byte", t: "MemRead = 1: a M.D. devolve a palavra inteira. Os 2 bits de baixo do endereço escolhem 1 dos 4 bytes, que passa pela extensão 8 → 32. LByte = 1 seleciona esse byte no mux novo." };
+    return { rtl: "Rt ← ext8(byte) ;  PC ← PC + 4", t: "MemToReg = 1 e RegWrite = 1: o byte estendido é gravado em Rt. PC ← PC + 4." };
+  }
+  if (g === "LW") {
+    if (ph === 2) return { rtl: "lê Rs ;  Rt → mux RegDst ;  imm 16→32", t: "Op = 100011 (35). Rs é lido (é a base do endereço). Rt [20-16] vai pelo mux RegDst (RegDst = 0) porque no LW o destino é Rt. O deslocamento [15-0] passa pela extensão de sinal 16 → 32." };
+    if (ph === 3) return { rtl: "ULA: Rs + deslocamento", t: "ALUSrc = 1: a entrada B da ULA é o deslocamento estendido. ALUOp = 000 → soma. O resultado é o endereço de memória." };
+    if (ph === 4) return { rtl: "lê M.D.[endereço]", t: "MemRead = 1: a Memória de Dados é lida no endereço calculado. É o segundo acesso à memória da instrução, por isso o LW é a mais demorada e define o ciclo do monociclo." };
+    return { rtl: "Rt ← M.D.[endereço] ;  PC ← PC + 4", t: "MemToReg = 1: o valor lido da memória vai para Ent. dados. RegWrite = 1 grava em Rt. PC ← PC + 4." };
+  }
+  if (p.cls === "SB") {
+    if (ph === 2) return { rtl: "lê Rs (base) e Rt (dado) ;  imm 16→32", t: "Op = 101000 (40). Igual ao SW: lê Rs (base) e Rt (o dado). RegDst = X porque nada é escrito no banco." };
+    if (ph === 3) return { rtl: "ULA: Rs + deslocamento", t: "ALUSrc = 1, ALUOp = 000: a ULA soma e gera o endereço do byte. Ele não precisa ser múltiplo de 4." };
+    return { rtl: "byte de M.D.[endereço] ← Rt[7-0] ;  PC ← PC + 4", t: "MemWrite = 1 e SByte = 1: a M.D. grava só os 8 bits de baixo de Rt, no byte escolhido por End.[1-0]. Os outros 3 bytes da palavra continuam iguais. RegWrite = 0." };
+  }
+  if (g === "SW") {
+    if (ph === 2) return { rtl: "lê Rs (base) e Rt (dado) ;  imm 16→32", t: "Op = 101011 (43). Lê Rs (base) e Rt (o dado que será guardado). RegDst = X porque nada é escrito no banco. Deslocamento estendido 16 → 32." };
+    if (ph === 3) return { rtl: "ULA: Rs + deslocamento", t: "ALUSrc = 1, ALUOp = 000: a ULA soma Rs + deslocamento = endereço." };
+    return { rtl: "M.D.[endereço] ← Rt ;  PC ← PC + 4", t: "MemWrite = 1: Saída Rt entra em Ent. dados da M.D. e é gravada no endereço. RegWrite = 0 e MemToReg = X (nada volta ao banco). PC ← PC + 4." };
+  }
+  if (g === "BEQ") {
+    const bne = p.cls === "BNE";
+    if (ph === 2) return { rtl: "lê Rs, Rt ;  PC+4 + (imm<<2)", t: "Op = " + opb + " (" + p.op + "). Lê Rs e Rt. Em paralelo, o imediato é estendido, deslocado 2 bits (<<2) e somado a PC + 4: o endereço de desvio fica pronto antes de saber se vai desviar." };
+    if (bne) return { rtl: "ULA: Rs − Rt ;  se Zero = 0 → desvia", t: "ALUSrc = 0, ALUOp = 001: a ULA faz Rs − Rt. NBranch = 1 entra numa AND com o Zero invertido: se Rs ≠ Rt (Zero = 0), o mux escolhe o endereço de desvio. Branch = 0. Sem memória de dados e sem escrita (RegWrite = 0)." };
+    return { rtl: "ULA: Rs − Rt ;  se Zero = 1 → desvia", t: "ALUSrc = 0, ALUOp = 001: a ULA faz Rs − Rt. Se der zero, Zero = 1, e Branch = 1 AND Zero seleciona o endereço de desvio no mux. Se Zero = 0, segue PC + 4. Sem memória de dados e sem escrita (RegWrite = 0)." };
+  }
+  if (p.cls === "LUI") {
+    if (ph === 2) return { rtl: "Rt → mux RegDst ;  imm 16→32", t: "Op = 001111 (15). O campo Rs vem zerado e não é usado. Rt [20-16] é o destino (RegDst = 0). O imediato [15-0] passa pela extensão de sinal." };
+    if (ph === 3) return { rtl: "ULA: imediato << 16", t: "ALUSrc = 1: entra o imediato. A ULA desloca 16 bits para a esquerda, então 0x8000 vira 0x80000000 (os 16 bits de baixo ficam zerados). É assim que se monta um endereço de 32 bits: LUI coloca a parte alta e um ADDi/ORi depois coloca a parte baixa." };
+    return { rtl: "Rt ← imm << 16 ;  PC ← PC + 4", t: "MemToReg = 0: o resultado da ULA volta pelo caminho de baixo. RegWrite = 1 grava em Rt. PC ← PC + 4." };
+  }
+  if (g === "I") {
+    if (ph === 2) return { rtl: "lê Rs ;  Rt → mux RegDst ;  imm 16→32", t: "Op = " + opb + " (" + p.op + "). Lê Rs. Rt [20-16] vai pelo mux RegDst (RegDst = 0): no tipo-I o destino é Rt. Imediato estendido 16 → 32." };
+    if (ph === 3) return { rtl: "ULA: Rs " + p.sym + " imediato", t: "ALUSrc = 1: a ULA opera Rs com o imediato. ALUOp = " + s.ALUOp + " já diz a operação direto, sem olhar funct." };
+    return { rtl: "Rt ← resultado ;  PC ← PC + 4", t: "MemToReg = 0: o resultado da ULA volta pelo caminho de baixo. RegWrite = 1 grava em Rt. PC ← PC + 4." };
+  }
+  return { rtl: "PC ← PC+4[31-28] ‖ (alvo << 2)", t: "Op = 000010 (2). Os 26 bits [25-0] são deslocados 2 bits (viram 28) e juntados com PC+4 [31-28]: endereço de 32 bits. DVI = 1 escolhe esse endereço no último mux. Não lê nem escreve registrador (RegWrite = 0, MemWrite = 0). Tempo estimado: só a busca (M)." };
+}
+function monoUseful(g) {
+  if (g === "R" || g === "I") return { f: "M + R + ULA + R", v: T.M + T.R + T.A + T.R };
+  if (g === "LW") return { f: "M + R + ULA + M + R", v: 2 * T.M + 2 * T.R + T.A };
+  if (g === "SW") return { f: "M + R + ULA + M", v: 2 * T.M + T.R + T.A };
+  if (g === "BEQ") return { f: "M + R + ULA", v: T.M + T.R + T.A };
+  return { f: "M", v: T.M };
+}
+
+/* ---------- Multiciclo: dados ---------- */
+function aluOpOf(p) { if (MSIG[p.cls]) return MSIG[p.cls][9]; return "000"; }
+const XSIG_COLS = ["PCWrite","PCWriteCond","PCWriteCondNE","IorD","MemRead","MemWrite","IRWrite","MemToReg","RegDst","RegWrite","ALUSrcA","ALUSrcB","ALUOp","PCSource","LByte","SByte"];
+function xsig(state, p) {
+  const s = { PCWrite:"0", PCWriteCond:"0", PCWriteCondNE:"0", IorD:"X", MemRead:"0", MemWrite:"0", IRWrite:"0", MemToReg:"X", RegDst:"X", RegWrite:"0", ALUSrcA:"X", ALUSrcB:"XX", ALUOp:"XXX", PCSource:"XX", LByte:"X", SByte:"X" };
+  const o = {
+    0:{PCWrite:"1",IorD:"0",MemRead:"1",IRWrite:"1",ALUSrcA:"0",ALUSrcB:"01",ALUOp:"000",PCSource:"00"},
+    1:{ALUSrcA:"0",ALUSrcB:"11",ALUOp:"000"},
+    2:{ALUSrcA:"1",ALUSrcB:"10",ALUOp:"000"},
+    3:{IorD:"1",MemRead:"1",LByte:"0"},
+    15:{IorD:"1",MemRead:"1",LByte:"1"},
+    4:{RegWrite:"1",MemToReg:"1",RegDst:"0"},
+    5:{IorD:"1",MemWrite:"1",SByte:"0"},
+    16:{IorD:"1",MemWrite:"1",SByte:"1"},
+    6:{ALUSrcA:"1",ALUSrcB:"00",ALUOp:"010"},
+    7:{RegWrite:"1",MemToReg:"0",RegDst:"1"},
+    8:{ALUSrcA:"1",ALUSrcB:"00",ALUOp:"001",PCWriteCond:"1",PCSource:"01"},
+    9:{PCWrite:"1",PCSource:"10"},
+    12:{ALUSrcA:"1",ALUSrcB:"10",ALUOp:aluOpOf(p)},
+    13:{RegWrite:"1",MemToReg:"0",RegDst:"0"},
+    14:{ALUSrcA:"1",ALUSrcB:"00",ALUOp:"001",PCWriteCondNE:"1",PCSource:"01"}
+  }[state];
+  return Object.assign(s, o);
+}
+const XSTEPS = { R:[0,1,6,7], LW:[0,1,2,3,4], SW:[0,1,2,5], BEQ:[0,1,8], BNE:[0,1,14], I:[0,1,12,13], J:[0,1,9] };
+function xsteps(p) { if (p.cls === "LB") return [0, 1, 2, 15, 4]; if (p.cls === "SB") return [0, 1, 2, 16]; if (p.cls === "BNE") return XSTEPS.BNE; return XSTEPS[group(p.cls)]; }
+const XNAME = {0:"Busca",1:"Decodificação",2:"Cálculo do endereço",3:"Leitura da memória",4:"Escreve Rt (lw)",5:"Escrita na memória",6:"Execução tipo-R",7:"Escreve Rd",8:"Desvio BEQ",9:"Salto J",12:"Execução tipo-I",13:"Escreve Rt (tipo-I)",14:"Desvio BNE",15:"Leitura de byte",16:"Escrita de byte"};
+const XUNIT = {0:"M",1:"R",2:"A",3:"M",4:"R",5:"M",6:"A",7:"R",8:"A",9:"",12:"A",13:"R",14:"A",15:"M",16:"M"};
+const XNEW = {12:1,13:1,14:1,15:1,16:1};
+const XEXC = {10:1,11:1};
+const XRTL = {
+  0:"IR ← Mem[PC] ;  PC ← PC + 4",
+  1:"A ← Reg[Rs] ;  B ← Reg[Rt] ;  ALUOut ← PC + (ext(imm) << 2)",
+  2:"ALUOut ← A + ext(imm)",
+  3:"MDR ← Mem[ALUOut]",
+  4:"Reg[Rt] ← MDR",
+  5:"Mem[ALUOut] ← B",
+  6:"ALUOut ← A op B",
+  7:"Reg[Rd] ← ALUOut",
+  8:"se (A == B) PC ← ALUOut",
+  9:"PC ← PC[31-28] ‖ (IR[25-0] << 2)",
+  12:"ALUOut ← A op ext(imm)",
+  13:"Reg[Rt] ← ALUOut",
+  14:"se (A ≠ B) PC ← ALUOut",
+  15:"MDR ← ext8(byte de Mem[ALUOut])",
+  16:"byte de Mem[ALUOut] ← B[7-0]"
+};
+function xText(st, p) {
+  const t = {
+    0:"IorD = 0 (endereço vem do PC), MemRead = 1 e IRWrite = 1: a instrução vai para o IR. No mesmo ciclo a ULA calcula PC + 4 (ALUSrcA = 0 → PC, ALUSrcB = 01 → constante 4, ALUOp = 000) e PCSource = 00 com PCWrite = 1 grava no PC. Quem dita o tempo é a memória.",
+    1:"A U.C. lê o Op do IR e decide o caminho. Rs e Rt são lidos para A e B (sempre, mesmo que a instrução não use). De forma otimista a ULA já calcula PC + (ext(imm) << 2) e guarda em ALUOut (ALUSrcA = 0, ALUSrcB = 11): se for desvio, o endereço já está pronto.",
+    2:"ALUSrcA = 1 (A = Rs), ALUSrcB = 10 (deslocamento estendido), ALUOp = 000 (soma). ALUOut recebe o endereço de memória.",
+    3:"IorD = 1: agora o endereço da memória vem de ALUOut, não do PC. MemRead = 1, o dado lido vai para o MDR.",
+    4:"MemToReg = 1 (dado vem do MDR), RegDst = 0 (destino é Rt), RegWrite = 1. Fim do LW: 5 ciclos.",
+    5:"IorD = 1, MemWrite = 1: Mem[ALUOut] ← B. B ainda guarda o valor de Rt lido no ciclo 2. Fim do SW: 4 ciclos.",
+    6:"ALUSrcA = 1 (A), ALUSrcB = 00 (B), ALUOp = 010: a U.C. da ULA consulta o funct [5-0] (" + (p.cls === "R" ? FUNCT_CTL[p.funct] : "") + "). ALUOut ← A op B.",
+    7:"MemToReg = 0 (vem de ALUOut), RegDst = 1 (destino é Rd), RegWrite = 1. Fim do tipo-R: 4 ciclos.",
+    8:"A ULA faz A − B (ALUOp = 001) só para gerar o Zero. PCWriteCond = 1 e PCSource = 01: se Zero = 1, PC ← ALUOut (endereço calculado no ciclo 2). Fim do BEQ: 3 ciclos.",
+    9:"PCSource = 10 escolhe PC[31-28] ‖ (IR[25-0] << 2) e PCWrite = 1 grava no PC. Não usa ULA nem memória. Fim do J: 3 ciclos.",
+    12:"Estado novo. ALUSrcA = 1 (A), ALUSrcB = 10 (imediato estendido) e ALUOp = " + xsig(12, p).ALUOp + " já diz a operação. ALUOut ← A op imediato." + (FREE_OP[p.cls] ? " Esse código de ALUOp é livre (só 000, 001 e 010 são fixos)." : ""),
+    13:"Estado novo. MemToReg = 0 (vem de ALUOut), RegDst = 0 (destino é Rt), RegWrite = 1. Fim do tipo-I: 4 ciclos.",
+    16:"Estado novo, só do SB. IorD = 1 e MemWrite = 1 como no SW, mas SByte = 1: a memória grava só B[7-0] (o byte de baixo de Rt) no byte escolhido pelos 2 bits de baixo do endereço. Fim do SB: 4 ciclos.",
+    15:"Estado novo, só do LB. IorD = 1 e MemRead = 1 como no LW, mas LByte = 1: os 2 bits de baixo do endereço escolhem 1 byte da palavra lida, que é estendido 8 → 32 antes de entrar no MDR. Depois volta ao estado 4 (Reg[Rt] ← MDR). Fim do LB: 5 ciclos.",
+    14:"Estado novo. Igual ao BEQ, mas com um sinal novo, PCWriteCondNE, que entra numa AND com o Zero invertido: PC ← ALUOut se A ≠ B. Fim do BNE: 3 ciclos."
+  };
+  return t[st];
+}
+const XW = {
+  pc_a:[[66,340],[80,340],[80,330]], pc_iord:[[80,330],[80,325],[95,325]], pc_alua:[[80,330],[80,145],[760,145],[760,245],[770,245]],
+  iord_out:[[117,345],[150,345]], mem_out:[[300,360],[318,360]], mem_ir:[[318,360],[318,330],[350,330]], mem_mdr:[[318,360],[318,480],[330,480]],
+  byte_in:[[318,470],[306,470],[306,495],[292,495]], byte_out:[[262,511],[262,525],[322,525],[322,505],[330,505]],
+  addr_b:[[132,345],[132,495],[232,495]], lb_out:[[348,492],[360,492]],
+  ir_op:[[395,230],[395,80],[440,80]], ir_rs:[[440,260],[530,260]], ir_rt_a:[[440,300],[460,300]], ir_rt_b:[[460,300],[530,300]],
+  rt_mux:[[460,300],[460,335],[480,335]], ir_rd:[[440,365],[480,365]],
+  ir_imm_a:[[440,390],[455,390],[455,540]], ir_imm_b:[[455,540],[558,540]], ir_funct:[[455,540],[455,600],[865,600],[865,552]],
+  ir_j:[[420,230],[420,155],[940,155],[940,100],[945,100]], j_out:[[1005,100],[1008,100],[1008,225],[1040,225]],
+  regdst_out:[[500,350],[530,350]], mdr_out:[[440,492],[462,492],[462,465],[480,465]], mtr_out:[[500,450],[530,450]],
+  rd1:[[670,280],[700,280]], rd2:[[670,375],[700,375]], a_out:[[736,280],[770,280]], alua_out:[[792,265],[830,265]],
+  b_out:[[736,375],[742,375]], b_alu:[[742,375],[770,375]], b_mem:[[742,375],[742,575],[140,575],[140,430],[150,430]],
+  four:[[760,405],[770,405]], alub_out:[[792,425],[830,425]],
+  se_out:[[622,540],[640,540]], se_sh:[[640,540],[664,540]], se_b:[[640,540],[640,510],[752,510],[752,435],[770,435]], sh_b:[[716,540],[762,540],[762,465],[770,465]],
+  alu_res:[[900,340],[925,340]], alu_aluout:[[925,340],[936,340]], alu_pcs:[[925,340],[925,165],[1040,165]], aluctrl:[[865,508],[865,431]],
+  aluout_o:[[994,340],[1000,340]], aluout_pcs:[[1000,340],[1020,340],[1020,195],[1040,195]], aluout_down:[[1000,340],[1000,615],[470,615]],
+  aluout_mtr:[[470,615],[470,435],[480,435]], aluout_iord:[[470,615],[88,615],[88,365],[95,365]],
+  exc:[[992,255],[1040,255]], pcs_out:[[1064,212],[1095,212],[1095,20],[12,20],[12,340],[30,340]],
+  zero:[[900,290],[910,290],[910,135],[130,135],[130,183],[230,183]], nzero:[[130,183],[130,221],[226,221]],
+  and1_out:[[256,177],[266,177],[266,193],[284,193]], and2_out:[[256,227],[266,227],[266,217],[284,217]],
+  pcen:[[312,205],[318,205],[318,268],[48,268],[48,300]]
+};
+const XDOTS = [[80,330,"pc_iord pc_alua"],[318,360,"mem_ir mem_mdr"],[318,470,"byte_in"],[132,345,"addr_b"],[460,300,"rt_mux ir_rt_b"],[455,540,"ir_imm_b ir_funct"],
+  [640,540,"se_sh se_b"],[742,375,"b_alu b_mem"],[925,340,"alu_aluout alu_pcs"],[1000,340,"aluout_pcs aluout_down"],[470,615,"aluout_mtr aluout_iord"],[130,183,"nzero"]];
+const XST = {
+  0:{w:"pc_a pc_iord iord_out mem_out mem_ir pc_alua alua_out four alub_out alu_res alu_pcs aluctrl pcs_out pcen",c:"PC IORD MEM IR MUXA MUXB ALU ALUC MUXPCS UC GATES",wr:"IR PC"},
+  1:{w:"ir_op ir_rs ir_rt_a ir_rt_b rd1 rd2 ir_imm_a ir_imm_b se_out se_sh sh_b pc_a pc_alua alua_out alub_out alu_res alu_aluout aluctrl",c:"UC IR REG A B SE SH MUXA MUXB ALU ALUC ALUOUT PC",wr:"A B ALUOUT"},
+  2:{w:"a_out alua_out ir_imm_a ir_imm_b se_out se_b alub_out alu_res alu_aluout aluctrl",c:"UC A MUXA IR SE MUXB ALU ALUC ALUOUT",wr:"ALUOUT"},
+  3:{w:"aluout_o aluout_down aluout_iord iord_out mem_out mem_mdr lb_out",c:"UC ALUOUT IORD MEM MUXLB MDR",wr:"MDR"},
+  15:{w:"aluout_o aluout_down aluout_iord iord_out addr_b mem_out mem_mdr byte_in byte_out lb_out",c:"UC ALUOUT IORD MEM BYTE MUXLB MDR",wr:"MDR"},
+  4:{w:"mdr_out mtr_out ir_rt_a rt_mux regdst_out",c:"UC MDR MUXMR IR MUXRD REG",wr:"REG"},
+  5:{w:"aluout_o aluout_down aluout_iord iord_out b_out b_mem",c:"UC ALUOUT IORD MEM B",wr:"MEM"},
+  16:{w:"aluout_o aluout_down aluout_iord iord_out b_out b_mem",c:"UC ALUOUT IORD MEM B",wr:"MEM"},
+  6:{w:"a_out alua_out b_out b_alu alub_out alu_res alu_aluout ir_imm_a ir_funct aluctrl",c:"UC A B MUXA MUXB ALU ALUC IR ALUOUT",wr:"ALUOUT"},
+  7:{w:"aluout_o aluout_down aluout_mtr mtr_out ir_rd regdst_out",c:"UC ALUOUT MUXMR IR MUXRD REG",wr:"REG"},
+  8:{w:"a_out alua_out b_out b_alu alub_out alu_res aluctrl zero and1_out aluout_o aluout_pcs pcs_out pcen",c:"UC A B MUXA MUXB ALU ALUC GATES ALUOUT MUXPCS PC",wr:"PC"},
+  9:{w:"ir_j j_out pcs_out pcen",c:"UC IR JSH MUXPCS PC GATES",wr:"PC"},
+  12:{w:"a_out alua_out ir_imm_a ir_imm_b se_out se_b alub_out alu_res alu_aluout aluctrl",c:"UC A MUXA IR SE MUXB ALU ALUC ALUOUT",wr:"ALUOUT"},
+  13:{w:"aluout_o aluout_down aluout_mtr mtr_out ir_rt_a rt_mux regdst_out",c:"UC ALUOUT MUXMR IR MUXRD REG",wr:"REG"},
+  14:{w:"a_out alua_out b_out b_alu alub_out alu_res aluctrl zero nzero and2_out aluout_o aluout_pcs pcs_out pcen",c:"UC A B MUXA MUXB ALU ALUC GATES ALUOUT MUXPCS PC",wr:"PC"}
+};
+const XCYC = { R:4, LW:5, SW:4, BEQ:3, BNE:3, I:4, J:3 };
+
+/* ---------- desenho SVG ---------- */
+function makeDiagram(svg) {
+  const L = { wires: E("g", {}, svg), ctrl: E("g", {}, svg), comps: E("g", {}, svg), dots: E("g", {}, svg), lbls: E("g", {}, svg), badges: E("g", {}, svg) };
+  return { svg, L, wires: {}, comps: {}, dots: [], badges: {} };
+}
+function wire(D, id, pts) {
+  const g = E("g", { class: "wire" }, D.L.wires);
+  g._base = E("path", { d: d(pts), class: "w-base" }, g);
+  g._flow = E("path", { d: d(pts), class: "w-flow" }, g);
+  D.wires[id] = g;
+  if (!D.pts) D.pts = {};
+  D.pts[id] = pts;
+}
+function hopD(pts, V, id) {
+  const HR = 5;
+  let out = "M" + pts[0].join(",");
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1];
+    if (a[1] === b[1] && a[0] !== b[0]) {
+      const y = a[1];
+      let dir = 1; if (b[0] < a[0]) dir = -1;
+      const lo = Math.min(a[0], b[0]), hi = Math.max(a[0], b[0]);
+      let xs = V.filter(v => v.id !== id && v.x > lo + HR && v.x < hi - HR && y > v.y1 + 1 && y < v.y2 - 1).map(v => v.x);
+      xs = Array.from(new Set(xs)).sort((m, n) => (m - n) * dir);
+      let sweep = 1; if (dir < 0) sweep = 0;
+      xs.forEach(x => { out += " L" + (x - HR * dir) + "," + y + " A" + HR + "," + HR + " 0 0 " + sweep + " " + (x + HR * dir) + "," + y; });
+    }
+    out += " L" + b.join(",");
+  }
+  return out;
+}
+function hopify(D) {
+  const V = [];
+  function addV(id, pts) {
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1];
+      if (a[0] === b[0] && a[1] !== b[1]) V.push({ id, x: a[0], y1: Math.min(a[1], b[1]), y2: Math.max(a[1], b[1]) });
+    }
+  }
+  for (const id in D.pts) addV(id, D.pts[id]);
+  (D.cpts || []).forEach(c => addV(c.vid, c.pts));
+  for (const id in D.pts) {
+    const out = hopD(D.pts[id], V, id);
+    D.wires[id]._base.setAttribute("d", out);
+    D.wires[id]._flow.setAttribute("d", out);
+  }
+  (D.cpts || []).forEach(c => { const out = hopD(c.pts, V, c.vid); c.el.forEach(el => el.setAttribute("d", out)); });
+}
+function comp(D, id) { const g = E("g", { class: "comp" }, D.L.comps); D.comps[id] = g; return g; }
+function rectC(D, id, x, y, w, hh, t1, t2, rx) {
+  const g = comp(D, id);
+  E("rect", { x, y, width: w, height: hh, rx: rx || 3, class: "sh" }, g);
+  if (t1) E("text", { x: x + w / 2, y: y + hh / 2 + (t2 ? -2 : 4), "text-anchor": "middle", class: "t1" }, g, t1);
+  if (t2) E("text", { x: x + w / 2, y: y + hh / 2 + 12, "text-anchor": "middle", class: "t2" }, g, t2);
+  return g;
+}
+function ellC(D, id, cx, cy, rx, ry, t1, t2) {
+  const g = comp(D, id);
+  E("ellipse", { cx, cy, rx, ry, class: "sh" }, g);
+  let ty = cy + 4;
+  if (t2 !== undefined) ty = cy - 1;
+  E("text", { x: cx, y: ty, "text-anchor": "middle", class: "t1" }, g, t1);
+  if (t2 !== undefined) E("text", { x: cx, y: cy + 11, "text-anchor": "middle", class: "t2" }, g, t2);
+  return g;
+}
+function muxC(D, id, x, y, w, hh, labels) {
+  const g = comp(D, id);
+  E("rect", { x, y, width: w, height: hh, rx: w / 2, class: "sh" }, g);
+  labels.forEach(l => E("text", { x: x + w / 2, y: l[0] + 3.5, "text-anchor": "middle", class: "t2" }, g, l[1]));
+  return g;
+}
+function aluC(D, id, x, y, w, hh, t1) {
+  const g = comp(D, id);
+  const mid = y + hh / 2, n = hh * 0.1, k = w * 0.2;
+  const pts = [[x, y], [x + w, y + hh * 0.22], [x + w, y + hh * 0.78], [x, y + hh], [x, mid + n * 1.5], [x + k * 0.9, mid], [x, mid - n * 1.5]];
+  E("polygon", { points: pts.map(p => p.join(",")).join(" "), class: "sh" }, g);
+  E("text", { x: x + w * 0.58, y: mid - (t1 === "ULA" ? 4 : -4), "text-anchor": "middle", class: "t1" }, g, t1);
+  if (t1 === "ULA") { const op = E("text", { x: x + w * 0.58, y: mid + 13, "text-anchor": "middle", class: "op" }, g, ""); g._op = op; }
+  return g;
+}
+function andShape(g, x, y, w, hh) { E("path", { d: `M${x},${y} H${x + w / 2} A${hh / 2},${hh / 2} 0 0 1 ${x + w / 2},${y + hh} H${x} Z`, class: "sh" }, g); }
+function orShape(g, x, y, w, hh) { E("path", { d: `M${x},${y} Q${x + w * 0.6},${y} ${x + w},${y + hh / 2} Q${x + w * 0.6},${y + hh} ${x},${y + hh} Q${x + w * 0.32},${y + hh / 2} ${x},${y} Z`, class: "sh" }, g); }
+function lbl(D, x, y, t, anchor, cls) { E("text", { x, y, "text-anchor": anchor || "start", class: "lbl" + (cls ? " " + cls : "") }, D.L.lbls, t); }
+function stub(D, pts) { E("path", { d: d(pts), class: "stub" }, D.L.lbls); }
+function badge(D, id, x, y, anchor) {
+  const g = E("g", { class: "badge" }, D.L.badges);
+  const r = E("rect", { y: y - 8, height: 16, rx: 3 }, g);
+  const t = E("text", { y: y + 3.5, "text-anchor": "middle" }, g, "");
+  D.badges[id] = { g, r, t, x, anchor: anchor || "middle" };
+}
+function setBadge(D, id, name, val) {
+  const b = D.badges[id];
+  const txt = name + "=" + val;
+  const w = txt.length * 6.1 + 10;
+  let left = b.x - w / 2;
+  if (b.anchor === "end") left = b.x - w;
+  if (b.anchor === "start") left = b.x;
+  b.r.setAttribute("x", left); b.r.setAttribute("width", w);
+  b.t.setAttribute("x", left + w / 2); b.t.textContent = txt;
+  let cls = "badge v0";
+  if (/1/.test(val)) cls = "badge v1";
+  if (/^X+$/.test(val)) cls = "badge vx";
+  if (/^0+$/.test(val)) cls = "badge v0";
+  b.g.setAttribute("class", cls);
+}
+function dotsOf(D, list) { list.forEach(([x, y, ids]) => { const c = E("circle", { cx: x, cy: y, r: 3.6, class: "dot" }, D.L.dots); D.dots.push({ c, ids: ids.split(" ") }); }); }
+
+/* ---------- sinais de controle, plaquinhas e lupa ---------- */
+const CT = 268;
+const CTRUNK = [[440, 215], [440, CT], [1080, CT]];
+const CSIG = {
+  RegDst:   { x: 440, own: [[[440, CT], [361, CT], [361, 360]]] },
+  RegWrite: { x: 505, own: [[[505, CT], [505, 274]]] },
+  ALUSrc:   { x: 651, own: [[[651, CT], [651, 395]]] },
+  ALUOp:    { x: 690, own: [[[690, CT], [690, 560], [694, 560]]] },
+  NBranch:  { x: 735, tail: 1, own: [[[735, CT], [735, 266]], [[768, 258], [820, 258]]] },
+  MemWrite: { x: 852, own: [[[852, CT], [852, 302]]] },
+  MemRead:  { x: 925, own: [[[925, CT], [925, 302]]] },
+  SByte:    { x: 980, own: [[[980, CT], [980, 326]]] },
+  LByte:    { x: 1018, own: [[[1018, CT], [1018, 364]]] },
+  DVI:      { x: 1030, own: [[[1030, CT], [1030, 141], [1021, 141]]] },
+  MemToReg: { x: 1080, own: [[[1080, CT], [1080, 362]]] },
+  Branch:   { x: null, tail: 1, own: [[[459, 212], [776, 212], [776, 170], [782, 170]], [[812, 178], [812, 206], [820, 206]]] }
+};
+function buildCtrl(D) {
+  D.cpts = []; D.cw = {};
+  let n = 0;
+  function reg(pts, el, tail) { D.cpts.push({ vid: "c" + (n++), pts, el, tail: !!tail }); }
+  const trunk = E("path", { class: "cw-trunk" }, D.L.ctrl);
+  reg(CTRUNK, [trunk]);
+  for (const k in CSIG) {
+    const c = CSIG[k];
+    const g = E("g", { class: "cw" }, D.L.ctrl);
+    if (c.x !== null) {
+      let pts = [[440, 215], [440, CT], [c.x, CT]];
+      if (c.x === 440) pts = [[440, 215], [440, CT]];
+      reg(pts, [E("path", { class: "cw-hl" }, g)]);
+    }
+    c.own.forEach((pts, i) => {
+      let extra = "";
+      if (c.tail === i) extra = " tail";
+      const hl = E("path", { class: "cw-hl" + extra }, g);
+      const own = E("path", { class: "cw-own" + extra }, g);
+      reg(pts, [hl, own], c.tail === i);
+    });
+    D.cw[k] = g;
+    const b = D.badges[k];
+    if (b) {
+      b.g.addEventListener("mouseenter", () => g.classList.add("hl"));
+      b.g.addEventListener("mouseleave", () => g.classList.remove("hl"));
+    }
+  }
+  lbl(D, 446, 244, "sinais de controle", "start", "ctl");
+  D.L.lbls.lastChild.classList.add("ctl-label");
+  D.cptsAll = D.cpts;
+}
+function setCtrlVisible(D, on) {
+  D.svg.classList.toggle("noctrl", !on);
+  if (on) D.cpts = D.cptsAll; else D.cpts = D.cptsAll.filter(c => c.tail);
+  hopify(D);
+}
+function setCtrl(D, s) {
+  for (const k in D.cw) {
+    let v = s[k];
+    if (v === undefined) v = "";
+    let cls = "v0";
+    if (/1/.test(v)) cls = "v1";
+    if (/^X+$/.test(v)) cls = "vx";
+    D.cw[k].classList.remove("v0", "v1", "vx");
+    D.cw[k].classList.add(cls);
+  }
+}
+
+function tagHex(v) { return "0x" + (v >>> 0).toString(16).toUpperCase().padStart(8, "0"); }
+const TAGPOS = {
+  pc4: [520, 90], rs: [403, 320], rt_b: [403, 355], rd: [322, 435], wr: [401, 415],
+  imm: [395, 540], se_a: [570, 552], funct: [480, 600], rd1: [616, 330], rd2_a: [610, 430],
+  aluctrl: [730, 515], alu_bypass_a: [905, 560], alu_addr: [888, 372], memrd_a: [996, 400],
+  wb: [750, 625], zero: [795, 300], addb_mux: [835, 150], pcsrc: [911, 160], jaddr: [820, 35]
+};
+function tagLines(id, p, V) {
+  function r(n) { return "$" + REGNAMES[n]; }
+  if (id === "pc4") return ["PC+4 = " + tagHex(V.pc4)];
+  if (id === "rs") return ["nº " + r(p.rs)];
+  if (id === "rt_b") return ["nº " + r(p.rt)];
+  if (id === "rd") return ["nº " + r(p.rd)];
+  if (id === "wr") return ["nº " + r(V.wreg)];
+  if (id === "imm") return ["imm = 0x" + (p.imm & 0xFFFF).toString(16).toUpperCase().padStart(4, "0")];
+  if (id === "se_a") return [tagHex(V.ext)];
+  if (id === "funct") return ["funct = " + p.funct.toString(2).padStart(6, "0")];
+  if (id === "rd1") return [r(p.rs), tagHex(V.vRs)];
+  if (id === "rd2_a") return [r(p.rt), tagHex(V.vRt)];
+  if (id === "aluctrl") { if (V.ctl === "LUI") return null; return [V.ctl]; }
+  if (id === "alu_bypass_a") return ["Res = " + tagHex(V.res)];
+  if (id === "alu_addr") return ["End. = " + tagHex(V.res)];
+  if (id === "memrd_a") return [tagHex(V.vMem)];
+  if (id === "wb") { if (V.wreg === 0) return ["$zero: escrita descartada"]; return [r(V.wreg) + " ← " + tagHex(V.wbv)]; }
+  if (id === "zero") return ["Zero = " + V.zero];
+  if (id === "addb_mux") return [tagHex(V.bt)];
+  if (id === "pcsrc") return ["PCSrc = " + V.taken];
+  if (id === "jaddr") return [tagHex(V.ja)];
+  return null;
+}
+function tagKind(id, lines) {
+  if (id === "wb") return "w";
+  if (id === "aluctrl" || id === "pcsrc") return "c";
+  if (lines[0].indexOf("nº") === 0) return "n";
+  return "d";
+}
+function drawTags(D, onMap) {
+  D.L.tags.innerHTML = "";
+  if (!A.tags) return;
+  let V = null;
+  if (A.on && A.vals) V = A.vals; else V = calcVals(S.p);
+  for (const id in TAGPOS) {
+    if (!onMap[id]) continue;
+    if (A.flying && A.flying[id]) continue;
+    const lines = tagLines(id, S.p, V);
+    if (!lines) continue;
+    const x = TAGPOS[id][0], y = TAGPOS[id][1];
+    const g = E("g", { class: "tag " + tagKind(id, lines) }, D.L.tags);
+    const w = Math.max.apply(null, lines.map(t => t.length)) * 5.75 + 8;
+    const hh = lines.length * 11 + 3;
+    E("rect", { x: x - w / 2, y: y - hh / 2, width: w, height: hh, rx: 3 }, g);
+    lines.forEach((t, i) => E("text", { x, y: y - hh / 2 + 10.5 + i * 11, "text-anchor": "middle" }, g, t));
+  }
+}
+
+const LUPA = { REG: { title: "Dentro do Banco de Registradores", render: renderLupaReg }, DM: { title: "Dentro da Memória de Dados", render: renderLupaDM } };
+function lupaBtn(D, compId, x, y) {
+  const g = E("g", { class: "lupa-btn", tabindex: "0", role: "button", "aria-label": "Abrir a lupa: " + LUPA[compId].title }, D.L.badges);
+  E("title", {}, g, "Ver por dentro");
+  E("rect", { x, y, width: 34, height: 15, rx: 7.5 }, g);
+  E("circle", { cx: x + 9, cy: y + 7, r: 3.4 }, g);
+  E("path", { d: "M" + (x + 11.5) + "," + (y + 9.5) + " L" + (x + 14) + "," + (y + 12) }, g);
+  E("text", { x: x + 25, y: y + 10.5, "text-anchor": "middle" }, g, "ver");
+  g.addEventListener("click", () => openLupa(compId));
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLupa(compId); } });
+}
+function openLupa(compId) {
+  const dlg = document.getElementById("lupa");
+  document.getElementById("lupaTitle").textContent = LUPA[compId].title;
+  LUPA[compId].render(document.getElementById("lupaSvg"), document.getElementById("lupaNotes"), document.getElementById("lupaDisc"));
+  if (!dlg.open) dlg.showModal();
+}
+function regsNow() {
+  if (A.prog && SIM && A.pi >= 0 && SIM.steps[A.pi]) return SIM.steps[A.pi].Rb;
+  return S.regs;
+}
+function bin5(n) { return n.toString(2).padStart(5, "0"); }
+function renderLupaReg(svg, notes, disc) {
+  svg.innerHTML = "";
+  svg.setAttribute("viewBox", "0 0 900 600");
+  const root = E("g", { class: "lz" }, svg);
+  const p = S.p, g = group(p.cls), V = calcVals(p), s = msig(p.cls);
+  const f1 = (p.word >>> 21) & 31, f2 = (p.word >>> 16) & 31;
+  const RB = regsNow();
+  function val(i) {
+    if (i === 0) return 0;
+    if (g !== "J" && i === f1) return V.vRs;
+    if (g !== "J" && i === f2) return V.vRt;
+    if (RB) return RB[i] >>> 0;
+    return null;
+  }
+  function rname(i) { return "$" + REGNAMES[i]; }
+  let use1 = "", use2 = "";
+  if (g === "R") { use1 = "→ ULA, entrada A"; use2 = "→ ULA, entrada B (ALUSrc = 0)"; }
+  if (g === "I") { use1 = "→ ULA, entrada A"; if (p.cls === "LUI") use1 = ""; }
+  if (g === "LW") use1 = "→ ULA: base do endereço";
+  if (g === "SW") { use1 = "→ ULA: base do endereço"; use2 = "→ M.D., Ent. dados"; }
+  if (g === "BEQ") { use1 = "→ ULA: comparação (Rs − Rt)"; use2 = "→ ULA: comparação (ALUSrc = 0)"; }
+  const write = s.RegWrite === "1";
+  const destKnown = s.RegDst !== "X";
+  const dest = V.wreg;
+  const RY = i => 52 + i * 15;
+  const M1Y = i => 43.75 + 7.5 * i, M2Y = i => 303.75 + 7.5 * i;
+
+  E("text", { x: 20, y: 22, class: "t" }, root, "Escrita");
+  E("text", { x: 385, y: 40, class: "t", "text-anchor": "middle" }, root, "32 registradores (valor em hex)");
+  E("text", { x: 880, y: 22, class: "t", "text-anchor": "end" }, root, "Leitura");
+
+  for (let i = 0; i < 32; i++) {
+    const y = RY(i) + 6.5;
+    let c1 = "fan", c2 = "fan";
+    if (i === f1) { if (use1) c1 = "fan on"; else c1 = "fan ign"; }
+    if (i === f2) { if (use2) c2 = "fan on"; else c2 = "fan ign"; }
+    const l1 = E("line", { x1: 470, y1: y, x2: 560, y2: M1Y(i), class: c1 }, root);
+    const l2 = E("line", { x1: 470, y1: y, x2: 560, y2: M2Y(i), class: c2 }, root);
+    if (i === f1) root.appendChild(l1);
+    if (i === f2) root.appendChild(l2);
+  }
+
+  E("rect", { x: 150, y: 50, width: 40, height: 482, rx: 4, class: "sh" }, root);
+  E("text", { x: 174, y: 291, "text-anchor": "middle", transform: "rotate(-90 174 291)", class: "rv" }, root, "Decodificador 5 → 32");
+  let decCls = "w"; if (destKnown) decCls = "w wr";
+  E("line", { x1: 20, y1: 291, x2: 150, y2: 291, class: decCls }, root);
+  E("text", { x: 20, y: 270 }, root, "Reg. a escrever");
+  let dtxt = "RegDst = X";
+  if (destKnown) dtxt = "nº " + rname(dest) + " (" + bin5(dest) + ")";
+  let dcl = "rq"; if (destKnown) dcl = "vWr";
+  E("text", { x: 20, y: 284, class: dcl }, root, dtxt);
+
+  let rwCls = "w c0"; if (write) rwCls = "w c1";
+  E("line", { x1: 210, y1: 30, x2: 210, y2: 52 + 31 * 15 + 9, class: rwCls }, root);
+  E("text", { x: 210, y: 24, "text-anchor": "middle", class: "vCt" }, root, "RegWrite = " + s.RegWrite);
+
+  let busCls = "w"; if (write) busCls = "w wr";
+  E("line", { x1: 275, y1: RY(0) + 11, x2: 275, y2: 560, class: busCls }, root);
+  E("text", { x: 275, y: 574, "text-anchor": "middle" }, root, "Dado a escrever");
+  let wtxt = "não importa (RegWrite = 0)";
+  if (write) wtxt = tagHex(V.wbv) + " → grava em " + rname(dest) + " na borda";
+  if (write && dest === 0) wtxt = tagHex(V.wbv) + " → $zero descarta";
+  let wcl = "rq"; if (write) wcl = "vWr";
+  E("text", { x: 275, y: 588, "text-anchor": "middle", class: wcl }, root, wtxt);
+
+  for (let i = 0; i < 32; i++) {
+    const y = RY(i);
+    const isDest = destKnown && i === dest;
+    let oc = "w"; if (isDest) oc = "w wr";
+    E("line", { x1: 190, y1: y + 4, x2: 222, y2: y + 4, class: oc }, root);
+    E("line", { x1: 210, y1: y + 9, x2: 222, y2: y + 9, class: rwCls }, root);
+    E("circle", { cx: 210, cy: y + 9, r: 1.6, class: "dot c" }, root);
+    const ga = E("g", {}, root);
+    andShape(ga, 222, y + 1, 16, 11);
+    ga.firstChild.setAttribute("class", "sh");
+    let en = "w"; if (isDest && write) en = "w wr";
+    E("path", { d: "M235.5," + (y + 6.5) + " H272.5 A2.5,2.5 0 0 1 277.5," + (y + 6.5) + " H300", class: en }, root);
+    let dc = "w"; if (isDest && write) dc = "w wr";
+    E("line", { x1: 275, y1: y + 11, x2: 300, y2: y + 11, class: dc }, root);
+    let rc = "row";
+    if ((i === f1 && use1) || (i === f2 && use2)) rc = "row r";
+    else if (i === f1 || i === f2) rc = "row ri";
+    if (isDest && write) { if (rc === "row r") rc = "row d r"; else rc = "row d"; }
+    E("rect", { x: 300, y, width: 170, height: 13, rx: 2, class: rc }, root);
+    E("text", { x: 305, y: y + 10, class: "rn" }, root, "$" + i);
+    E("text", { x: 330, y: y + 10, class: "rv" }, root, REGNAMES[i]);
+    const v = val(i);
+    let vt = "?", vc = "rq";
+    if (v !== null) { vt = (v >>> 0).toString(16).toUpperCase().padStart(8, "0"); vc = "rv"; }
+    if (i === 0) vt = "00000000 fixo";
+    E("text", { x: 465, y: y + 10, "text-anchor": "end", class: vc }, root, vt);
+    if (isDest && write) {
+      let nt = "← " + (V.wbv >>> 0).toString(16).toUpperCase().padStart(8, "0");
+      if (i === 0) nt = "escrita descartada";
+      E("text", { x: 476, y: y + 10, class: "vWr", "paint-order": "stroke", stroke: "var(--panel)", "stroke-width": 3 }, root, nt);
+    }
+  }
+
+  E("polygon", { points: "560,40 600,70 600,250 560,280", class: "sh" }, root);
+  E("text", { x: 580, y: 158, "text-anchor": "middle", class: "rv" }, root, "MUX");
+  E("text", { x: 580, y: 171, "text-anchor": "middle" }, root, "32:1");
+  E("polygon", { points: "560,300 600,330 600,510 560,540", class: "sh" }, root);
+  E("text", { x: 580, y: 418, "text-anchor": "middle", class: "rv" }, root, "MUX");
+  E("text", { x: 580, y: 431, "text-anchor": "middle" }, root, "32:1");
+
+  let s1c = "w on", s2c = "w on";
+  if (!use1) s1c = "w ign";
+  if (!use2) s2c = "w ign";
+  E("line", { x1: 580, y1: 20, x2: 580, y2: 55, class: s1c }, root);
+  E("text", { x: 590, y: 14, class: "vOn" }, root, "Reg. lido #1 [25-21] = nº " + rname(f1) + " (" + bin5(f1) + ")");
+  E("line", { x1: 580, y1: 525, x2: 580, y2: 566, class: s2c }, root);
+  E("text", { x: 590, y: 580, class: "vOn" }, root, "Reg. lido #2 [20-16] = nº " + rname(f2) + " (" + bin5(f2) + ")");
+
+  function outBlock(y, title, i, use, cls) {
+    E("line", { x1: 600, y1: y, x2: 700, y2: y, class: cls }, root);
+    E("text", { x: 708, y: y - 12, class: "rv" }, root, title);
+    const v = val(i);
+    let t = rname(i) + " = ?";
+    if (v !== null) t = rname(i) + " = " + tagHex(v);
+    let tcl = "rq"; if (use) tcl = "vOn";
+    E("text", { x: 708, y: y + 2, class: tcl }, root, t);
+    let u = use;
+    if (!u) { u = "valor ignorado"; if (g === "LW" || g === "I") u = "ignorado: ALUSrc = 1"; }
+    E("text", { x: 708, y: y + 16 }, root, u);
+  }
+  outBlock(160, "Dado lido #1", f1, use1, s1c);
+  outBlock(420, "Dado lido #2", f2, use2, s2c);
+
+  const items = [];
+  if (g === "J") {
+    items.push("No J, os bits [25-21] e [20-16] fazem parte do endereço de salto. Os fios continuam ligados ao banco, então os muxes de leitura selecionam " + rname(f1) + " e " + rname(f2) + ", mas ninguém usa o que sai.");
+  } else {
+    let t1 = "<b>Leitura #1:</b> o campo [25-21] = " + bin5(f1) + " é o seletor do mux 1, que deixa passar o conteúdo de " + rname(f1) + ".";
+    if (!use1) t1 += " Na LUI esse valor não é usado.";
+    items.push(t1);
+    let t2 = "<b>Leitura #2:</b> o campo [20-16] = " + bin5(f2) + " seleciona " + rname(f2) + " no mux 2.";
+    if (!use2) t2 += " O banco lê mesmo assim, porque [20-16] está sempre ligado ao Reg. lido #2. Quem descarta o valor é o mux ALUSrc (= 1), lá fora.";
+    items.push(t2);
+  }
+  if (write && dest === 0) items.push("<b>Escrita:</b> o destino é $zero. Ele é fixo em 0, então a escrita é descartada.");
+  else if (write) items.push("<b>Escrita:</b> o mux RegDst (= " + s.RegDst + ") entregou nº " + rname(dest) + " = " + bin5(dest) + ". O decodificador põe 1 só na saída " + dest + "; a AND com RegWrite = 1 libera só o enable de " + rname(dest) + ". O dado a escrever chega nos 32 registradores, mas só " + rname(dest) + " grava, na borda do clock, no fim do ciclo.");
+  else items.push("<b>Escrita:</b> RegWrite = 0, então todas as ANDs dão 0 e nenhum registrador grava, seja qual for a saída do decodificador.");
+  if (write && dest !== 0 && g !== "J" && (dest === f1 || (dest === f2 && use2))) items.push("Aqui " + rname(dest) + " é lido e escrito na mesma instrução. A leitura pega o valor antigo; o novo só existe depois da borda do clock.");
+  items.push("<b>Tempo:</b> a leitura é combinacional, não espera clock. No modelo da aula, ler o banco custa 1 ns e escrever custa 1 ns; muxes e decodificador internos fazem parte desse tempo.");
+  notes.innerHTML = items.map(t => "<li>" + t + "</li>").join("");
+  let dsc = "Nível abaixo do que a disciplina desenha: nas aulas o banco é uma caixa com 2 entradas de leitura (5 bits cada), 1 de escrita (5 bits), o dado a escrever e RegWrite. O interior aqui é a implementação clássica do livro Patterson & Hennessy (2 muxes de leitura + decodificador com enable). Serve para entender o que acontece; não é desenho cobrado.";
+  if (!RB) dsc += " Registradores com valor desconhecido aparecem como ?. Para ver todos, abra a instrução pelo Simulador de programa.";
+  disc.textContent = dsc;
+}
+
+function memNow() {
+  if (A.prog && SIM && A.pi >= 0 && SIM.steps[A.pi]) return SIM.steps[A.pi].Mb;
+  return S.mem;
+}
+function byteOf(w, k) { return (w >>> (8 * k)) & 0xFF; }
+function hx2(b) { return b.toString(16).toUpperCase().padStart(2, "0"); }
+function renderLupaDM(svg, notes, disc) {
+  svg.innerHTML = "";
+  svg.setAttribute("viewBox", "0 0 900 600");
+  const root = E("g", { class: "lz" }, svg);
+  const p = S.p, g = group(p.cls), V = calcVals(p), sg = msig(p.cls);
+  const rd = sg.MemRead === "1", wr = sg.MemWrite === "1";
+  const isSB = p.cls === "SB", isLB = p.cls === "LB";
+  const addr = V.res >>> 0, base = (addr & ~3) >>> 0, k = addr & 3;
+  const MB = memNow();
+  const ROWS = 8, SEL = 3;
+  const RY = i => 122 + i * 46;
+  function rowAddr(i) { return (base + (i - SEL) * 4) >>> 0; }
+  function known(a) {
+    if (MB && (a in MB)) return MB[a] >>> 0;
+    if (a === base && rd) return V.vMem >>> 0;
+    return null;
+  }
+  function h8(v) { return (v >>> 0).toString(16).toUpperCase().padStart(8, "0"); }
+  let newWord = null;
+  if (wr) {
+    if (isSB) {
+      const old = known(base);
+      if (old !== null) newWord = ((old & ~(0xFF << (8 * k))) | ((V.vRt & 0xFF) << (8 * k))) >>> 0;
+    } else newWord = V.vRt >>> 0;
+  }
+  const used = rd || wr;
+
+  E("text", { x: 20, y: 22, class: "t" }, root, "Escrita");
+  E("text", { x: 430, y: 22, class: "t", "text-anchor": "middle" }, root, "Palavras da memória (janela de 8)");
+  E("text", { x: 880, y: 22, class: "t", "text-anchor": "end" }, root, "Leitura");
+
+  let aCls = "w"; if (used) aCls = "w on";
+  E("line", { x1: 20, y1: 70, x2: 660, y2: 70, class: aCls }, root);
+  E("text", { x: 20, y: 50, class: "rv" }, root, "Endereço (resultado da ULA)");
+  let atx = tagHex(addr); if (g === "J") atx = "valor qualquer";
+  let acl = "rq"; if (used) acl = "vOn";
+  E("text", { x: 20, y: 63, class: acl }, root, atx);
+  E("text", { x: 230, y: 63 }, root, "[31-2] escolhem a palavra · [1-0] = " + (k >>> 0).toString(2).padStart(2, "0") + " é o byte dentro dela");
+  E("line", { x1: 170, y1: 70, x2: 170, y2: 110, class: aCls }, root);
+  E("circle", { cx: 170, cy: 70, r: 2.4, class: "dot" }, root);
+  let mselCls = "w"; if (rd) mselCls = "w on";
+  E("line", { x1: 660, y1: 70, x2: 660, y2: 130, class: mselCls }, root);
+
+  E("rect", { x: 150, y: 110, width: 40, height: 370, rx: 4, class: "sh" }, root);
+  E("text", { x: 174, y: 295, "text-anchor": "middle", transform: "rotate(-90 174 295)", class: "rv" }, root, "Decodificador de endereço");
+
+  let mwCls = "w c0"; if (wr) mwCls = "w c1";
+  E("line", { x1: 210, y1: 110, x2: 210, y2: 470, class: mwCls }, root);
+  E("text", { x: 210, y: 498, "text-anchor": "middle", class: "vCt" }, root, "MemWrite = " + sg.MemWrite);
+  if (isSB) E("text", { x: 210, y: 512, "text-anchor": "middle", class: "vCt" }, root, "SByte = 1");
+
+  let busCls = "w"; if (wr) busCls = "w wr";
+  E("line", { x1: 275, y1: RY(0) + 26, x2: 275, y2: 556, class: busCls }, root);
+  E("text", { x: 275, y: 572, "text-anchor": "middle" }, root, "Ent. dados (Saída Rt)");
+  let dtx = tagHex(V.vRt) + " chega, mas MemWrite = 0";
+  if (g === "J") dtx = "valor qualquer, MemWrite = 0";
+  if (wr) { dtx = tagHex(V.vRt) + " → grava na borda"; if (isSB) dtx = "só Rt[7-0] = 0x" + hx2(V.vRt & 0xFF) + " → byte +" + k + " na borda"; }
+  let dcl = "rq"; if (wr) dcl = "vWr";
+  E("text", { x: 275, y: 586, "text-anchor": "middle", class: dcl }, root, dtx);
+
+  E("text", { x: 306, y: 112 }, root, "palavra");
+  ["+3", "+2", "+1", "+0"].forEach((t, j) => E("text", { x: 421 + j * 38, y: 112, "text-anchor": "middle" }, root, t));
+
+  for (let i = 0; i < ROWS; i++) {
+    const y = RY(i), a = rowAddr(i), isSel = i === SEL;
+    const yc = y + 18;
+    let oc = "w"; if (isSel && wr) oc = "w wr";
+    E("line", { x1: 190, y1: yc - 5, x2: 222, y2: yc - 5, class: oc }, root);
+    E("line", { x1: 210, y1: yc + 1, x2: 222, y2: yc + 1, class: mwCls }, root);
+    E("circle", { cx: 210, cy: yc + 1, r: 1.6, class: "dot c" }, root);
+    const ga = E("g", {}, root);
+    andShape(ga, 222, yc - 8, 16, 12);
+    ga.firstChild.setAttribute("class", "sh");
+    let en = "w"; if (isSel && wr) en = "w wr";
+    E("path", { d: "M236," + (yc - 2) + " H272.5 A2.5,2.5 0 0 1 277.5," + (yc - 2) + " H300", class: en }, root);
+    let dc = "w"; if (isSel && wr) dc = "w wr";
+    E("line", { x1: 275, y1: y + 26, x2: 300, y2: y + 26, class: dc }, root);
+
+    let rc = "row";
+    if (isSel && rd) rc = "row r";
+    if (isSel && wr) rc = "row d";
+    E("rect", { x: 300, y, width: 260, height: 36, rx: 3, class: rc }, root);
+    let atxt = h8(a);
+    E("text", { x: 306, y: y + 16, class: "rv" }, root, "0x" + atxt);
+    if (isSel && wr) E("text", { x: 306, y: y + 30, class: "vWr" }, root, "grava na borda");
+    else if (isSel && rd) E("text", { x: 306, y: y + 30, class: "vOn" }, root, "lida");
+    const w0 = known(a);
+    for (let j = 0; j < 4; j++) {
+      const lane = 3 - j;
+      let cc = "cell", tc = "rq", t = "??";
+      if (w0 !== null) { t = hx2(byteOf(w0, lane)); tc = "ct"; }
+      if (isSel && rd && !isLB) cc = "cell r";
+      if (isSel && isLB) { if (lane === k) cc = "cell r"; else cc = "cell ri"; }
+      if (isSel && wr) {
+        if (!isSB || lane === k) {
+          cc = "cell d"; tc = "vWr";
+          if (isSB) t = hx2(V.vRt & 0xFF); else t = hx2(byteOf(newWord, lane));
+        }
+      }
+      E("rect", { x: 404 + j * 38, y: y + 6, width: 34, height: 24, rx: 2, class: cc }, root);
+      E("text", { x: 421 + j * 38, y: y + 22, "text-anchor": "middle", class: tc }, root, t);
+    }
+    let fc = "fan"; if (isSel && rd) fc = "fan on";
+    const my = 140 + i * 45;
+    const fl = E("line", { x1: 560, y1: yc, x2: 640, y2: my, class: fc }, root);
+    if (isSel) root.appendChild(fl);
+  }
+  E("text", { x: 340, y: RY(0) - 4, "text-anchor": "middle", class: "rq" }, root, "⋮");
+  E("text", { x: 340, y: RY(ROWS - 1) + 50, "text-anchor": "middle", class: "rq" }, root, "⋮");
+
+  E("polygon", { points: "640,120 680,150 680,460 640,490", class: "sh" }, root);
+  E("text", { x: 660, y: 300, "text-anchor": "middle", class: "rv" }, root, "MUX");
+  E("text", { x: 660, y: 313, "text-anchor": "middle" }, root, "leitura");
+
+  let outCls = "w"; if (rd) outCls = "w on";
+  E("line", { x1: 680, y1: 305, x2: 712, y2: 305, class: outCls }, root);
+  let triCls = "tri"; if (rd) triCls = "tri on";
+  E("polygon", { points: "712,293 736,305 712,317", class: triCls }, root);
+  let mrCls = "w c0"; if (rd) mrCls = "w c1";
+  E("line", { x1: 722, y1: 230, x2: 722, y2: 298, class: mrCls }, root);
+  E("text", { x: 722, y: 222, "text-anchor": "middle", class: "vCt" }, root, "MemRead = " + sg.MemRead);
+  let soCls = "w"; if (rd) soCls = "w on";
+  E("line", { x1: 736, y1: 305, x2: 770, y2: 305, class: soCls }, root);
+  E("text", { x: 776, y: 292, class: "rv" }, root, "Saída mem");
+  let otx = "não liberada", ocl = "rq", odest = "MemRead = 0:", odest2 = "ninguém usa";
+  if (rd) {
+    ocl = "vOn";
+    otx = tagHex(V.vMem);
+    odest = "→ mux MemToReg (1)"; odest2 = "→ banco";
+    if (isLB) { odest = "→ seleção de byte"; odest2 = "lá fora (LByte = 1)"; }
+  }
+  E("text", { x: 776, y: 307, class: ocl }, root, otx);
+  E("text", { x: 776, y: 321 }, root, odest);
+  E("text", { x: 776, y: 335 }, root, odest2);
+
+  const items = [];
+  const bk = (k >>> 0).toString(2).padStart(2, "0");
+  if (!used) {
+    items.push("<b>Esta instrução não usa a M.D.</b> O resultado da ULA chega no endereço porque o fio está sempre ligado, mas MemRead = 0 e MemWrite = 0: nada é lido e nada é gravado.");
+  } else {
+    items.push("<b>Endereço:</b> a ULA calculou Rs + deslocamento = " + tagHex(addr) + ". O MIPS endereça bytes: os bits [31-2] escolhem a palavra " + tagHex(base) + " e os bits [1-0] = " + bk + " apontam o byte +" + k + " dentro dela.");
+    if ((g === "LW" && !isLB) || (g === "SW" && !isSB)) {
+      if (k !== 0) items.push("<span class='warn'>Endereço não alinhado:</span> LW e SW exigem endereço múltiplo de 4 ([1-0] = 00). No MIPS real isso gera exceção; a janela mostra a palavra " + tagHex(base) + " só para ilustrar.");
+      else items.push("Endereço alinhado ([1-0] = 00), como LW e SW exigem: palavra sempre em múltiplo de 4.");
+    }
+  }
+  if (rd && !isLB) items.push("<b>Leitura:</b> o endereço seleciona a palavra no mux de leitura e MemRead = 1 libera a saída. A palavra " + tagHex(V.vMem) + " segue para o mux MemToReg (= 1) e é escrita no banco.");
+  if (isLB) items.push("<b>Leitura (LB):</b> a memória entrega a palavra inteira " + tagHex(V.vMem) + ". Quem escolhe o byte +" + k + " (0x" + hx2(byteOf(V.vMem, k)) + ") é o circuito de byte lá fora, com End.[1-0] e o mux LByte = 1, e depois a extensão de sinal 8 → 32.");
+  if (wr && !isSB) items.push("<b>Escrita:</b> MemWrite = 1. O decodificador ativa só a linha da palavra " + tagHex(base) + "; a AND com MemWrite libera o enable dela. O valor de Ent. dados (" + tagHex(V.vRt) + ", que veio da Saída Rt) chega em todas as palavras, mas só essa grava, na borda do clock.");
+  if (isSB) items.push("<b>Escrita (SB):</b> MemWrite = 1 e SByte = 1. Só o byte +" + k + " da palavra " + tagHex(base) + " recebe enable e grava Rt[7-0] = 0x" + hx2(V.vRt & 0xFF) + ". Os outros 3 bytes não mudam.");
+  if (used && !wr) items.push("MemWrite = 0: nenhuma palavra grava. O valor da Saída Rt chega em Ent. dados, mas é ignorado.");
+  if (used && !rd) items.push("MemRead = 0: a saída não é liberada; nada desta memória vai para o banco.");
+  items.push("<b>Tempo:</b> no modelo da aula, cada acesso à memória (ler ou escrever) custa 2 ns. Por isso o LW é a instrução mais lenta: usa a memória de instruções, a ULA, a memória de dados e ainda escreve no banco (2 + 1 + 2 + 2 + 1 = 8 ns).");
+  notes.innerHTML = items.map(t => "<li>" + t + "</li>").join("");
+  let dsc = "Interior conceitual. O \"mux de leitura\" é a forma abstrata do livro; uma memória real usa linhas de palavra, bitlines e amplificadores, mas o comportamento é o mesmo. O que a disciplina cobra: endereço de byte, palavra alinhada em múltiplo de 4, MemRead libera a leitura, MemWrite grava na borda, 2 ns por acesso. Ordem dos bytes: aqui o byte +0 é o menos significativo (little-endian, como no simulador MARS e no resto deste diagrama); a aula apresenta big e little endian.";
+  if (!MB) dsc += " Conteúdo desconhecido aparece como ??. Para ver a memória do programa, abra a instrução pelo Simulador de programa.";
+  disc.textContent = dsc;
+}
+
+/* monociclo */
+const DM = makeDiagram(document.getElementById("svgMono"));
+(function buildMono() {
+  const D = DM;
+  for (const id in MW) wire(D, id, MW[id]);
+  dotsOf(D, MDOTS);
+  rectC(D, "PC", 30, 295, 40, 80, "PC");
+  rectC(D, "IM", 110, 270, 130, 150, "M.I.", "Memória de Instruções");
+  aluC(D, "ADD4", 150, 50, 50, 80, "+");
+  ellC(D, "JSH", 330, 35, 38, 16, "<<2");
+  const uc = ellC(D, "UC", 440, 165, 55, 50, "U.C.", "");
+  D.ucOp = uc.querySelector(".t2");
+  muxC(D, "MUXRD", 350, 380, 22, 70, [[395, "0"], [435, "1"]]);
+  rectC(D, "REG", 430, 295, 150, 190, "", "");
+  const reg = D.comps.REG;
+  E("text", { x: 505, y: 388, "text-anchor": "middle", class: "t1" }, reg, "Banco de");
+  E("text", { x: 505, y: 403, "text-anchor": "middle", class: "t1" }, reg, "Registradores");
+  [["Rs", 436, 324], ["Rt", 436, 359], ["Rd (escrita)", 436, 419], ["Ent. dados", 436, 459]].forEach(a => E("text", { x: a[1], y: a[2], class: "t2" }, reg, a[0]));
+  [["Saída Rs", 574, 334], ["Saída Rt", 574, 434]].forEach(a => E("text", { x: a[1], y: a[2], "text-anchor": "end", class: "t2" }, reg, a[0]));
+  ellC(D, "SE", 500, 540, 32, 22, "16→32", "ext. sinal");
+  ellC(D, "SH2", 630, 190, 26, 16, "<<2");
+  aluC(D, "ADDB", 690, 110, 50, 80, "+");
+  muxC(D, "MUXALU", 640, 415, 22, 70, [[430, "0"], [470, "1"]]);
+  const alu = aluC(D, "ALU", 700, 300, 80, 160, "ULA");
+  D.aluOp = alu._op;
+  E("text", { x: 776, y: 349, "text-anchor": "end", class: "t2" }, alu, "Zero");
+  E("text", { x: 776, y: 394, "text-anchor": "end", class: "t2" }, alu, "Res.");
+  ellC(D, "ALUC", 730, 560, 36, 24, "U.C.", "ULA");
+  const dm = rectC(D, "DM", 830, 320, 120, 200, "M.D.", "Memória de Dados");
+  [["End.", 836, 394], ["Ent. dados", 836, 484]].forEach(a => E("text", { x: a[1], y: a[2], class: "t2" }, dm, a[0]));
+  E("text", { x: 944, y: 404, "text-anchor": "end", class: "t2" }, dm, "Saída mem");
+  muxC(D, "MUXMR", 1065, 380, 22, 80, [[400, "1"], [440, "0"]]);
+  muxC(D, "MUXLB", 1028, 385, 20, 55, [[400, "0"], [428, "1"]]);
+  ellC(D, "BYTE", 1000, 470, 25, 16, "8→32", "byte");
+  lbl(D, 1006, 522, "End.[1-0]");
+  muxC(D, "MUXPC", 900, 75, 22, 70, [[90, "0"], [130, "1"]]);
+  muxC(D, "MUXJ", 990, 20, 22, 105, [[35, "1"], [110, "0"]]);
+  const gates = comp(D, "GATES");
+  andShape(gates, 820, 200, 28, 24); andShape(gates, 820, 240, 28, 24); orShape(gates, 868, 215, 30, 40);
+  E("circle", { cx: 817, cy: 246, r: 3, class: "sh" }, gates);
+
+  lbl(D, 118, 119, "4", "end");
+  lbl(D, 600, 84, "PC + 4");
+  lbl(D, 436, 64, "PC+4[31-28]");
+  lbl(D, 640, 29, "Endereço do desvio incondicional [31-0]", "middle");
+  lbl(D, 275, 30, "[25-0]", "end");
+  lbl(D, 384, 30, "28", "start", "bits");
+  lbl(D, 288, 159, "[31-26]"); lbl(D, 288, 314, "[25-21]"); lbl(D, 288, 349, "[20-16]");
+  lbl(D, 288, 429, "[15-11]"); lbl(D, 288, 534, "[15-0]"); lbl(D, 288, 594, "[5-0]");
+  lbl(D, 246, 339, "[31-0]");
+  lbl(D, 452, 533, "16", "end", "bits"); lbl(D, 546, 533, "32", "start", "bits");
+  lbl(D, 736, 497, "3 bits", "start", "bits");
+  lbl(D, 918, 194, "PCSrc ="); lbl(D, 918, 206, "Branch·Zero +"); lbl(D, 918, 218, "NBranch·¬Zero");
+  lbl(D, 748, 144, "End. desvio", "start", "bits");
+
+  badge(D, "RegDst", 361, 368); badge(D, "RegWrite", 505, 282); badge(D, "ALUSrc", 651, 403);
+  badge(D, "ALUOp", 660, 575); badge(D, "MemWrite", 852, 310); badge(D, "MemRead", 925, 310);
+  badge(D, "MemToReg", 1108, 370, "end"); badge(D, "LByte", 1000, 372); badge(D, "SByte", 980, 334); badge(D, "Branch", 812, 170); badge(D, "NBranch", 735, 258); badge(D, "DVI", 1001, 141);
+  buildCtrl(D);
+  hopify(D);
+  D.ctlW = { aluctrl: 1, pcsrc: 1, and1_out: 1, and2_out: 1 };
+  D.ctlVal = function (id) {
+    let V = null;
+    if (A.on && A.vals) V = A.vals; else V = calcVals(S.p);
+    const sg = msig(S.p.cls);
+    if (id === "aluctrl") return V.ctl !== "000";
+    if (id === "pcsrc") return V.taken === 1;
+    if (id === "and1_out") return sg.Branch === "1" && V.zero === 1;
+    if (id === "and2_out") return sg.NBranch === "1" && V.zero === 0;
+    return true;
+  };
+  D.L.tags = E("g", {}, D.svg);
+  D.hasTags = true;
+  lupaBtn(D, "REG", 542, 299);
+  lupaBtn(D, "DM", 912, 324);
+})();
+
+/* multiciclo */
+const DX = makeDiagram(document.getElementById("svgMulti"));
+(function buildMulti() {
+  const D = DX;
+  for (const id in XW) wire(D, id, XW[id]);
+  dotsOf(D, XDOTS);
+  rectC(D, "PC", 30, 300, 36, 80, "PC");
+  muxC(D, "IORD", 95, 310, 22, 70, [[325, "0"], [365, "1"]]);
+  const mem = rectC(D, "MEM", 150, 280, 150, 180, "", "");
+  E("text", { x: 225, y: 392, "text-anchor": "middle", class: "t1" }, mem, "Memória");
+  E("text", { x: 225, y: 406, "text-anchor": "middle", class: "t2" }, mem, "instruções + dados");
+  [["Endereço", 156, 349], ["Ent. dados", 156, 434]].forEach(a => E("text", { x: a[1], y: a[2], class: "t2" }, mem, a[0]));
+  E("text", { x: 294, y: 364, "text-anchor": "end", class: "t2" }, mem, "Saída mem");
+  const ir = rectC(D, "IR", 350, 230, 90, 170, "", "");
+  E("text", { x: 372, y: 320, "text-anchor": "middle", class: "t1" }, ir, "IR");
+  [["[25-21]", 264], ["[20-16]", 304], ["[15-11]", 369], ["[15-0]", 394]].forEach(a => E("text", { x: 434, y: a[1], "text-anchor": "end", class: "t2" }, ir, a[0]));
+  rectC(D, "MDR", 360, 470, 80, 45, "MDR");
+  muxC(D, "MUXLB", 330, 465, 18, 55, [[480, "0"], [505, "1"]]);
+  ellC(D, "BYTE", 262, 495, 30, 16, "8→32", "byte");
+  lbl(D, 138, 507, "End.[1-0]");
+  muxC(D, "MUXRD", 480, 320, 20, 60, [[335, "0"], [365, "1"]]);
+  muxC(D, "MUXMR", 480, 420, 20, 60, [[435, "0"], [465, "1"]]);
+  const reg = rectC(D, "REG", 530, 240, 140, 230, "", "");
+  E("text", { x: 600, y: 400, "text-anchor": "middle", class: "t1" }, reg, "Banco de");
+  E("text", { x: 600, y: 415, "text-anchor": "middle", class: "t1" }, reg, "Registradores");
+  [["Rs", 536, 264], ["Rt", 536, 304], ["Reg. escrita", 536, 354], ["Ent. dados", 536, 454]].forEach(a => E("text", { x: a[1], y: a[2], class: "t2" }, reg, a[0]));
+  [["Saída Rs", 664, 284], ["Saída Rt", 664, 379]].forEach(a => E("text", { x: a[1], y: a[2], "text-anchor": "end", class: "t2" }, reg, a[0]));
+  rectC(D, "A", 700, 262, 36, 36, "A"); rectC(D, "B", 700, 357, 36, 36, "B");
+  ellC(D, "SE", 590, 540, 32, 20, "16→32");
+  ellC(D, "SH", 690, 540, 26, 16, "<<2");
+  muxC(D, "MUXA", 770, 230, 22, 70, [[245, "0"], [280, "1"]]);
+  muxC(D, "MUXB", 770, 360, 22, 130, [[375, "0"], [405, "1"], [435, "2"], [465, "3"]]);
+  const alu = aluC(D, "ALU", 830, 230, 70, 220, "ULA");
+  D.aluOp = alu._op;
+  E("text", { x: 896, y: 294, "text-anchor": "end", class: "t2" }, alu, "Zero");
+  E("text", { x: 896, y: 344, "text-anchor": "end", class: "t2" }, alu, "Res.");
+  ellC(D, "ALUC", 865, 530, 36, 22, "U.C.", "ULA");
+  rectC(D, "ALUOUT", 936, 320, 58, 40, "ALUOut");
+  ellC(D, "JSH", 975, 100, 30, 15, "<<2");
+  muxC(D, "MUXPCS", 1040, 150, 24, 125, [[165, "00"], [195, "01"], [225, "10"], [255, "11"]]);
+  const uc = ellC(D, "UC", 560, 80, 120, 40, "U.C. · máquina de estados", "");
+  D.ucOp = uc.querySelector(".t2");
+  const gates = comp(D, "GATES");
+  andShape(gates, 230, 165, 28, 24); andShape(gates, 230, 215, 28, 24); orShape(gates, 282, 183, 30, 44);
+  E("circle", { cx: 228, cy: 221, r: 2.6, class: "sh" }, gates);
+
+  lbl(D, 764, 400, "4", "middle");
+  lbl(D, 988, 259, "C000 0000", "end");
+  lbl(D, 1013, 130, "+PC[31-28]");
+  lbl(D, 390, 196, "Op [31-26]", "end");
+  lbl(D, 424, 220, "[25-0]");
+  lbl(D, 600, 594, "[5-0]");
+  lbl(D, 552, 533, "16", "end", "bits"); lbl(D, 626, 533, "32", "start", "bits");
+  lbl(D, 960, 125, "26→28", "middle", "bits");
+  lbl(D, 1060, 145, "Fonte PC", "middle");
+
+  badge(D, "IorD", 115, 300); badge(D, "MemRead", 190, 298); badge(D, "MemWrite", 262, 298);
+  badge(D, "IRWrite", 395, 420); badge(D, "RegDst", 492, 312); badge(D, "MemToReg", 512, 500);
+  badge(D, "RegWrite", 600, 230); badge(D, "ALUSrcA", 805, 215); badge(D, "ALUSrcB", 832, 478);
+  badge(D, "ALUOp", 940, 530); badge(D, "PCSource", 1062, 292);
+  badge(D, "LByte", 350, 537); badge(D, "SByte", 225, 448); badge(D, "PCWrite", 238, 205); badge(D, "PCWriteCond", 226, 171, "end"); badge(D, "PCWriteCondNE", 226, 233, "end");
+  stub(D, [[269, 205], [286, 205]]);
+  hopify(D);
+  D.wtags = {};
+  [["IR", 395, 226], ["MDR", 400, 528], ["A", 718, 256], ["B", 718, 351], ["ALUOUT", 965, 314], ["PC", 48, 392], ["REG", 640, 486], ["MEM", 225, 474]].forEach(a => {
+    D.wtags[a[0]] = E("text", { x: a[1], y: a[2], "text-anchor": "middle", class: "wtag" }, D.L.badges, "");
+  });
+})();
+
+/* FSM */
+const FSM = (function () {
+  const svg = document.getElementById("svgFsm");
+  const g = E("g", { class: "fsm" }, svg);
+  const N = { 0:[40,190,"Busca"], 1:[140,190,"Decod."], 2:[262,80,"End. mem"], 3:[384,22,"Lê mem"], 15:[384,64,"Lê byte"], 4:[506,42,"Escreve Rt ↩0"], 5:[384,106,"Escreve mem ↩0"], 16:[384,148,"Escreve byte ↩0"],
+    6:[262,190,"Exec. R"], 7:[384,190,"Escreve Rd ↩0"], 12:[262,232,"Exec. I"], 13:[384,232,"Escreve Rt ↩0"], 8:[262,274,"BEQ ↩0"], 14:[262,314,"BNE ↩0"], 9:[262,354,"J ↩0"],
+    10:[480,300,"Indefinida ↩0"], 11:[480,354,"Overflow ↩0"] };
+  const EDG = [[0,1,""],[1,2,"lw/sw"],[1,6,"tipo-R"],[1,12,"tipo-I"],[1,8,"beq"],[1,14,"bne"],[1,9,"j"],[2,3,"lw"],[2,15,"lb"],[2,5,"sw"],[2,16,"sb"],[3,4,""],[15,4,""],[6,7,""],[12,13,""]];
+  const eg = {}, ng = {};
+  EDG.forEach(([a, b, t]) => {
+    const A = N[a], B = N[b];
+    const dx = B[0] - A[0], dy = B[1] - A[1], len = Math.hypot(dx, dy);
+    const x1 = A[0] + dx / len * 17, y1 = A[1] + dy / len * 17, x2 = B[0] - dx / len * 19, y2 = B[1] - dy / len * 19;
+    const ln = E("line", { x1, y1, x2, y2 }, g);
+    eg[a + "-" + b] = ln;
+    if (t) E("text", { x: x2 - 10, y: y2 - 4, "text-anchor": "end", class: "el" }, g, t);
+  });
+  E("path", { d: "M40,208 Q40,366 120,366 L230,366", class: "back" }, g).setAttribute("stroke-dasharray", "2 4");
+  for (const k in N) {
+    const [x, y, c] = N[k];
+    let nc = ""; if (XNEW[k]) nc = "new"; if (XEXC[k]) nc = "exc";
+    const ng1 = E("g", { class: nc }, g);
+    E("circle", { cx: x, cy: y, r: 16 }, ng1);
+    E("text", { x, y: y + 4.5, "text-anchor": "middle", class: "n" }, ng1, k);
+    E("text", { x: x + 21, y: y + 4, class: "c" }, ng1, c);
+    if (XNEW[k]) E("text", { x: x, y: y - 20, "text-anchor": "middle", class: "el" }, ng1, "novo");
+    if (+k === 10) E("text", { x: x + 21, y: y + 16, class: "el" }, ng1, "do S1: Op desconhecido");
+    if (+k === 11) E("text", { x: x + 21, y: y + 16, class: "el" }, ng1, "do S7: overflow na ULA");
+    ng[k] = ng1;
+  }
+  E("text", { x: 464, y: 274, class: "el" }, g, "Exceções (slides 69-70)");
+  return { eg, ng };
+})();
+
+/* ---------- estado e render ---------- */
+const S = { tab: "mono", p: parse("add $t0, $t1, $t2"), ph: 0, step: 0, timer: null };
+
+function renderChips() {
+  const box = document.getElementById("chips"); box.innerHTML = "";
+  CHIPS.forEach(([n, ex]) => {
+    const b = h("button", "chip", n); b.type = "button";
+    const m = ex.split(" ")[0];
+    let pressed = "false";
+    if (S.p && OPS[m].cls === S.p.cls && (S.p.cls !== "R" || n === "Tipo-R")) pressed = "true";
+    b.setAttribute("aria-pressed", pressed);
+    b.onclick = () => { document.getElementById("asm").value = ex; onAsm(); };
+    box.appendChild(b);
+  });
+}
+function onAsm() {
+  const v = document.getElementById("asm").value;
+  const err = document.getElementById("asmErr");
+  try { S.p = parse(v); S.regs = null; S.mem = null; err.hidden = true; S.ph = 0; S.step = 0; stopPlay(); animOff(); A.prog = false; renderAll(); }
+  catch (e) { err.textContent = e.message; err.hidden = false; }
+}
+
+function applyWires(D, onMap, nowSet) {
+  for (const id in D.wires) {
+    const g = D.wires[id];
+    let cls = "wire";
+    if (D.ctlW && D.ctlW[id]) { cls += " ctl"; if (onMap[id] && D.ctlVal && !D.ctlVal(id)) cls += " z"; }
+    if (onMap[id]) { cls += " on"; if (nowSet && nowSet[id]) cls += " now"; g.parentNode.appendChild(g); }
+    g.setAttribute("class", cls);
+  }
+  D.dots.forEach(o => { let on = o.ids.some(i => onMap[i]); o.c.setAttribute("class", on ? "dot on" : "dot"); });
+  if (D.hasTags) drawTags(D, onMap);
+}
+function applyComps(D, onMap, writes) {
+  for (const id in D.comps) {
+    let cls = "comp";
+    if (onMap[id]) cls += " on";
+    if (writes && writes[id]) cls += " write";
+    D.comps[id].setAttribute("class", cls);
+  }
+}
+
+function renderMono() {
+  const p = S.p, g = group(p.cls);
+  const wmap = MWIRES[p.cls] || MWIRES[g];
+  const phases = MPHASES[g];
+  const last = phases[phases.length - 1];
+  const cur = S.ph;
+  const on = {}, now = {};
+  setBus(DM, wmap);
+  for (const id in wmap) {
+    let ph = wmap[id]; if (ph === 9) ph = last;
+    if (cur === 0 || ph <= cur) on[id] = 1;
+    if (cur !== 0 && ph === cur) now[id] = 1;
+  }
+  applyWires(DM, on, now);
+  const cm = {};
+  const cmap = MCOMPS[p.cls] || MCOMPS[g];
+  for (const id in cmap) { let ph = cmap[id]; if (ph === 9) ph = last; if (cur === 0 || ph <= cur) cm[id] = 1; }
+  applyComps(DM, cm);
+  const s = msig(p.cls);
+  ["RegDst","RegWrite","ALUSrc","ALUOp","MemWrite","MemRead","MemToReg","Branch","NBranch","DVI","LByte","SByte"].forEach(k => setBadge(DM, k, k, s[k]));
+  setCtrl(DM, s);
+  DM.ucOp.textContent = "Op " + p.op.toString(2).padStart(6, "0");
+  let sym = p.sym; if (p.cls === "J") sym = "";
+  DM.aluOp.textContent = sym;
+
+  const box = document.getElementById("monoPhases"); box.innerHTML = "";
+  const all = h("button", "pill"); all.type = "button"; all.innerHTML = "<b>●</b>Tudo"; all.setAttribute("aria-pressed", cur === 0 ? "true" : "false");
+  all.onclick = () => { animOff(); S.ph = 0; renderMono(); }; box.appendChild(all);
+  phases.forEach((ph, i) => {
+    const b = h("button", "pill"); b.type = "button";
+    let nm = PHASE[ph].n; if (g === "J" && ph === 2) nm = "Monta endereço do salto";
+    b.innerHTML = "<b>" + (i + 1) + "</b>" + nm;
+    b.setAttribute("aria-pressed", cur === ph ? "true" : "false");
+    b.onclick = () => { animOff(); S.ph = ph; renderMono(); };
+    box.appendChild(b);
+  });
+
+  const ex = document.getElementById("monoExplain"); ex.innerHTML = "";
+  if (cur === 0) {
+    const u = monoUseful(g);
+    ex.appendChild(h("div", "rtl", rtlMono(p)));
+    ex.appendChild(h("p", "", "Todos os fios usados por " + p.mn.toUpperCase() + " aparecem em azul. Clique numa fase (ou em Animar) para ver a ordem em que o sinal percorre o caminho."));
+    ex.appendChild(h("div", "unit", "Tempo útil: " + u.f + " = " + fmt(u.v) + " ns"));
+  } else {
+    const t = monoText(p, cur);
+    ex.appendChild(h("div", "rtl", t.rtl));
+    ex.appendChild(h("p", "", t.t));
+    let u = PHASE[cur].u; let un = { M: "memória", R: "registradores", A: "ULA" }[u];
+    let txt = "Custo desta fase: " + un + " = " + fmt(tv(u)) + " ns";
+    if (g === "J" && cur === 2) txt = "Custo desta fase: só fios e deslocamento, ≈ 0 ns";
+    ex.appendChild(h("div", "unit", txt));
+  }
+
+  const tl = document.getElementById("monoTimeline"); tl.innerHTML = "";
+  const clock = 2 * T.M + 2 * T.R + T.A;
+  let used = 0;
+  phases.forEach(ph => {
+    let v = tv(PHASE[ph].u); if (g === "J" && ph === 2) v = 0;
+    if (v <= 0) return;
+    used += v;
+    const sg = h("div", "seg" + (cur === ph ? " cur" : ""));
+    sg.style.width = (v / clock * 100) + "%";
+    sg.innerHTML = { M: "M", R: "R", A: "ULA" }[PHASE[ph].u] + "<small>" + fmt(v) + " ns</small>";
+    sg.title = PHASE[ph].n;
+    tl.appendChild(sg);
+  });
+  if (clock - used > 0.001) {
+    const sg = h("div", "seg idle"); sg.style.width = ((clock - used) / clock * 100) + "%";
+    sg.innerHTML = "ocioso<small>" + fmt(clock - used) + " ns</small>"; tl.appendChild(sg);
+  }
+  const cap = document.getElementById("monoTcap");
+  cap.innerHTML = "<span>Tempo útil: <strong>" + fmt(used) + " ns</strong></span><span>Ciclo do clock = pior caso (LW): <strong>" + fmt(clock) + " ns</strong></span>";
+
+  const tt = document.getElementById("monoTimes");
+  const rows = [["Tipo-R / tipo-I", "R", "M + R + ULA + R"], ["LW", "LW", "M + R + ULA + M + R"], ["SW", "SW", "M + R + ULA + M"], ["BEQ / BNE", "BEQ", "M + R + ULA"], ["J", "J", "M"]];
+  let html = "<thead><tr><th>Classe</th><th>Caminho</th><th>ns</th></tr></thead><tbody>";
+  rows.forEach(r => {
+    let gg = r[1]; let isCur = gg === g || (gg === "R" && g === "I");
+    const u = monoUseful(gg);
+    html += "<tr class='" + (isCur ? "cur" : "") + "'><td>" + r[0] + "</td><td>" + r[2] + "</td><td>" + fmt(u.v) + "</td></tr>";
+  });
+  html += "</tbody>";
+  tt.innerHTML = html;
+
+  const st = document.getElementById("monoSig");
+  let sh = "<thead><tr><th>Inst.</th>" + MSIG_COLS.map(c => "<th>" + c.replace("LByte", "LByte<span class='new'>novo</span>").replace("SByte", "SByte<span class='new'>novo</span>") + "</th>").join("") + "</tr></thead><tbody>";
+  MSIG_ROWS.forEach(([k, n]) => {
+    sh += "<tr class='" + (k === p.cls ? "cur" : "") + "'><td>" + n + "</td>" + MSIG[k].map((v, ci) => { let t = v; if (MSIG_COLS[ci] === "ALUOp" && FREE_OP[k]) t = v + "*"; return "<td class='" + vcls(v) + "'>" + t + "</td>"; }).join("") + "</tr>";
+  });
+  st.innerHTML = sh + "</tbody>";
+
+  const ctl = aluCtl(p);
+  const at = document.getElementById("aluTbl");
+  const AT = [["000","AND","and, andi"],["001","OR","or, ori"],["010","ADD","add, addi, lw, sw"],["110","SUB","sub, beq, bne"],["111","SLT","slt, slti"]];
+  at.innerHTML = "<thead><tr><th>Ent. controle</th><th>Função</th><th>Quem usa</th></tr></thead><tbody>" +
+    AT.map(r => "<tr class='" + (r[0] === ctl ? "cur" : "") + "'><td>" + r[0] + "</td><td>" + r[1] + "</td><td style='font-family:var(--f-sans)'>" + r[2] + "</td></tr>").join("") + "</tbody>";
+  let note = "ALUOp = " + s.ALUOp + " → controle da ULA = " + ctl + ".";
+  if (p.cls === "R") note = "ALUOp = 010 (tipo-R): a U.C. da ULA lê o funct " + p.funct + " (" + p.funct.toString(2).padStart(6, "0") + ") → controle = " + ctl + ".";
+  if (p.cls === "J") note = "J não usa a ULA (ALUOp = XXX).";
+  if (p.cls === "LUI") note = "LUI: a ULA desloca o imediato 16 bits (imm << 16), operação que não está nesta tabela. O ALUOp 110 é só um código livre escolhido aqui.";
+  if (FREE_OP[p.cls] && p.cls !== "LUI") note += " O código " + s.ALUOp + " é livre: só 000, 001 e 010 são fixos; na prova, declare o código que você escolheu.";
+  document.getElementById("aluNote").textContent = note;
+  if (A.on && S.tab === "mono") overlayAnim();
+}
+function vcls(v) { if (/1/.test(v)) return "v1"; if (/^X+$/.test(v)) return "vx"; return "v0"; }
+function rtlMono(p) {
+  const g = group(p.cls);
+  if (g === "R") return "Rd ← Rs " + p.sym + " Rt ;  PC ← PC + 4";
+  if (p.cls === "LB") return "Rt ← ext8(byte de M.D.[Rs + ext(desloc)]) ;  PC ← PC + 4";
+  if (g === "LW") return "Rt ← M.D.[Rs + ext(desloc)] ;  PC ← PC + 4";
+  if (p.cls === "SB") return "byte de M.D.[Rs + ext(desloc)] ← Rt[7-0] ;  PC ← PC + 4";
+  if (g === "SW") return "M.D.[Rs + ext(desloc)] ← Rt ;  PC ← PC + 4";
+  if (p.cls === "BEQ") return "se Rs == Rt: PC ← PC+4 + (ext(imm) << 2)";
+  if (p.cls === "BNE") return "se Rs ≠ Rt: PC ← PC+4 + (ext(imm) << 2)";
+  if (p.cls === "LUI") return "Rt ← imm << 16 ;  PC ← PC + 4";
+  if (g === "I") return "Rt ← Rs " + p.sym + " ext(imm) ;  PC ← PC + 4";
+  return "PC ← PC+4[31-28] ‖ (alvo << 2)";
+}
+
+function renderMulti() {
+  const p = S.p;
+  const steps = xsteps(p);
+  if (S.step >= steps.length) S.step = 0;
+  const st = steps[S.step];
+  const def = XST[st];
+  const on = {}; def.w.split(" ").forEach(i => { on[i] = 1; });
+  applyWires(DX, on, on);
+  const cm = {}; def.c.split(" ").forEach(i => { cm[i] = 1; });
+  const wr = {}; def.wr.split(" ").forEach(i => { wr[i] = 1; });
+  applyComps(DX, cm, wr);
+  for (const k in DX.wtags) { DX.wtags[k].textContent = wr[k] ? "escreve" : ""; }
+  const s = xsig(st, p);
+  XSIG_COLS.forEach(k => setBadge(DX, k, k, s[k]));
+  DX.ucOp.textContent = "Estado " + st + " · " + XNAME[st];
+  let op = "";
+  if (st === 0 || st === 1 || st === 2) op = "+";
+  if (st === 6 || st === 12) op = p.sym;
+  if (st === 8 || st === 14) op = "−";
+  DX.aluOp.textContent = op;
+
+  const box = document.getElementById("multiSteps"); box.innerHTML = "";
+  steps.forEach((x, i) => {
+    const b = h("button", "pill"); b.type = "button";
+    b.innerHTML = "<b>" + (i + 1) + "</b>S" + x + " · " + XNAME[x];
+    b.setAttribute("aria-pressed", i === S.step ? "true" : "false");
+    b.onclick = () => { animOff(); S.step = i; renderMulti(); };
+    box.appendChild(b);
+  });
+
+  const ex = document.getElementById("multiExplain"); ex.innerHTML = "";
+  let rtl = XRTL[st];
+  if (st === 12 && p.cls === "LUI") rtl = "ALUOut ← ext(imm) << 16";
+  ex.appendChild(h("div", "rtl", rtl));
+  ex.appendChild(h("p", "", xText(st, p)));
+  const Tc = Math.max(T.M, T.R, T.A);
+  let un = { M: "memória", R: "registradores", A: "ULA", "": "nenhuma unidade lenta" }[XUNIT[st]];
+  ex.appendChild(h("div", "unit", "Unidade usada: " + un + " (" + fmt(tv(XUNIT[st])) + " ns), mas o ciclo dura sempre " + fmt(Tc) + " ns, a unidade mais lenta."));
+
+  const tl = document.getElementById("multiTimeline"); tl.innerHTML = "";
+  steps.forEach((x, i) => {
+    const sg = h("div", "seg" + (i === S.step ? " cur" : ""));
+    sg.style.width = (100 / steps.length) + "%";
+    sg.innerHTML = "S" + x + "<small>" + fmt(Tc) + " ns</small>";
+    tl.appendChild(sg);
+  });
+  document.getElementById("multiTcap").innerHTML = "<span>Ciclo = max(M, R, ULA) = <strong>" + fmt(Tc) + " ns</strong></span><span>" + steps.length + " ciclos × " + fmt(Tc) + " = <strong>" + fmt(steps.length * Tc) + " ns</strong></span>";
+
+  const ct = document.getElementById("multiCycles");
+  const rows = [["LW","LW",5],["SW","SW",4],["Tipo-R","R",4],["Tipo-I (addi, andi...)","I",4],["BEQ / BNE","BEQ",3],["J","J",3]];
+  const g = group(p.cls);
+  ct.innerHTML = "<thead><tr><th>Classe</th><th>Ciclos</th><th>ns</th></tr></thead><tbody>" +
+    rows.map(r => "<tr class='" + (r[1] === g ? "cur" : "") + "'><td>" + r[0] + "</td><td>" + r[2] + "</td><td>" + fmt(r[2] * Tc) + "</td></tr>").join("") + "</tbody>";
+
+  const sgt = document.getElementById("multiSig");
+  let hh = "<thead><tr><th>Ciclo</th>" + XSIG_COLS.map(c => "<th>" + c.replace("PCWriteCondNE", "PCWriteCondNE<span class='new'>novo</span>").replace("LByte", "LByte<span class='new'>novo</span>").replace("SByte", "SByte<span class='new'>novo</span>") + "</th>").join("") + "</tr></thead><tbody>";
+  steps.forEach((x, i) => {
+    const sv = xsig(x, p);
+    hh += "<tr class='" + (i === S.step ? "cur" : "") + "'><td>" + (i + 1) + " · S" + x + "</td>" + XSIG_COLS.map(c => "<td class='" + vcls(sv[c]) + "'>" + sv[c] + "</td>").join("") + "</tr>";
+  });
+  sgt.innerHTML = hh + "</tbody>";
+
+  for (const k in FSM.ng) {
+    let cls = "";
+    if (XNEW[k]) cls = "new";
+    if (XEXC[k]) cls = "exc";
+    if (steps.indexOf(+k) >= 0) cls += " on";
+    if (+k === st) cls += " cur";
+    FSM.ng[k].setAttribute("class", cls.trim());
+  }
+  for (const k in FSM.eg) {
+    const [a, b] = k.split("-").map(Number);
+    const ia = steps.indexOf(a), ib = steps.indexOf(b);
+    FSM.eg[k].setAttribute("class", ia >= 0 && ib === ia + 1 ? "eon" : "");
+  }
+  if (A.on && S.tab === "multi") overlayAnim();
+}
+
+function startPlay(which) {
+  stopPlay();
+  if (which === "mono") {
+    const ph = MPHASES[group(S.p.cls)];
+    S.ph = ph[0]; renderMono();
+    S.timer = setInterval(() => {
+      const i = ph.indexOf(S.ph);
+      if (i < ph.length - 1) { S.ph = ph[i + 1]; renderMono(); } else { stopPlay(); renderMono(); }
+    }, 1700);
+    renderMono();
+  } else {
+    S.step = 0; renderMulti();
+    S.timer = setInterval(() => {
+      const n = xsteps(S.p).length;
+      if (S.step < n - 1) { S.step++; renderMulti(); } else { stopPlay(); renderMulti(); }
+    }, 1900);
+    renderMulti();
+  }
+}
+function stopPlay() { if (S.timer) { clearInterval(S.timer); S.timer = null; } }
+
+/* ---------- bits e valores ---------- */
+function hexIn(id) {
+  const raw = document.getElementById(id).value.replace(/[:\s_]/g, "").replace(/^0x/i, "");
+  if (!/^[0-9a-f]{1,8}$/i.test(raw)) return 0;
+  return parseInt(raw, 16) >>> 0;
+}
+function hex32(n) { const s = (n >>> 0).toString(16).toUpperCase().padStart(8, "0"); return s.slice(0, 4) + ":" + s.slice(4); }
+function binW(n, w) {
+  let s = (n >>> 0).toString(2);
+  if (w < 32) s = (n & ((1 << w) - 1) >>> 0).toString(2);
+  s = s.padStart(w, "0").slice(-w);
+  if (w % 4 === 0 && w >= 8) return s.match(/.{4}/g).join(" ");
+  return s;
+}
+function regName(n) { return "$" + REGNAMES[n] + " (" + n + ")"; }
+function renderBits() {
+  const p = S.p, g = group(p.cls), sg = msig(p.cls);
+  const F = document.getElementById("fields"); F.innerHTML = "";
+  let cells;
+  const w = p.word;
+  if (p.cls === "R") cells = [["op","[31-26]",6,p.op,""],["rs","[25-21]",5,p.rs,regName(p.rs)],["rt","[20-16]",5,p.rt,regName(p.rt)],["rd","[15-11]",5,p.rd,regName(p.rd)],["shamt","[10-6]",5,0,""],["funct","[5-0]",6,p.funct,""]];
+  else if (p.cls === "J") cells = [["op","[31-26]",6,p.op,""],["endereço","[25-0]",26,p.target,""]];
+  else cells = [["op","[31-26]",6,p.op,""],["rs","[25-21]",5,p.rs,regName(p.rs)],["rt","[20-16]",5,p.rt,regName(p.rt)],["imediato / desloc.","[15-0]",16,p.imm,""]];
+  cells.forEach(c => {
+    const el = h("div", "fld"); el.style.flex = c[2] + " 1 0";
+    el.appendChild(h("span", "n", c[0])); el.appendChild(h("span", "r", c[1]));
+    el.appendChild(h("span", "b", binW(c[3], c[2])));
+    let dec = "= " + c[3]; if (c[4]) dec = c[4];
+    if (c[0].indexOf("imediato") === 0) { let sv = c[3]; if (sv & 0x8000) sv = sv - 65536; dec = "= " + sv; }
+    el.appendChild(h("span", "d", dec));
+    F.appendChild(el);
+  });
+
+  document.getElementById("lRs").hidden = g === "J";
+  document.getElementById("lRt").hidden = !(g === "R" || g === "SW" || g === "BEQ");
+  document.getElementById("lMem").hidden = g !== "LW";
+
+  const V = calcVals(p);
+  const { PC, vRs, vRt, vMem, pc4, ext, B, ctl, res, zero, bt, ja, next, wreg, wbv } = V;
+
+  const R = [];
+  R.push(["Instrução [31-0]", "saída da M.I.", 32, w]);
+  R.push(["[31-26] op", "→ U.C.", 6, w >>> 26]);
+  if (g !== "J") {
+    R.push(["[25-21] Rs", "→ Rs do banco", 5, (w >>> 21) & 31]);
+    R.push(["[20-16] Rt", "→ Rt do banco e mux RegDst (0)", 5, (w >>> 16) & 31]);
+    R.push(["[15-11]", "→ mux RegDst (1)", 5, (w >>> 11) & 31]);
+    if (sg.RegWrite === "1") R.push(["Reg. escrita", "saída do mux RegDst = " + REGNAMES[wreg], 5, wreg]);
+    R.push(["[15-0]", "→ extensão de sinal", 16, w & 0xFFFF]);
+    R.push(["Ext. sinal", "saída 32 bits", 32, ext]);
+    R.push(["[5-0] funct", "→ U.C. da ULA", 6, w & 63]);
+    if (ctl !== "LUI") R.push(["Controle ULA", "U.C. ULA → ULA", 3, parseInt(ctl, 2)]);
+    R.push(["Saída Rs", "entrada A da ULA", 32, vRs]);
+    if (g === "R" || g === "SW" || g === "BEQ") R.push(["Saída Rt", "dado lido 2", 32, vRt]);
+    R.push(["Entrada B da ULA", "saída do mux ALUSrc (" + sg.ALUSrc + ")", 32, B]);
+    R.push(["Resultado ULA", ctl, 32, res]);
+    R.push(["Zero", "", 1, zero]);
+    if (p.cls === "SW") R.push(["Ent. dados M.D.", "dado gravado = Rt", 32, vRt]);
+    if (p.cls === "SB") { R.push(["Ent. dados M.D.", "Saída Rt (a memória usa só [7-0])", 32, vRt]); R.push(["End.[1-0]", "qual byte é gravado (little-endian)", 2, V.byteIdx]); R.push(["Byte gravado", "Rt[7-0]", 8, vRt & 0xFF]); }
+    if (g === "LW") R.push(["Saída mem", "palavra lida da M.D.", 32, vMem]);
+    if (p.cls === "LB") { R.push(["End.[1-0]", "escolhe o byte (little-endian)", 2, V.byteIdx]); R.push(["Byte estendido", "saída 8→32, mux LByte (1)", 32, V.byteExt]); }
+    if (sg.RegWrite === "1") R.push(["Ent. dados (banco)", "saída do mux MemToReg (" + sg.MemToReg + ")", 32, wbv]);
+  } else {
+    R.push(["[25-0] alvo", "→ <<2", 26, p.target]);
+    R.push(["Endereço J", "PC+4[31-28] ‖ alvo<<2", 32, ja]);
+  }
+  R.push(["PC + 4", "saída do somador", 32, pc4]);
+  if (g === "BEQ") R.push(["Endereço de desvio", "PC+4 + (ext << 2)", 32, bt]);
+  R.push(["Próximo PC", "saída do mux DVI", 32, next]);
+
+  const tb = document.getElementById("wireTbl");
+  tb.innerHTML = "<thead><tr><th>Fio</th><th>Onde</th><th>bits</th><th>Hex / dec</th><th>Binário</th></tr></thead><tbody>" +
+    R.map(r => {
+      let hv = String(r[3]); if (r[2] === 32) hv = hex32(r[3]);
+      return "<tr><td class='nm'>" + r[0] + "</td><td class='w' style='font-family:var(--f-sans)'>" + r[1] + "</td><td class='w'>" + r[2] + "</td><td>" + hv + "</td><td class='bin'>" + binW(r[3], r[2]) + "</td></tr>";
+    }).join("") + "</tbody>";
+  let note = "Instrução em hexa: " + hex32(w) + ".";
+  if (g === "BEQ") note += " O terceiro operando do desvio é o valor do campo imediato (em palavras).";
+  if (p.cls === "J") note += " O operando do J é lido como endereço em bytes; o campo guarda endereço >> 2.";
+  if (p.cls === "ANDI" || p.cls === "ORI") note += " No diagrama do professor só existe extensão de sinal; no MIPS real andi/ori estendem com zeros.";
+  document.getElementById("bitsNote").textContent = note;
+}
+
+/* ---------- simulador de programa ---------- */
+const BASE = 0x00400000;
+function fmtV(v) { const sv = v | 0; if (sv > -65536 && sv < 65536) return String(sv); return "0x" + ((v >>> 0).toString(16).toUpperCase().padStart(8, "0")); }
+function stripLine(raw) { return raw.replace(/\/\/.*$/, "").replace(/#.*$/, "").trim(); }
+function parseProgram(text) {
+  const items = [], labels = {}, errs = [];
+  text.split("\n").forEach((raw, li) => {
+    let s = stripLine(raw);
+    const here = [];
+    let m = s.match(/^([a-z_]\w*)\s*:\s*(.*)$/i);
+    while (m) { labels[m[1].toLowerCase()] = items.length; here.push(m[1]); s = m[2].trim(); m = s.match(/^([a-z_]\w*)\s*:\s*(.*)$/i); }
+    if (s) items.push({ src: s, labels: here, line: li + 1 });
+    else if (here.length) { items.pendingLabels = (items.pendingLabels || []).concat(here); }
+  });
+  items.forEach((it, i) => {
+    const low = it.src.toLowerCase();
+    const mn = low.split(/\s+/)[0];
+    const args = low.slice(mn.length).split(",").map(x => x.trim()).filter(Boolean);
+    let canon = low;
+    try {
+      if ((mn === "beq" || mn === "bne") && args.length === 3 && !/^-?(0x[0-9a-f]+|\d+)$/.test(args[2])) {
+        if (!(args[2] in labels)) throw new Error("rótulo não encontrado: " + args[2]);
+        it.target = args[2].toUpperCase();
+        canon = mn + " " + args[0] + ", " + args[1] + ", " + (labels[args[2]] - (i + 1));
+      }
+      if (mn === "j" && args.length === 1 && !/^-?(0x[0-9a-f]+|\d+)$/.test(args[0])) {
+        if (!(args[0] in labels)) throw new Error("rótulo não encontrado: " + args[0]);
+        it.target = args[0].toUpperCase();
+        canon = "j 0x" + (BASE + 4 * labels[args[0]]).toString(16);
+      }
+      it.p = parse(canon);
+      it.canon = canon;
+    } catch (e) { errs.push("linha " + it.line + ": " + e.message); }
+  });
+  return { items, labels, errs };
+}
+function parseKV(text, keyFn) {
+  const out = {};
+  text.split("\n").forEach(raw => {
+    const s = stripLine(raw); if (!s) return;
+    const m = s.match(/^(.+?)\s*[:=]\s*(-?(?:0x[0-9a-f]+|\d+))$/i);
+    if (!m) return;
+    try { out[keyFn(m[1].trim())] = numOf(m[2]) >>> 0; } catch (e) {}
+  });
+  return out;
+}
+function simulate(items) {
+  const R = new Array(32).fill(0);
+  const ri = parseKV(document.getElementById("regInit").value, k => regOf(k));
+  for (const k in ri) R[k] = ri[k];
+  R[0] = 0;
+  const mem = parseKV(document.getElementById("memInit").value, k => parseInt(k.replace(/^0x/i, "").replace(/[:\s]/g, ""), 16) >>> 0);
+  const mem0 = Object.assign({}, mem);
+  const steps = [];
+  let pc = 0, cyc = 0, capped = false;
+  while (pc >= 0 && pc < items.length) {
+    if (steps.length >= 300) { capped = true; break; }
+    const it = items[pc], p = it.p, g = group(p.cls);
+    const vRs = R[p.rs] >>> 0, vRt = R[p.rt] >>> 0;
+    const Rb = R.slice();
+    const Mb = Object.assign({}, mem);
+    let ext = p.imm; if (p.imm & 0x8000) ext = (p.imm | 0xFFFF0000) >>> 0;
+    const pcAddr = (BASE + 4 * pc) >>> 0;
+    let next = pc + 1, eff = "", vMem = 0, wr = -1, wv = 0;
+    if (p.cls === "R") {
+      let r = 0;
+      if (p.funct === 32) r = vRs + vRt;
+      if (p.funct === 34) r = vRs - vRt;
+      if (p.funct === 36) r = vRs & vRt;
+      if (p.funct === 37) r = vRs | vRt;
+      if (p.funct === 42) { if ((vRs | 0) < (vRt | 0)) r = 1; else r = 0; }
+      wr = p.rd; wv = r >>> 0;
+    } else if (g === "I") {
+      let r = 0;
+      if (p.cls === "ADDI") r = vRs + ext;
+      if (p.cls === "ANDI") r = vRs & ext;
+      if (p.cls === "ORI") r = vRs | ext;
+      if (p.cls === "SLTI") { if ((vRs | 0) < (ext | 0)) r = 1; else r = 0; }
+      if (p.cls === "LUI") r = (p.imm << 16);
+      wr = p.rt; wv = r >>> 0;
+    } else if (p.cls === "LW") {
+      const a = (vRs + ext) >>> 0;
+      let known = a in mem;
+      vMem = 0; if (known) vMem = mem[a];
+      wr = p.rt; wv = vMem;
+      eff = "$" + REGNAMES[p.rt] + " ← Mem[" + hex32(a) + "] = " + fmtV(vMem);
+      if (!known) eff += " (posição não informada, assumi 0)";
+    } else if (p.cls === "LB") {
+      const a = (vRs + ext) >>> 0, al = (a & ~3) >>> 0;
+      let known = al in mem;
+      vMem = 0; if (known) vMem = mem[al];
+      let bt8 = (vMem >>> (8 * (a & 3))) & 0xFF;
+      let bx = bt8; if (bt8 & 0x80) bx = (bt8 | 0xFFFFFF00) >>> 0;
+      wr = p.rt; wv = bx;
+      eff = "$" + REGNAMES[p.rt] + " ← byte " + (a & 3) + " de Mem[" + hex32(al) + "] = " + fmtV(bx);
+      if (!known) eff += " (posição não informada, assumi 0)";
+    } else if (p.cls === "SB") {
+      const a = (vRs + ext) >>> 0, al = (a & ~3) >>> 0, sh = 8 * (a & 3);
+      let old = 0; if (al in mem) old = mem[al];
+      mem[al] = (((old & ~(0xFF << sh)) | ((vRt & 0xFF) << sh)) >>> 0);
+      eff = "byte " + (a & 3) + " de Mem[" + hex32(al) + "] ← " + fmtV(vRt & 0xFF) + " (Rt[7-0])";
+    } else if (p.cls === "SW") {
+      const a = (vRs + ext) >>> 0;
+      mem[a] = vRt;
+      eff = "Mem[" + hex32(a) + "] ← " + fmtV(vRt) + " ($" + REGNAMES[p.rt] + ")";
+    } else if (p.cls === "BEQ" || p.cls === "BNE") {
+      const eq = vRs === vRt;
+      let taken = eq; if (p.cls === "BNE") taken = !eq;
+      let rel = " ≠ "; if (eq) rel = " = ";
+      const dest = it.target || ("PC+4+" + ((ext | 0) * 4));
+      if (taken) { next = pc + 1 + (ext | 0); eff = fmtV(vRs) + rel + fmtV(vRt) + ": desvia para " + dest; }
+      else eff = fmtV(vRs) + rel + fmtV(vRt) + ": não desvia";
+    } else if (p.cls === "J") {
+      next = ((((p.target << 2) >>> 0) - BASE) >>> 2);
+      eff = "salta para " + (it.target || hex32((p.target << 2) >>> 0));
+    }
+    if (wr > 0) { R[wr] = wv; if (!eff) eff = "$" + REGNAMES[wr] + " ← " + fmtV(wv); }
+    if (wr === 0 && !eff) eff = "$zero não muda";
+    const n = XCYC[p.cls === "BNE" ? "BNE" : g];
+    steps.push({ it, p, k: steps.length + 1, from: cyc + 1, to: cyc + n, pcAddr, vRs, vRt, vMem, eff, Rb, Mb });
+    cyc += n;
+    pc = next;
+  }
+  return { steps, R, mem, mem0, cyc, capped };
+}
+function sigMini(cols, vals) {
+  return "<div class='sigs'>" + cols.map((c, i) => "<span><i>" + c + "</i><b class='" + vcls(vals[i]) + "'>" + vals[i] + "</b></span>").join("") + "</div>";
+}
+function stepLabel(st) { let l = ""; if (st.it.labels.length) l = st.it.labels.join(", ") + ": "; return l + st.it.src; }
+let SIM = null;
+function renderProg() {
+  const err = document.getElementById("simErr");
+  const pr = parseProgram(document.getElementById("code").value);
+  if (pr.errs.length) { err.textContent = pr.errs.join(" · "); err.hidden = false; SIM = null; }
+  else { err.hidden = true; SIM = simulate(pr.items); }
+  const tot = document.getElementById("totals"), tb = document.getElementById("progTbl");
+  if (!SIM) { tot.innerHTML = ""; tb.innerHTML = ""; document.getElementById("qMonoOut").innerHTML = ""; document.getElementById("qMultiOut").innerHTML = ""; document.getElementById("finalState").textContent = ""; return; }
+  const Tc = Math.max(T.M, T.R, T.A);
+  const clock = 2 * T.M + 2 * T.R + T.A;
+  const n = SIM.steps.length;
+  let warn = "";
+  if (SIM.capped) warn = "<div class='tot'><span class='k'>Atenção</span><span class='f'>Parei em 300 instruções: o laço parece infinito.</span></div>";
+  tot.innerHTML =
+    "<div class='tot'><span class='k'>Monociclo</span><span class='v'>" + fmt(n * clock) + " ns</span><span class='f'>" + n + " instruções × LW (" + fmt(clock) + " ns)</span></div>" +
+    "<div class='tot'><span class='k'>Multiciclo</span><span class='v'>" + fmt(SIM.cyc * Tc) + " ns</span><span class='f'>" + SIM.cyc + " ciclos × " + fmt(Tc) + " ns</span></div>" + warn;
+  tb.innerHTML = "<thead><tr><th>Mono</th><th>Multi</th><th>Instrução</th><th>Efeito</th></tr></thead><tbody>" +
+    SIM.steps.map((st, i) => "<tr data-i='" + i + "' tabindex='0'><td>" + st.k + "º</td><td>[" + st.from + "-" + st.to + "]</td><td>" + escapeHtml(stepLabel(st)) + "</td><td style='font-family:var(--f-sans)'>" + escapeHtml(st.eff) + "</td></tr>").join("") + "</tbody>";
+  tb.querySelectorAll("tr[data-i]").forEach(tr => {
+    const go = () => loadStep(+tr.dataset.i, S.tab, 0);
+    tr.onclick = go; tr.onkeydown = e => { if (e.key === "Enter") go(); };
+  });
+  renderQueries();
+  const regs = [];
+  SIM.R.forEach((v, i) => { if (i > 0 && v !== 0) regs.push("$" + REGNAMES[i] + " = " + fmtV(v)); });
+  const mems = Object.keys(SIM.mem).map(Number).sort((a, b) => a - b).map(a => {
+    let s = hex32(a) + " = " + fmtV(SIM.mem[a]);
+    if (SIM.mem0[a] !== SIM.mem[a]) { let old = "?"; if (a in SIM.mem0) old = fmtV(SIM.mem0[a]); s += " (era " + old + ")"; }
+    return s;
+  });
+  document.getElementById("finalState").innerHTML = "<strong>No fim:</strong> " + escapeHtml(regs.join(" · ") || "nenhum registrador alterado") + "<br><strong>Memória:</strong> " + escapeHtml(mems.join(" · ") || "vazia");
+}
+function renderQueries() {
+  const om = document.getElementById("qMonoOut"), ox = document.getElementById("qMultiOut");
+  if (!SIM) return;
+  const nm = parseInt(document.getElementById("qMono").value, 10);
+  const st = SIM.steps[nm - 1];
+  if (!st) om.innerHTML = "<p class='note'>O programa tem só " + SIM.steps.length + " ciclos no monociclo.</p>";
+  else {
+    om.innerHTML = "<p class='qa'><b>" + escapeHtml(stepLabel(st)) + "</b> · " + escapeHtml(st.eff) + "</p>" + sigMini(MSIG_COLS, MSIG[st.p.cls]) +
+      "<button type='button' class='btn ghost' id='qMonoGo'>Ver no diagrama monociclo</button>";
+    document.getElementById("qMonoGo").onclick = () => loadStep(nm - 1, "mono", 0);
+  }
+  const nx = parseInt(document.getElementById("qMulti").value, 10);
+  let idx = -1;
+  SIM.steps.forEach((s, i) => { if (nx >= s.from && nx <= s.to) idx = i; });
+  if (idx < 0) ox.innerHTML = "<p class='note'>O programa tem " + SIM.cyc + " ciclos no multiciclo.</p>";
+  else {
+    const s = SIM.steps[idx], k = nx - s.from, seq = xsteps(s.p), stt = seq[k];
+    const sv = xsig(stt, s.p);
+    ox.innerHTML = "<p class='qa'><b>" + escapeHtml(stepLabel(s)) + "</b> · ciclo " + (k + 1) + " de " + seq.length + " · estado S" + stt + ": " + XNAME[stt] + "</p><p class='note mono'>" + XRTL[stt] + "</p>" +
+      sigMini(XSIG_COLS, XSIG_COLS.map(c => sv[c])) + "<button type='button' class='btn ghost' id='qMultiGo'>Ver no diagrama multiciclo</button>";
+    document.getElementById("qMultiGo").onclick = () => loadStep(idx, "multi", k);
+  }
+}
+function loadStep(i, tab, stepIdx) {
+  const st = SIM.steps[i];
+  document.getElementById("asm").value = st.it.canon;
+  document.getElementById("asmErr").hidden = true;
+  document.getElementById("vPC").value = hex32(st.pcAddr).replace(":", "");
+  document.getElementById("vRs").value = hex32(st.vRs).replace(":", "");
+  document.getElementById("vRt").value = hex32(st.vRt).replace(":", "");
+  document.getElementById("vMem").value = hex32(st.vMem).replace(":", "");
+  stopPlay(); animOff(); A.prog = false;
+  S.p = st.p; S.ph = 0; S.step = stepIdx; S.regs = st.Rb; S.mem = st.Mb;
+  setTab(tab);
+  S.step = stepIdx;
+  if (tab === "multi") renderMulti();
+  let target = "viewMono"; if (tab === "multi") target = "viewMulti";
+  document.getElementById(target).scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function escapeHtml(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+/* ---------- animação (modo debug) ---------- */
+function calcVals(p) {
+  const sg = msig(p.cls), g = group(p.cls);
+  const PC = hexIn("vPC"), vMem = hexIn("vMem");
+  let vRs = hexIn("vRs"), vRt = hexIn("vRt");
+  if (p.cls !== "J") {
+    if (p.rs === p.rt) vRt = vRs;
+    if (p.rs === 0) vRs = 0;
+    if (p.rt === 0) vRt = 0;
+  }
+  const pc4 = (PC + 4) >>> 0;
+  let ext = p.imm; if (p.imm & 0x8000) ext = (p.imm | 0xFFFF0000) >>> 0;
+  let B = vRt; if (sg.ALUSrc === "1") B = ext;
+  const ctl = aluCtl(p);
+  let res = 0;
+  if (ctl === "010") res = (vRs + B) >>> 0;
+  if (ctl === "110") res = (vRs - B) >>> 0;
+  if (ctl === "000") res = (vRs & B) >>> 0;
+  if (ctl === "001") res = (vRs | B) >>> 0;
+  if (ctl === "111") { if ((vRs | 0) < (B | 0)) res = 1; else res = 0; }
+  if (ctl === "LUI") res = (p.imm << 16) >>> 0;
+  let zero = 0; if (res === 0) zero = 1;
+  const bt = (pc4 + ((ext << 2) >>> 0)) >>> 0;
+  const ja = ((pc4 & 0xF0000000) | (p.target << 2)) >>> 0;
+  let taken = 0;
+  if (p.cls === "BEQ" && zero) taken = 1;
+  if (p.cls === "BNE" && !zero) taken = 1;
+  let next = pc4;
+  if (taken) next = bt;
+  if (p.cls === "J") next = ja;
+  let wreg = p.rt; if (sg.RegDst === "1") wreg = p.rd;
+  const byteIdx = res & 3;
+  let byte = (vMem >>> (8 * byteIdx)) & 0xFF;
+  let byteExt = byte; if (byte & 0x80) byteExt = (byte | 0xFFFFFF00) >>> 0;
+  let wbv = res; if (g === "LW") wbv = vMem;
+  if (p.cls === "LB") wbv = byteExt;
+  return { PC, vRs, vRt, vMem, pc4, ext, B, ctl, res, zero, bt, ja, taken, next, wreg, wbv, byteIdx, byteExt, word: p.word };
+}
+function sv(v) { v = v >>> 0; if (v <= 0xFFFF) return String(v); return v.toString(16).toUpperCase().padStart(8, "0"); }
+function rn(n) { return "$" + REGNAMES[n]; }
+function monoLbl(id, V, p) {
+  const m = {
+    pc_im: sv(V.PC), pc_add: sv(V.PC), four: "4", pc4: sv(V.pc4), pc4_mux: sv(V.pc4), pc4_addb: sv(V.pc4), pc4_jhi: "PC+4[31-28]",
+    ibus: sv(V.word), bus: sv(V.word), bus_up: sv(V.word), bus_dn: sv(V.word), op: p.op.toString(2).padStart(6, "0"), rs: rn(p.rs), rt_a: rn(p.rt), rt_b: rn(p.rt), rt_mux: rn(p.rt),
+    rd: rn(p.rd), wr: rn(V.wreg), imm: "0x" + p.imm.toString(16).toUpperCase().padStart(4, "0"), funct: p.funct.toString(2).padStart(6, "0"),
+    se_a: sv(V.ext), se_mux: sv(V.ext), se_shift: sv(V.ext), sh_addb: sv((V.ext << 2) >>> 0), addb_mux: sv(V.bt),
+    rd1: sv(V.vRs), rd2_a: sv(V.vRt), rd2_alu: sv(V.vRt), rd2_mem: sv(V.vRt) + (p.cls === "SB" ? " → [7-0]" : ""), mux_alu: sv(V.B), aluctrl: V.ctl,
+    alu_out: sv(V.res), alu_addr: sv(V.res), alu_bypass_a: sv(V.res), alu_bypass_b: sv(V.res), memrd_a: sv(V.vMem), memrd_w: sv(V.vMem), memrd_b: sv(V.vMem), addr_b: "End[1-0]=" + (V.res & 3), byte_out: sv(V.byteExt), lb_out: sv(p.cls === "LB" ? V.byteExt : V.vMem), wb: sv(V.wbv),
+    zero: "Zero=" + V.zero, nzero: "¬Zero=" + (1 - V.zero), and1_out: "PCSrc=" + V.taken, and2_out: "PCSrc=" + V.taken, pcsrc: "PCSrc=" + V.taken,
+    mux1_mux2: sv(V.taken ? V.bt : V.pc4), next: sv(V.next), j26: "0x" + p.target.toString(16).toUpperCase(), jaddr: sv(V.ja)
+  };
+  return m[id] || "";
+}
+function xLbl(id, st) {
+  const pcv = { 0: "PC", 1: "PC+4" }[st] || "PC";
+  const aluR = { 0: "PC+4", 1: "PC+ext<<2", 2: "endereço", 6: "A op B", 8: "A−B", 14: "A−B", 12: "A op imm" }[st] || "";
+  const m = {
+    pc_a: pcv, pc_iord: pcv, pc_alua: pcv, iord_out: st === 0 ? "PC" : "ALUOut", mem_out: st === 0 ? "instrução" : "dado", mem_ir: "instrução", mem_mdr: "dado", addr_b: "End[1-0]", byte_in: "palavra", byte_out: "byte ext.", lb_out: st === 15 ? "byte ext." : "dado",
+    four: "4", alua_out: (st === 0 || st === 1) ? pcv : "A", alub_out: { 0: "4", 1: "ext<<2", 2: "ext", 12: "ext" }[st] || "B",
+    alu_res: aluR, alu_pcs: aluR, alu_aluout: aluR, aluctrl: "op", ir_op: "Op", ir_rs: "Rs", ir_rt_a: "Rt", ir_rt_b: "Rt", rt_mux: "Rt", ir_rd: "Rd",
+    ir_imm_a: "imm", ir_imm_b: "imm", ir_funct: "funct", ir_j: "[25-0]", j_out: "end. J", regdst_out: st === 7 ? "Rd" : "Rt",
+    mdr_out: "MDR", mtr_out: st === 4 ? "MDR" : "ALUOut", rd1: "Reg[Rs]", rd2: "Reg[Rt]", a_out: "A", b_out: "B", b_alu: "B", b_mem: "B",
+    se_out: "ext", se_sh: "ext", se_b: "ext", sh_b: "ext<<2", aluout_o: "ALUOut", aluout_pcs: "ALUOut", aluout_down: "ALUOut", aluout_mtr: "ALUOut", aluout_iord: "ALUOut",
+    zero: "Zero", nzero: "¬Zero", and1_out: "desvia?", and2_out: "desvia?", pcs_out: { 0: "PC+4", 8: "ALUOut", 14: "ALUOut", 9: "end. J" }[st] || "", pcen: "escreve PC"
+  };
+  return m[id] || "";
+}
+const FETCH_STEPS = [
+  { t: "PC entrega o endereço para a M.I. e para o somador (+4).", ph: 1, waves: [["pc_im", "pc_add", "four"]] },
+  { t: "M.I. lê a instrução. Em paralelo o somador calcula PC + 4.", ph: 1, wait: "M", units: ["IM", "ADD4"] }
+];
+function swLast(p) {
+  if (p.cls === "SB") return { t: "MemWrite = 1 e SByte = 1: a M.D. grava só Rt[7-0], no byte escolhido por End.[1-0]. Os outros 3 bytes não mudam.", ph: 4, wait: "M", units: ["DM"], flash: 1 };
+  return { t: "MemWrite = 1 e SByte = 0: a M.D. grava a palavra inteira de Rt no endereço.", ph: 4, wait: "M", units: ["DM"] };
+}
+function lbOrLw(p) {
+  if (p.cls === "LB") return [
+    { t: "LByte = 1: os 2 bits de baixo do endereço (End.[1-0]) escolhem 1 byte da palavra lida, e ele é estendido 8 → 32 (≈ 0 ns).", ph: 4, waves: [["memrd_a", "alu_bypass_a"], ["memrd_b", "addr_b"], ["byte_out"]], units: ["BYTE", "MUXLB"] },
+    { t: "MemToReg = 1: o byte estendido vai para Ent. dados do banco.", ph: 5, waves: [["lb_out"], ["wb"]] }];
+  return [{ t: "LByte = 0 e MemToReg = 1: a palavra lida vai inteira para Ent. dados do banco.", ph: 5, waves: [["memrd_a"], ["memrd_w"], ["lb_out"], ["wb"]] }];
+}
+function monoAnimSteps(p) {
+  const g = group(p.cls);
+  const S2 = [];
+  const fin = { t: "Borda do clock: o mux DVI entrega o próximo endereço e o PC é atualizado.", ph: 9, waves: [["mux1_mux2"], ["next"]], units: ["PC"] };
+  if (g === "R") S2.push(
+    { t: "A instrução se divide: Op → U.C., Rs, Rt e Rd → banco, funct → U.C. da ULA. PC + 4 segue para o mux.", ph: 2, waves: [["ibus", "pc4"], ["bus", "pc4_mux"], ["op", "rs", "rt_a", "rd", "funct"], ["rt_b", "wr"]] },
+    { t: "U.C. decodifica o Op e liga os sinais (RegDst = 1). O banco lê Rs e Rt.", ph: 2, wait: "R", units: ["UC", "REG"], flash: 1 },
+    { t: "Saída Rs e Saída Rt vão para a ULA (ALUSrc = 0). A U.C. da ULA usa o funct.", ph: 3, waves: [["rd1", "rd2_a", "aluctrl"], ["rd2_alu"], ["mux_alu"]] },
+    { t: "ULA calcula Rs " + p.sym + " Rt.", ph: 3, wait: "A", units: ["ALU"] },
+    { t: "MemToReg = 0: o resultado passa por baixo da M.D. e volta para Ent. dados.", ph: 5, waves: [["alu_out"], ["alu_bypass_a"], ["alu_bypass_b"], ["wb"]] },
+    { t: "RegWrite = 1: o banco grava em Rd.", ph: 5, wait: "R", units: ["REG"] }, fin);
+  if (g === "I") S2.push(
+    { t: "A instrução se divide: Op → U.C., Rs → banco, Rt → mux RegDst (destino), imediato → extensão de sinal.", ph: 2, waves: [["ibus", "pc4"], ["bus", "pc4_mux"], ["op", "rs", "rt_a", "imm"], ["rt_mux", "se_a"], ["wr"]] },
+    { t: "U.C. decodifica (RegDst = 0, ALUSrc = 1). O banco lê Rs e o imediato vira 32 bits.", ph: 2, wait: "R", units: ["UC", "REG", "SE"], flash: 1 },
+    { t: "Saída Rs e o imediato estendido vão para a ULA.", ph: 3, waves: [["rd1", "se_mux", "aluctrl"], ["mux_alu"]] },
+    { t: "ULA calcula (" + p.mn + ").", ph: 3, wait: "A", units: ["ALU"] },
+    { t: "MemToReg = 0: o resultado volta pelo caminho de baixo para Ent. dados.", ph: 5, waves: [["alu_out"], ["alu_bypass_a"], ["alu_bypass_b"], ["wb"]] },
+    { t: "RegWrite = 1: o banco grava em Rt.", ph: 5, wait: "R", units: ["REG"] }, fin);
+  if (g === "LW") S2.push(
+    { t: "A instrução se divide: Op → U.C., Rs (base) → banco, Rt → mux RegDst (destino), deslocamento → extensão de sinal.", ph: 2, waves: [["ibus", "pc4"], ["bus", "pc4_mux"], ["op", "rs", "rt_a", "imm"], ["rt_mux", "se_a"], ["wr"]] },
+    { t: "U.C. decodifica (RegDst = 0, ALUSrc = 1, MemRead = 1, MemToReg = 1). O banco lê Rs.", ph: 2, wait: "R", units: ["UC", "REG", "SE"], flash: 1 },
+    { t: "Rs e o deslocamento estendido vão para a ULA.", ph: 3, waves: [["rd1", "se_mux", "aluctrl"], ["mux_alu"]] },
+    { t: "ULA soma: Rs + deslocamento = endereço.", ph: 3, wait: "A", units: ["ALU"] },
+    { t: "O endereço chega na M.D.", ph: 4, waves: [["alu_out"], ["alu_addr"]] },
+    { t: "M.D. lê a memória (segundo acesso à memória da instrução).", ph: 4, wait: "M", units: ["DM"] },
+    ...lbOrLw(p),
+    { t: "RegWrite = 1: o banco grava em Rt.", ph: 5, wait: "R", units: ["REG"] }, fin);
+  if (g === "SW") S2.push(
+    { t: "A instrução se divide: Op → U.C., Rs (base) e Rt (dado) → banco, deslocamento → extensão de sinal.", ph: 2, waves: [["ibus", "pc4"], ["bus", "pc4_mux"], ["op", "rs", "rt_a", "imm"], ["rt_b", "se_a"]] },
+    { t: "U.C. decodifica (ALUSrc = 1, MemWrite = 1, RegWrite = 0). O banco lê Rs e Rt.", ph: 2, wait: "R", units: ["UC", "REG", "SE"], flash: 1 },
+    { t: "Rs e o deslocamento vão para a ULA. Saída Rt já segue para Ent. dados da M.D.", ph: 3, waves: [["rd1", "rd2_a", "se_mux", "aluctrl"], ["mux_alu", "rd2_mem"]] },
+    { t: "ULA soma: Rs + deslocamento = endereço.", ph: 3, wait: "A", units: ["ALU"] },
+    { t: "O endereço chega na M.D.", ph: 4, waves: [["alu_out"], ["alu_addr"]] },
+    swLast(p), fin);
+  if (g === "BEQ") {
+    let gate = [["zero"], ["and1_out"], ["pcsrc"]];
+    let gt = "Branch = 1 AND Zero decide o mux do desvio.";
+    if (p.cls === "BNE") { gate = [["zero"], ["nzero"], ["and2_out"], ["pcsrc"]]; gt = "NBranch = 1 AND (Zero invertido) decide o mux do desvio."; }
+    S2.push(
+      { t: "A instrução se divide: Op → U.C., Rs e Rt → banco, imediato → extensão de sinal. PC + 4 vai para o mux e para o somador do desvio.", ph: 2, waves: [["ibus", "pc4"], ["bus", "pc4_mux", "pc4_addb"], ["op", "rs", "rt_a", "imm"], ["rt_b", "se_a"]] },
+      { t: "U.C. decodifica (ALUSrc = 0, ALUOp = 001). O banco lê Rs e Rt.", ph: 2, wait: "R", units: ["UC", "REG", "SE"], flash: 1 },
+      { t: "Rs e Rt vão para a ULA. Em paralelo: ext << 2 + (PC + 4) = endereço de desvio.", ph: 3, waves: [["rd1", "rd2_a", "se_shift", "aluctrl"], ["rd2_alu", "sh_addb"], ["mux_alu", "addb_mux"]] },
+      { t: "ULA faz Rs − Rt só para gerar o Zero.", ph: 3, wait: "A", units: ["ALU", "ADDB"] },
+      { t: gt, ph: 3, waves: gate, units: ["GATES"] },
+      { t: "Borda do clock: PC ← endereço de desvio se desviou, senão PC + 4.", ph: 9, waves: [["mux1_mux2"], ["next"]], units: ["PC"] });
+  }
+  if (g === "J") S2.push(
+    { t: "A instrução se divide: Op → U.C., [25-0] → deslocador <<2. PC+4[31-28] sobe para a junção.", ph: 2, waves: [["ibus", "pc4"], ["bus", "pc4_jhi"], ["op", "j26"]] },
+    { t: "28 bits ‖ PC+4[31-28] = endereço de 32 bits (só fios, ≈ 0 ns). DVI = 1.", ph: 2, waves: [["jaddr"]], units: ["JSH", "MUXJ"], flash: 1 },
+    { t: "Borda do clock: PC ← endereço do salto.", ph: 9, waves: [["next"]], units: ["PC"] });
+  const wm = MWIRES[p.cls] || MWIRES[g];
+  const busIds = [];
+  if (wm.bus_up) busIds.push("bus_up");
+  if (wm.bus_dn) busIds.push("bus_dn");
+  S2.forEach(st => { if (st.waves) st.waves = st.waves.map(w => w.flatMap(id => (id === "bus" ? busIds : [id]))); });
+  return FETCH_STEPS.concat(S2);
+}
+const XWAVES = {
+  0: [["pc_a"], ["pc_iord", "pc_alua", "four"], ["iord_out", "alua_out", "alub_out", "aluctrl"], ["mem_out", "alu_res"], ["mem_ir", "alu_pcs"], ["pcs_out", "pcen"]],
+  1: [["ir_op", "ir_rs", "ir_rt_a", "ir_imm_a", "pc_a"], ["ir_rt_b", "ir_imm_b", "pc_alua"], ["rd1", "rd2", "se_out", "alua_out"], ["se_sh"], ["sh_b"], ["alub_out", "aluctrl"], ["alu_res"], ["alu_aluout"]],
+  2: [["a_out", "ir_imm_a"], ["alua_out", "ir_imm_b"], ["se_out"], ["se_b"], ["alub_out", "aluctrl"], ["alu_res"], ["alu_aluout"]],
+  3: [["aluout_o"], ["aluout_down"], ["aluout_iord"], ["iord_out"], ["mem_out"], ["mem_mdr"], ["lb_out"]],
+  15: [["aluout_o"], ["aluout_down"], ["aluout_iord"], ["iord_out", "addr_b"], ["mem_out"], ["mem_mdr"], ["byte_in"], ["byte_out"], ["lb_out"]],
+  4: [["mdr_out", "ir_rt_a"], ["mtr_out", "rt_mux"], ["regdst_out"]],
+  5: [["aluout_o", "b_out"], ["aluout_down", "b_mem"], ["aluout_iord"], ["iord_out"]],
+  16: [["aluout_o", "b_out"], ["aluout_down", "b_mem"], ["aluout_iord"], ["iord_out"]],
+  6: [["a_out", "b_out", "ir_imm_a"], ["alua_out", "b_alu", "ir_funct"], ["alub_out", "aluctrl"], ["alu_res"], ["alu_aluout"]],
+  7: [["aluout_o", "ir_rd"], ["aluout_down", "regdst_out"], ["aluout_mtr"], ["mtr_out"]],
+  8: [["a_out", "b_out"], ["alua_out", "b_alu"], ["alub_out", "aluctrl"], ["alu_res", "aluout_o"], ["zero", "aluout_pcs"], ["and1_out", "pcs_out"], ["pcen"]],
+  9: [["ir_j"], ["j_out"], ["pcs_out", "pcen"]],
+  12: [["a_out", "ir_imm_a"], ["alua_out", "ir_imm_b"], ["se_out"], ["se_b"], ["alub_out", "aluctrl"], ["alu_res"], ["alu_aluout"]],
+  13: [["aluout_o", "ir_rt_a"], ["aluout_down", "rt_mux"], ["aluout_mtr", "regdst_out"], ["mtr_out"]],
+  14: [["a_out", "b_out"], ["alua_out", "b_alu"], ["alub_out", "aluctrl"], ["alu_res", "aluout_o"], ["zero", "aluout_pcs"], ["nzero"], ["and2_out", "pcs_out"], ["pcen"]]
+};
+function multiAnimSteps(p) {
+  return xsteps(p).map((st, i) => ({ t: "S" + st + " · " + XNAME[st] + ": " + XRTL[st], st, idx: i, waves: XWAVES[st], units: XST[st].wr.split(" "), wait: "C" }));
+}
+
+const A = { flying: {}, tags: true, on: false, steps: [], k: 0, playing: false, busy: false, token: 0, speed: 1, prog: false, pi: -1, lit: {}, now: {}, act: {}, clock: 0, bars: {} };
+const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function curD() { if (S.tab === "multi") return DX; return DM; }
+function stepWait(st) { if (!st.wait) return 0; if (st.wait === "C") return Math.max(T.M, T.R, T.A); return tv(st.wait); }
+function buildSteps() { if (S.tab === "multi") A.steps = multiAnimSteps(S.p); else A.steps = monoAnimSteps(S.p); }
+function animOff() {
+  A.token++; A.on = false; A.playing = false; A.busy = false; A.k = 0; A.lit = {}; A.now = {}; A.act = {}; A.pi = -1; A.flying = {};
+  clearOrbs(DM); clearOrbs(DX); updateBars();
+}
+function clearOrbs(D) { if (D.L.anim) D.L.anim.innerHTML = ""; }
+function baseLit(k) {
+  const lit = {};
+  if (S.tab === "multi") return lit;
+  for (let i = 0; i < k; i++) (A.steps[i].waves || []).forEach(w => w.forEach(id => { lit[id] = 1; }));
+  return lit;
+}
+function syncPanels(k) {
+  if (k <= 0) return;
+  const st = A.steps[k - 1];
+  if (S.tab === "multi") S.step = st.idx;
+  else { let ph = st.ph; if (ph === 9) { const ps = MPHASES[group(S.p.cls)]; ph = ps[ps.length - 1]; } S.ph = ph; }
+}
+function snapTo(k) {
+  A.k = k;
+  A.lit = baseLit(k);
+  A.now = {}; A.act = {};
+  if (k > 0) {
+    const st = A.steps[k - 1];
+    (st.waves || []).forEach(w => w.forEach(id => { A.lit[id] = 1; A.now[id] = 1; }));
+    (st.units || []).forEach(u => { A.act[u] = 1; });
+  }
+  A.clock = 0;
+  for (let i = 0; i < k; i++) A.clock += stepWait(A.steps[i]);
+  if (S.tab === "multi") A.clock = k * Math.max(T.M, T.R, T.A);
+  syncPanels(k);
+  clearOrbs(curD());
+  if (S.tab === "multi") renderMulti(); else renderMono();
+  updateBars();
+}
+function overlayAnim() {
+  const D = curD();
+  if (S.tab === "multi" && A.k === 0 && !A.busy) { applyWires(D, {}, {}); }
+  if (S.tab === "multi" && A.busy && !A.edge) { for (const k in DX.wtags) DX.wtags[k].textContent = ""; }
+  else applyWires(D, A.lit, A.now);
+  for (const id in D.comps) {
+    let c = (D.comps[id].getAttribute("class") || "comp").replace(" act", "");
+    if (A.busy && !A.edge) c = c.replace(" write", "");
+    if (A.act[id]) c += " act";
+    D.comps[id].setAttribute("class", c);
+  }
+}
+function centerOf(D, id) { const b = D.comps[id].getBBox(); return [b.x + b.width / 2, b.y + b.height / 2]; }
+function makeOrb(D, label) {
+  const g = E("g", { class: "orb" }, D.L.anim);
+  const ring = E("circle", { r: 6, class: "ring" }, g);
+  E("animate", { attributeName: "r", values: "6;13;6", dur: "1s", repeatCount: "indefinite" }, ring);
+  E("animate", { attributeName: "opacity", values: "0.7;0;0.7", dur: "1s", repeatCount: "indefinite" }, ring);
+  E("circle", { r: 5.5, class: "core" }, g);
+  if (label && A.labels) E("text", { x: 9, y: -8 }, g, label);
+  return g;
+}
+function wait(ms, token) { return new Promise(r => { if (ms <= 0) { r(); return; } const t0 = performance.now(); function f(now) { if (A.token !== token || now - t0 >= ms) { r(); return; } requestAnimationFrame(f); } requestAnimationFrame(f); }); }
+function animateWave(D, ids, token, st) {
+  return new Promise(resolve => {
+    ids.forEach(id => { A.lit[id] = 1; A.now[id] = 1; });
+    if (!REDUCED) ids.forEach(id => { A.flying[id] = 1; });
+    overlayAnim();
+    if (REDUCED) { resolve(); return; }
+    function land() { ids.forEach(id => { delete A.flying[id]; }); overlayAnim(); }
+    const runs = ids.map(id => {
+      const path = D.wires[id]._base, len = path.getTotalLength();
+      let lb = "";
+      if (S.tab === "multi") lb = xLbl(id, st.st); else lb = monoLbl(id, A.vals, S.p);
+      const dur = Math.max(280, Math.min(1500, len / 0.42)) / A.speed;
+      return { path, len, dur, g: makeOrb(D, lb) };
+    });
+    const t0 = performance.now();
+    function frame(now) {
+      if (A.token !== token) { runs.forEach(r => r.g.remove()); ids.forEach(id => { delete A.flying[id]; }); resolve(); return; }
+      let done = true;
+      runs.forEach(r => {
+        const f = Math.min(1, (now - t0) / r.dur);
+        if (f < 1) done = false;
+        const pt = r.path.getPointAtLength(f * r.len);
+        r.g.setAttribute("transform", "translate(" + pt.x + "," + pt.y + ")");
+      });
+      if (done) { runs.forEach(r => r.g.remove()); land(); resolve(); return; }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+}
+async function runStep(i) {
+  const token = A.token;
+  const D = curD();
+  A.busy = true; A.on = true; A.edge = false;
+  A.vals = calcVals(S.p);
+  A.k = i;
+  A.lit = baseLit(i); A.now = {}; A.act = {};
+  const st = A.steps[i];
+  syncPanels(i + 1);
+  if (S.tab === "multi") renderMulti(); else renderMono();
+  A.lit = baseLit(i); A.now = {};
+  overlayAnim();
+  updateBars(i);
+  for (const w of (st.waves || [])) { if (A.token !== token) break; await animateWave(D, w, token, st); }
+  if (A.token === token && st.flash) flashBadges(D);
+  if (A.token === token && (st.units || []).length) {
+    A.edge = true;
+    if (S.tab === "multi") renderMulti();
+    (st.units || []).forEach(u => { A.act[u] = 1; });
+    overlayAnim();
+    const orbs = [];
+    if (!REDUCED && st.wait && st.wait !== "C") (st.units || []).forEach(u => { if (D.comps[u]) { const c = centerOf(D, u); const g = makeOrb(D, ""); g.setAttribute("transform", "translate(" + c[0] + "," + c[1] + ")"); orbs.push(g); } });
+    const v = stepWait(st);
+    const c0 = A.clock;
+    let ms = 450 / A.speed;
+    if (st.wait && st.wait !== "C") ms = (450 + 260 * v) / A.speed;
+    if (REDUCED) ms = 0;
+    const t0 = performance.now();
+    await new Promise(r => { function f(now) { const fr = Math.min(1, (now - t0) / Math.max(ms, 1)); A.clock = c0 + v * fr; updateClock(); if (A.token !== token || fr >= 1) { r(); return; } requestAnimationFrame(f); } requestAnimationFrame(f); });
+    orbs.forEach(o => o.remove());
+  }
+  A.busy = false;
+  if (A.token === token) snapTo(i + 1);
+}
+function flashBadges(D) {
+  for (const k in D.badges) { const g = D.badges[k].g; g.classList.add("flash"); setTimeout(() => g.classList.remove("flash"), 1300); }
+  if (D.cw) for (const k in D.cw) { const g = D.cw[k]; g.classList.add("flash"); setTimeout(() => g.classList.remove("flash"), 1300); }
+}
+function haveNextInstr() { return A.prog && SIM && A.pi >= 0 && A.pi < SIM.steps.length - 1; }
+function loadInstr(pi) {
+  const st = SIM.steps[pi];
+  A.pi = pi;
+  document.getElementById("asm").value = st.it.canon;
+  document.getElementById("asmErr").hidden = true;
+  document.getElementById("vPC").value = hex32(st.pcAddr).replace(":", "");
+  document.getElementById("vRs").value = hex32(st.vRs).replace(":", "");
+  document.getElementById("vRt").value = hex32(st.vRt).replace(":", "");
+  document.getElementById("vMem").value = hex32(st.vMem).replace(":", "");
+  S.p = st.p; S.ph = 0; S.step = 0;
+  buildSteps();
+  A.k = 0; A.lit = {}; A.now = {}; A.act = {}; A.clock = 0; A.on = true;
+  renderChips();
+  renderBits();
+  if (S.tab === "multi") renderMulti(); else renderMono();
+  updateBars();
+}
+async function animNext() {
+  if (A.busy) { A.token++; A.playing = false; updateBars(); return; }
+  if (!A.on) { A.on = true; buildSteps(); if (A.prog && SIM && A.pi < 0) loadInstr(0); }
+  if (A.k >= A.steps.length) { if (haveNextInstr()) loadInstr(A.pi + 1); else return; }
+  await runStep(A.k);
+}
+async function animPlay() {
+  if (A.playing) { A.playing = false; A.token++; updateBars(); return; }
+  if (!A.on) { A.on = true; buildSteps(); if (A.prog && SIM && A.pi < 0) loadInstr(0); }
+  if (A.k >= A.steps.length && !haveNextInstr()) { snapTo(0); }
+  A.playing = true; updateBars();
+  while (A.playing) {
+    if (A.k >= A.steps.length) { if (haveNextInstr()) { loadInstr(A.pi + 1); await wait(350 / A.speed, A.token); } else break; }
+    await runStep(A.k);
+    if (A.playing) await wait(220 / A.speed, A.token);
+  }
+  A.playing = false; updateBars();
+}
+function animPrev() {
+  A.token++; A.playing = false; A.busy = false;
+  if (!A.on) return;
+  if (A.k > 0) snapTo(A.k - 1);
+  else if (A.prog && A.pi > 0) { loadInstr(A.pi - 1); snapTo(A.steps.length); }
+}
+function animReset() {
+  const prog = A.prog;
+  animOff();
+  A.prog = prog;
+  if (prog && SIM) { A.on = true; loadInstr(0); }
+  if (S.tab === "multi") renderMulti(); else renderMono();
+  updateBars();
+}
+function updateClock() {
+  for (const k in A.bars) {
+    const b = A.bars[k];
+    if (k !== S.tab) continue;
+    let txt = "";
+    if (A.on) {
+      if (S.tab === "multi") {
+        const Tc = Math.max(T.M, T.R, T.A);
+        txt = "ciclo " + Math.max(A.k, A.busy ? A.k + 1 : A.k) + " de " + A.steps.length + " · t = " + fmt(A.clock) + " ns";
+        if (A.prog && SIM && A.pi >= 0) { const g0 = SIM.steps[A.pi].from - 1; txt += " · ciclo do programa " + (g0 + Math.max(1, A.k + (A.busy ? 1 : 0))) + "/" + SIM.cyc; }
+      } else {
+        const clk = 2 * T.M + 2 * T.R + T.A;
+        txt = "t = " + fmt(A.clock) + " ns (clock = " + fmt(clk) + " ns)";
+        if (A.prog && SIM && A.pi >= 0) txt += " · instrução " + (A.pi + 1) + "/" + SIM.steps.length + " = ciclo " + (A.pi + 1) + " do monociclo";
+      }
+    }
+    b.clock.textContent = txt;
+  }
+}
+function updateBars(running) {
+  for (const k in A.bars) {
+    const b = A.bars[k];
+    b.play.textContent = A.playing ? "⏸ Pausa" : "▶ Play";
+    b.prog.checked = A.prog;
+    let msg = "Aperte Play para ver o fluxo inteiro, ou Next para ir passo a passo.";
+    if (A.on && A.steps.length) {
+      let i = A.k - 1;
+      if (A.busy && running !== undefined) i = running;
+      if (A.busy) i = Math.min(A.k, A.steps.length - 1);
+      if (i >= 0) msg = "Passo " + (i + 1) + "/" + A.steps.length + ": " + A.steps[i].t;
+      if (!A.busy && A.k >= A.steps.length) {
+        if (haveNextInstr()) msg += "  →  Next carrega a próxima instrução do programa.";
+        else msg += "  (fim)";
+      }
+      if (A.prog && SIM && A.pi >= 0) msg = stepLabel(SIM.steps[A.pi]) + "  ·  " + msg;
+    }
+    b.msg.textContent = msg;
+  }
+  updateClock();
+}
+function buildBar(cardId, tab) {
+  const card = document.querySelector("#" + cardId + " .card.diagram");
+  const bar = h("div", "animbar");
+  const play = h("button", "btn", "▶ Play"); play.type = "button";
+  const next = h("button", "btn ghost", "Next ⏭"); next.type = "button";
+  const prev = h("button", "btn ghost", "⏮ Voltar"); prev.type = "button";
+  const reset = h("button", "btn ghost", "Reiniciar"); reset.type = "button";
+  const spl = h("label", "opt"); spl.textContent = "Velocidade ";
+  const sel = document.createElement("select"); sel.id = "spd-" + tab;
+  [["0.5", "0,5×"], ["1", "1×"], ["2", "2×"]].forEach(o => { const op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; if (o[0] === "1") op.selected = true; sel.appendChild(op); });
+  spl.appendChild(sel);
+  const lbl2 = h("label", "opt"); const lb = document.createElement("input"); lb.type = "checkbox"; lb.checked = true; lb.id = "lbl-" + tab; lbl2.appendChild(lb); lbl2.appendChild(document.createTextNode(" valores na esfera"));
+  const pl = h("label", "opt"); const pc = document.createElement("input"); pc.type = "checkbox"; pc.id = "prog-" + tab; pl.appendChild(pc); pl.appendChild(document.createTextNode(" seguir o programa do simulador"));
+  const clock = h("span", "clock");
+  const msg = h("p", "msg");
+  const items = [play, next, prev, reset, spl, lbl2];
+  if (tab === "mono") {
+    const tl = h("label", "opt"); const tk = document.createElement("input"); tk.type = "checkbox"; tk.checked = true; tk.id = "tags-" + tab;
+    tl.appendChild(tk); tl.appendChild(document.createTextNode(" plaquinhas nos fios"));
+    tk.onchange = () => { A.tags = tk.checked; if (A.on) overlayAnim(); else renderMono(); };
+    items.push(tl);
+    const cl = h("label", "opt"); const ck = document.createElement("input"); ck.type = "checkbox"; ck.checked = true; ck.id = "ctl-" + tab;
+    cl.appendChild(ck); cl.appendChild(document.createTextNode(" fios de controle"));
+    ck.onchange = () => setCtrlVisible(DM, ck.checked);
+    items.push(cl);
+  }
+  items.push(pl, clock, msg);
+  items.forEach(x => bar.appendChild(x));
+  card.insertBefore(bar, card.firstChild);
+  play.onclick = () => { stopPlay(); animPlay(); };
+  next.onclick = () => { stopPlay(); A.playing = false; animNext(); };
+  prev.onclick = animPrev;
+  reset.onclick = animReset;
+  sel.onchange = () => { A.speed = parseFloat(sel.value); for (const k in A.bars) A.bars[k].sel.value = sel.value; };
+  lb.onchange = () => { A.labels = lb.checked; for (const k in A.bars) A.bars[k].lb.checked = lb.checked; };
+  pc.onchange = () => {
+    A.prog = pc.checked;
+    if (A.prog && !SIM) { A.prog = false; pc.checked = false; msg.textContent = "O código do simulador tem erro; corrija lá embaixo primeiro."; return; }
+    animReset();
+  };
+  A.bars[tab] = { play, sel, lb, prog: pc, clock, msg };
+}
+A.labels = true;
+[DM, DX].forEach(D => { D.L.anim = E("g", {}, D.svg); });
+buildBar("viewMono", "mono");
+document.getElementById("lupaClose").onclick = () => document.getElementById("lupa").close();
+document.getElementById("lupa").addEventListener("click", e => { if (e.target.id === "lupa") e.target.close(); });
+buildBar("viewMulti", "multi");
+updateBars();
+
+function renderAll() {
+  renderChips();
+  const g = group(S.p.cls);
+  document.getElementById("clsInfo").textContent = { R: "tipo-R", LW: "tipo-I (load)", SW: "tipo-I (store)", BEQ: "tipo-I (desvio)", I: "tipo-I (aritm./lógica)", J: "tipo-J" }[g];
+  if (S.tab === "mono") renderMono(); else renderMulti();
+  renderBits();
+  renderProg();
+}
+
+function setTab(t) {
+  stopPlay();
+  if (typeof A !== "undefined" && S.tab !== t) { const pg = A.prog, pi = A.pi; animOff(); A.prog = pg; if (pg && pi >= 0) { A.pi = pi; } }
+  S.tab = t;
+  document.getElementById("tabMono").setAttribute("aria-selected", t === "mono" ? "true" : "false");
+  document.getElementById("tabMulti").setAttribute("aria-selected", t === "multi" ? "true" : "false");
+  document.getElementById("viewMono").hidden = t !== "mono";
+  document.getElementById("viewMulti").hidden = t !== "multi";
+  try { localStorage.setItem("mips-tab", t); } catch (e) {}
+  renderAll();
+}
+document.getElementById("tabMono").onclick = () => setTab("mono");
+document.getElementById("tabMulti").onclick = () => setTab("multi");
+document.getElementById("asm").addEventListener("input", onAsm);
+["tM","tR","tA"].forEach(id => document.getElementById(id).addEventListener("input", () => {
+  const v = parseFloat(document.getElementById(id).value);
+  const key = { tM: "M", tR: "R", tA: "A" }[id];
+  if (!isNaN(v) && v >= 0) { T[key] = v; renderAll(); }
+}));
+["vPC","vRs","vRt","vMem"].forEach(id => document.getElementById(id).addEventListener("input", renderBits));
+["code","memInit","regInit"].forEach(id => document.getElementById(id).addEventListener("input", renderProg));
+["qMono","qMulti"].forEach(id => document.getElementById(id).addEventListener("input", renderQueries));
+let saved = "mono";
+try { const v = localStorage.getItem("mips-tab"); if (v === "multi") saved = "multi"; } catch (e) {}
+setTab(saved);
+</script>
+
+</body></html>

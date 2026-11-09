@@ -1,0 +1,1167 @@
+<title>Manual Mono + Multi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: índice fixo à esquerda (vira faixa rolável no celular), coluna de leitura de ~68ch, tabelas e diagramas rolam dentro do próprio bloco.
+   Cores com o mesmo código do Caminho de Dados: azul = dados, vermelho = controle, âmbar = registrador escrito no ciclo. */
+:root{
+  --bg:#eef1f5; --paper:#fbfcfd; --tint:#e3e8ef; --ink:#17202c; --soft:#3b4656; --muted:#667183; --line:#cfd6e0;
+  --data:#1f4fc9; --data-bg:#e4ebfb; --ctrl:#b8303a; --ctrl-bg:#f8e6e7; --write:#9a6110; --write-bg:#f7ecd8;
+  --ok:#1b7348; --ok-bg:#e1f2e8;
+  --f-disp:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --navw:250px; --col:760px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1319; --paper:#161b23; --tint:#1d2430; --ink:#e4e8ef; --soft:#bcc4d0; --muted:#8c96a5; --line:#2c3441;
+  --data:#86a6ff; --data-bg:#1a2440; --ctrl:#ff858d; --ctrl-bg:#33191c; --write:#f0b85a; --write-bg:#2e2412;
+  --ok:#6fd09c; --ok-bg:#132a1f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1319; --paper:#161b23; --tint:#1d2430; --ink:#e4e8ef; --soft:#bcc4d0; --muted:#8c96a5; --line:#2c3441;
+  --data:#86a6ff; --data-bg:#1a2440; --ctrl:#ff858d; --ctrl-bg:#33191c; --write:#f0b85a; --write-bg:#2e2412;
+  --ok:#6fd09c; --ok-bg:#132a1f; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font:17px/1.62 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1,h2,h3,h4{font-family:var(--f-disp);line-height:1.1;text-wrap:balance;margin:0;letter-spacing:.005em}
+h1{font-size:clamp(2.3rem,6vw,3.4rem);font-weight:700}
+h2{font-size:2rem;font-weight:700}
+h3{font-size:1.4rem;font-weight:600;margin-top:1.6rem}
+h4{font-size:1.12rem;font-weight:600;margin-top:1.1rem}
+p,ul,ol{margin:.55rem 0}
+li{margin:.25rem 0}
+a{color:var(--data)}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+p code,li code,td code{background:var(--tint);border-radius:4px;padding:.05em .35em}
+strong{font-weight:700}
+.d{color:var(--data);font-weight:600}.c{color:var(--ctrl);font-weight:600}.w{color:var(--write);font-weight:600}
+
+.wrap{display:grid;grid-template-columns:var(--navw) minmax(0,1fr);min-height:100vh}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--line);
+  padding-block:28px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;background:var(--bg)}
+.toc .kick{font:600 .72rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.toc .nm{font:700 1.5rem var(--f-disp);margin:.15rem 0 1rem}
+.toc ol{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px}
+.toc a{display:flex;gap:10px;align-items:baseline;padding:5px 8px;border-radius:6px;color:var(--soft);text-decoration:none;font-size:.95rem;line-height:1.3}
+.toc a .n{font:600 .72rem var(--f-mono);color:var(--muted);min-width:18px}
+.toc a:hover{background:var(--tint);color:var(--ink)}
+.toc a.on{background:var(--data-bg);color:var(--ink)}
+.toc a.on .n{color:var(--data)}
+.toc a .ck{margin-left:auto;color:var(--ok);font-size:.8rem}
+main{min-width:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+.col{max-width:var(--col);margin:0 auto}
+@media (max-width:960px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  nav.toc{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:20;border-right:0;border-bottom:1px solid var(--line);
+    padding-block:8px;padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:auto;overflow-y:hidden}
+  .toc .kick,.toc .nm{display:none}
+  .toc ol{flex-direction:row;width:max-content}
+  .toc a{white-space:nowrap;font-size:.88rem}
+  .toc a .ck{margin-left:4px}
+}
+
+header.hero{padding-block:44px 8px}
+.hero .kick{font:600 .78rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--data)}
+.hero h1{margin:.3rem 0 .6rem}
+.hero .lede{font-size:1.15rem;color:var(--soft);max-width:60ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.9rem;color:var(--muted);margin-top:14px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+.sw.d{background:var(--data)}.sw.c{background:var(--ctrl)}.sw.w{background:var(--write)}
+
+section.sec{padding-top:56px;scroll-margin-top:16px}
+@media (max-width:960px){section.sec{scroll-margin-top:60px}}
+.sec>header{display:flex;flex-direction:column;gap:2px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:12px}
+.sec>header .num{font:600 .8rem var(--f-mono);color:var(--data);letter-spacing:.08em}
+.sec>header .sub{color:var(--muted);font-size:.98rem}
+.done{display:inline-flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted);margin-top:18px;cursor:pointer;user-select:none}
+.done input{width:18px;height:18px;accent-color:var(--ok)}
+
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{background:var(--tint);font:600 .74rem var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+table.sig td,table.sig th{text-align:center;font-family:var(--f-mono);font-size:.84rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.sig td:first-child,table.sig th:first-child{text-align:left;font-family:var(--f-body);font-weight:600}
+.v1{color:var(--ctrl);font-weight:700}.v0{color:var(--muted)}.vx{color:var(--line)}
+:root[data-theme="dark"] .vx{color:#4a5466}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .vx{color:#4a5466}}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:.86rem}
+
+.box{border-left:4px solid var(--line);background:var(--paper);border-radius:0 8px 8px 0;padding:10px 14px;margin:16px 0}
+.box>.lab{display:block;font:600 .72rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.box p:first-of-type{margin-top:0}.box p:last-child{margin-bottom:0}
+.box.regra{border-color:var(--data);background:var(--data-bg)}.box.regra .lab{color:var(--data)}
+.box.peg{border-color:var(--ctrl);background:var(--ctrl-bg)}.box.peg .lab{color:var(--ctrl)}
+.box.prova{border-color:var(--write);background:var(--write-bg)}.box.prova .lab{color:var(--write)}
+.box.ok{border-color:var(--ok);background:var(--ok-bg)}.box.ok .lab{color:var(--ok)}
+
+pre.rtl{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font:.86rem/1.6 var(--f-mono);margin:12px 0}
+pre.rtl .k{color:var(--muted)}
+
+details.sol{border:1px solid var(--line);border-radius:8px;background:var(--paper);margin:14px 0}
+details.sol>summary{cursor:pointer;padding:11px 14px;font-weight:700;list-style:none;display:flex;gap:10px;align-items:baseline}
+details.sol>summary::-webkit-details-marker{display:none}
+details.sol>summary::before{content:"+";font:700 1rem var(--f-mono);color:var(--data);width:12px}
+details.sol[open]>summary::before{content:"−"}
+details.sol>summary .tag{margin-left:auto;font:600 .7rem var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+details.sol .in{padding:2px 16px 14px;border-top:1px solid var(--line)}
+summary:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-within{outline:2px solid var(--data);outline-offset:2px}
+
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:16px 0}
+.day{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.day .dn{font:700 1.15rem var(--f-disp)}
+.day .dt{font:600 .7rem var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.day label{display:flex;gap:8px;align-items:flex-start;font-size:.92rem;line-height:1.35;cursor:pointer}
+.day input{margin-top:3px;accent-color:var(--ok)}
+
+.bars{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+.bar-row{display:grid;grid-template-columns:70px minmax(0,1fr);gap:10px;align-items:center}
+.bar-row .bl{font:600 .85rem var(--f-mono)}
+.bar-pair{display:flex;flex-direction:column;gap:3px}
+.bar{height:20px;border-radius:3px;display:flex;align-items:center;font:600 .72rem var(--f-mono);padding-left:6px;white-space:nowrap;color:var(--paper)}
+.bar.mono{background:var(--data)}
+.bar.idle{background:repeating-linear-gradient(135deg,var(--data-bg) 0 5px,transparent 5px 9px);color:var(--muted);border:1px solid var(--data-bg)}
+.bar.multi{background:var(--write)}
+.bar-track{display:flex;width:100%}
+
+.fsmwrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+.fsmwrap svg{display:block;width:100%;min-width:640px;height:auto}
+svg .nd circle{fill:var(--paper);stroke:var(--data);stroke-width:2}
+svg .nd.ex circle{stroke:var(--ctrl);stroke-dasharray:3 3}
+svg .nd text.n{font:700 15px var(--f-mono);fill:var(--ink);text-anchor:middle}
+svg .nd text.t{font:600 12px var(--f-body);fill:var(--soft);text-anchor:middle}
+svg .ed{stroke:var(--muted);stroke-width:1.5;fill:none}
+svg .ed.back{stroke-dasharray:4 4}
+svg .ed.ex{stroke:var(--ctrl);stroke-dasharray:3 3}
+svg .el{font:600 11px var(--f-mono);fill:var(--muted)}
+svg .el.ex{fill:var(--ctrl)}
+svg .arrow{fill:var(--muted)}
+svg .arrow.ex{fill:var(--ctrl)}
+
+.tool{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;margin:14px 0}
+.tool .row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end}
+.tool label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.tool input[type=number]{width:84px;font:600 .95rem var(--f-mono);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.tool textarea{width:100%;min-height:180px;font:.88rem/1.55 var(--f-mono);padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);resize:vertical}
+.tool .grid2{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px}
+@media (max-width:720px){.tool .grid2{grid-template-columns:minmax(0,1fr)}}
+.tots{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tot{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.tot .k{font:600 .7rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tot .v{font:700 1.7rem var(--f-disp);font-variant-numeric:tabular-nums;line-height:1.1}
+.tot .f{font:.78rem var(--f-mono);color:var(--muted)}
+.ans{border-left:3px solid var(--data);padding:4px 0 4px 12px;font-size:.95rem}
+.ans .s{font-family:var(--f-mono);font-size:.82rem;color:var(--ctrl)}
+.err{color:var(--ctrl);font-size:.9rem}
+.btn{font:600 .9rem var(--f-body);padding:7px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+
+.quiz{display:flex;flex-direction:column;gap:14px;margin:14px 0}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.q .qt{font-weight:700;margin-bottom:8px}
+.q .qt .qn{font:600 .78rem var(--f-mono);color:var(--muted);margin-right:6px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{text-align:left;font:inherit;font-size:.95rem;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
+.opt:hover{border-color:var(--data)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--ctrl);background:var(--ctrl-bg)}
+.q .why{margin-top:8px;font-size:.93rem;color:var(--soft)}
+.score{font:700 1.3rem var(--f-disp)}
+
+.cheat{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}
+.cheat>div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-width:0}
+.cheat h4{margin-top:0}
+.cheat ul{padding-left:18px;font-size:.93rem}
+footer.end{margin-top:56px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Seções">
+  <div class="kick">Arquitetura · UNICAP</div>
+  <div class="nm">Manual Mono + Multi</div>
+  <ol id="tocList">
+    <li><a href="#inicio"><span class="n">00</span>Como usar</a></li>
+    <li><a href="#base"><span class="n">01</span>O processador</a></li>
+    <li><a href="#pecas"><span class="n">02</span>As peças</a></li>
+    <li><a href="#formatos"><span class="n">03</span>Formatos</a></li>
+    <li><a href="#mono"><span class="n">04</span>Monociclo</a></li>
+    <li><a href="#multi"><span class="n">05</span>Multiciclo</a></li>
+    <li><a href="#fsm"><span class="n">06</span>Máquina de estados</a></li>
+    <li><a href="#compara"><span class="n">07</span>Mono x Multi</a></li>
+    <li><a href="#novas"><span class="n">08</span>Instruções novas</a></li>
+    <li><a href="#receitas"><span class="n">09</span>Receitas de prova</a></li>
+    <li><a href="#calc"><span class="n">10</span>Contador de ciclos</a></li>
+    <li><a href="#resolvidos"><span class="n">11</span>Resolvidos</a></li>
+    <li><a href="#pegadinhas"><span class="n">12</span>Pegadinhas</a></li>
+    <li><a href="#autoteste"><span class="n">13</span>Autoteste</a></li>
+    <li><a href="#cola"><span class="n">14</span>Revisão final</a></li>
+  </ol>
+</nav>
+
+<main>
+<div class="col">
+
+<header class="hero" id="inicio">
+  <div class="kick">2º Exercício Teórico · 1,5 ponto · Prof. Sérgio Murilo</div>
+  <h1>Monociclo e Multiciclo, do zero à prova</h1>
+  <p class="lede">Tudo o que a prova cobra, na ordem em que faz sentido aprender: o que é um caminho de dados, como cada instrução passa por ele, os sinais de controle, a máquina de estados, as contas de tempo e os tipos de questão que ele repete. Base: Aula 6, quadro, provas de 2016 a 2018 e as suas anotações.</p>
+  <div class="legend">
+    <span><i class="sw d"></i>dado</span>
+    <span><i class="sw c"></i>sinal de controle</span>
+    <span><i class="sw w"></i>registrador escrito no fim do ciclo</span>
+  </div>
+</header>
+
+<section class="sec" id="inicio-plano" style="padding-top:28px">
+  <h3 style="margin-top:0">Plano até terça</h3>
+  <p>Cada dia tem um pedaço pequeno. Marque o que terminou; fica salvo neste navegador.</p>
+  <div class="plan" id="plan">
+    <div class="day"><span class="dt">sex · 06/11</span><span class="dn">Base + Monociclo</span>
+      <label><input type="checkbox" id="p1"> Ler 01, 02 e 03</label>
+      <label><input type="checkbox" id="p2"> Ler 04 e copiar a tabela de sinais no caderno</label></div>
+    <div class="day"><span class="dt">sáb · 07/11</span><span class="dn">Multiciclo</span>
+      <label><input type="checkbox" id="p3"> Ler 05 e 06</label>
+      <label><input type="checkbox" id="p4"> Desenhar a FSM de memória (0 a 9 com sinais)</label>
+      <label><input type="checkbox" id="p5"> Autoteste, questões 1 a 8</label></div>
+    <div class="day"><span class="dt">dom · 08/11</span><span class="dn">Questões de prova</span>
+      <label><input type="checkbox" id="p6"> Ler 07, 08 e 09</label>
+      <label><input type="checkbox" id="p7"> Fazer 3 trechos no contador de ciclos</label></div>
+    <div class="day"><span class="dt">seg · 09/11</span><span class="dn">Treino</span>
+      <label><input type="checkbox" id="p8"> Refazer os resolvidos no papel antes de abrir</label>
+      <label><input type="checkbox" id="p9"> Autoteste completo + pegadinhas</label></div>
+    <div class="day"><span class="dt">ter · 10/11</span><span class="dn">Prova</span>
+      <label><input type="checkbox" id="p10"> Só a revisão final (14)</label></div>
+  </div>
+  <div class="box prova"><span class="lab">O que ele cobra</span>
+    <p>Pelas provas antigas e pelo quadro, as questões se repetem em 6 formatos. A seção 09 tem a receita de cada um:</p>
+    <ol>
+      <li>Tempo de um trecho de código no monociclo e no multiciclo.</li>
+      <li>"O que acontece no ciclo N" e os sinais de controle nesse ciclo.</li>
+      <li>Tabela de sinais de controle de uma ou mais instruções.</li>
+      <li>Bits e valores que passam nos fios (rótulos a1, a2, b1... que mudam de lugar em cada prova).</li>
+      <li>Modificar o caminho de dados ou criar estados para uma instrução nova (BNE, ANDi, LB, SB...).</li>
+      <li>Desempenho: clock fixo x variável, CPI médio, ganho.</li>
+    </ol>
+  </div>
+  <p>Para ver os fios acendendo instrução por instrução, use o seu <strong>Caminho de Dados</strong> na mesma pasta. Este manual explica; aquele mostra.</p>
+</section>
+
+<!-- 01 -->
+<section class="sec" id="base">
+  <header><span class="num">01</span><h2>O processador por dentro</h2><span class="sub">Caminho de dados, controle e clock</span></header>
+  <p>O processador tem duas partes. O <strong class="d">caminho de dados</strong> é por onde os valores passam: PC, memória, banco de registradores, ULA, multiplexadores. A <strong class="c">unidade de controle (U.C.)</strong> não mexe em dado nenhum: ela lê o opcode da instrução e liga ou desliga os sinais que decidem o que cada peça faz e qual entrada cada mux escolhe.</p>
+  <h3>Dois tipos de peça</h3>
+  <ul>
+    <li><strong>Combinacionais</strong>: a saída depende só da entrada naquele instante. ULA, somadores, muxes, extensão de sinal. Não guardam nada.</li>
+    <li><strong>De estado</strong>: guardam valor. PC, banco de registradores, memória e, no multiciclo, IR, MDR, A, B e ALUOut.</li>
+  </ul>
+  <h3>O clock</h3>
+  <p>Um ciclo de clock funciona assim: os elementos de estado entregam o que têm, o valor atravessa a lógica combinacional, e na <strong>borda do clock</strong> o resultado é gravado no próximo elemento de estado. Ler pode acontecer a qualquer momento; escrever, só na borda. Por isso a escrita no banco ou no PC é sempre a última coisa de um ciclo.</p>
+  <h3>A fórmula de desempenho</h3>
+  <pre class="rtl">Tempo de execução = Nº de instruções × CPI × Período do clock</pre>
+  <p>As duas implementações atacam termos diferentes. O monociclo tem CPI = 1, mas um período longo. O multiciclo tem período curto, mas CPI entre 3 e 5. O número de instruções é o mesmo nos dois, porque o programa não muda.</p>
+  <div class="box regra"><span class="lab">Os tempos da prova</span>
+    <p>A questão dá três números: <strong>M</strong> (acesso à memória), <strong>R</strong> (banco de registradores, leitura ou escrita) e <strong>ULA</strong>. Somadores, muxes, U.C., extensão de sinal e fios contam <strong>0 ns</strong>. Nas aulas de 2026: M = 2, R = 1, ULA = 2.</p>
+  </div>
+  <label class="done"><input type="checkbox" id="d-base"> Entendi esta seção</label>
+</section>
+
+<!-- 02 -->
+<section class="sec" id="pecas">
+  <header><span class="num">02</span><h2>As peças</h2><span class="sub">O que cada caixa do desenho faz</span></header>
+  <div class="tbl"><table>
+    <thead><tr><th>Peça</th><th>O que faz</th><th>Onde aparece</th></tr></thead>
+    <tbody>
+      <tr><td><strong>PC</strong></td><td>Guarda o endereço da instrução atual.</td><td>Mono e multi</td></tr>
+      <tr><td><strong>Memória de instruções / de dados</strong></td><td>No monociclo são duas, porque a instrução e o dado são lidos no mesmo ciclo.</td><td>Mono</td></tr>
+      <tr><td><strong>Memória única</strong></td><td>Instruções e dados na mesma memória; o mux <span class="c">IorD</span> escolhe se o endereço vem do PC ou do ALUOut.</td><td>Multi</td></tr>
+      <tr><td><strong>Banco de registradores</strong></td><td>Lê dois registradores (Rs e Rt) e escreve um. Escrita só com <span class="c">RegWrite</span> = 1, na borda.</td><td>Mono e multi</td></tr>
+      <tr><td><strong>ULA</strong></td><td>Soma, subtrai, AND, OR, SLT. Gera o sinal <span class="d">Zero</span> quando o resultado é 0 (usado no BEQ).</td><td>Mono e multi</td></tr>
+      <tr><td><strong>U.C. da ULA</strong></td><td>Recebe <span class="c">ALUOp</span> e o funct [5-0] e gera os 3 bits de controle da ULA.</td><td>Mono e multi</td></tr>
+      <tr><td><strong>Extensão de sinal</strong></td><td>Transforma o imediato de 16 bits em 32 copiando o bit 15.</td><td>Mono e multi</td></tr>
+      <tr><td><strong>Deslocador &lt;&lt;2</strong></td><td>Multiplica por 4: o imediato do desvio conta palavras, o endereço conta bytes.</td><td>Mono e multi</td></tr>
+      <tr><td><strong>Somadores</strong></td><td>Um faz PC + 4, outro faz PC + 4 + (ext &lt;&lt; 2) para o desvio.</td><td>Só mono</td></tr>
+      <tr><td><strong>Mux</strong></td><td>Escolhe uma entrada pelo sinal de controle. É assim que o mesmo hardware serve a instruções diferentes.</td><td>Mono e multi</td></tr>
+      <tr><td><strong>IR, MDR, A, B, ALUOut</strong></td><td>Registradores internos que seguram valores de um ciclo para o outro.</td><td>Só multi</td></tr>
+    </tbody>
+  </table></div>
+  <label class="done"><input type="checkbox" id="d-pecas"> Entendi esta seção</label>
+</section>
+
+<!-- 03 -->
+<section class="sec" id="formatos">
+  <header><span class="num">03</span><h2>Revisão relâmpago dos formatos</h2><span class="sub">Para onde vai cada campo da instrução</span></header>
+  <div class="tbl"><table>
+    <thead><tr><th>Formato</th><th>Campos (bits)</th><th>Exemplos</th></tr></thead>
+    <tbody>
+      <tr><td><strong>R</strong></td><td><code>op 6 | rs 5 | rt 5 | rd 5 | shamt 5 | funct 6</code></td><td>add, sub, and, or, slt (op = 000000)</td></tr>
+      <tr><td><strong>I</strong></td><td><code>op 6 | rs 5 | rt 5 | imediato 16</code></td><td>lw (35), sw (43), beq (4), bne (5), addi (8), andi (12), ori (13), slti (10), lui (15)</td></tr>
+      <tr><td><strong>J</strong></td><td><code>op 6 | endereço 26</code></td><td>j (2)</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>[31-26] op</strong> vai para a U.C.</li>
+    <li><strong>[25-21] rs</strong> vai para "registrador lido 1".</li>
+    <li><strong>[20-16] rt</strong> vai para "registrador lido 2" e para a entrada 0 do mux <span class="c">RegDst</span> (destino no lw e no tipo-I).</li>
+    <li><strong>[15-11] rd</strong> vai para a entrada 1 do mux <span class="c">RegDst</span> (destino no tipo-R).</li>
+    <li><strong>[15-0] imediato</strong> vai para a extensão de sinal.</li>
+    <li><strong>[5-0] funct</strong> vai para a U.C. da ULA.</li>
+    <li><strong>[25-0] endereço do J</strong> vai para o deslocador &lt;&lt;2 (vira 28 bits) e junta com os 4 bits de cima de PC + 4.</li>
+  </ul>
+  <div class="box peg"><span class="lab">Pegadinha clássica</span><p>No <code>sw</code>, o rt é <strong>fonte</strong> (o dado a gravar), não destino. Por isso no sw nada é escrito no banco e RegDst vira X.</p></div>
+  <label class="done"><input type="checkbox" id="d-formatos"> Entendi esta seção</label>
+</section>
+
+<!-- 04 -->
+<section class="sec" id="mono">
+  <header><span class="num">04</span><h2>Monociclo</h2><span class="sub">Uma instrução por ciclo, um ciclo do tamanho da pior instrução</span></header>
+  <h3>A ideia</h3>
+  <p>Cada instrução começa e termina dentro de <strong>um único ciclo de clock</strong>. Como o clock tem período fixo, ele precisa caber a instrução mais lenta, que é o <code>lw</code>. As outras terminam antes e ficam esperando o fim do ciclo. Esse tempo parado é o defeito do monociclo, e o motivo do multiciclo existir.</p>
+  <p>Como cada peça só pode ser usada uma vez por ciclo, o monociclo precisa de <strong>duas memórias</strong> (instruções e dados) e de <strong>dois somadores</strong> além da ULA.</p>
+
+  <h3>O caminho de cada instrução</h3>
+  <p>Toda instrução faz a busca (PC → memória de instruções, PC + 4 em paralelo) e lê os registradores. Depois disso, cada classe segue o seu caminho:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Classe</th><th>Caminho depois da busca</th><th>Unidades em série</th><th>Tempo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tipo-R</strong></td><td>lê rs e rt → ULA faz rs op rt → resultado volta (MemToReg = 0) → escreve rd</td><td>M, R, ULA, R</td><td class="mono">M+2R+ULA</td></tr>
+      <tr><td><strong>Tipo-I aritm.</strong></td><td>lê rs → ULA faz rs op imediato (ALUSrc = 1) → escreve rt</td><td>M, R, ULA, R</td><td class="mono">M+2R+ULA</td></tr>
+      <tr><td><strong>LW</strong></td><td>lê rs → ULA faz rs + desloc. = endereço → lê memória de dados → escreve rt (MemToReg = 1)</td><td>M, R, ULA, M, R</td><td class="mono">2M+2R+ULA</td></tr>
+      <tr><td><strong>SW</strong></td><td>lê rs e rt → ULA faz endereço → grava rt na memória (MemWrite = 1)</td><td>M, R, ULA, M</td><td class="mono">2M+R+ULA</td></tr>
+      <tr><td><strong>BEQ / BNE</strong></td><td>lê rs e rt → ULA faz rs − rt para gerar Zero; em paralelo o somador faz PC+4+(ext&lt;&lt;2); a AND decide o mux</td><td>M, R, ULA</td><td class="mono">M+R+ULA</td></tr>
+      <tr><td><strong>J</strong></td><td>[25-0] &lt;&lt; 2 junto com PC+4[31-28] → DVI = 1 escolhe no último mux</td><td>M</td><td class="mono">M</td></tr>
+    </tbody>
+  </table></div>
+  <p class="mono" style="color:var(--muted)">Com M = 2, R = 1, ULA = 2: LW 8 ns · SW 7 · R e tipo-I 6 · BEQ 5 · J 2. Clock = 8 ns.</p>
+
+  <h3>Os sinais de controle, um por um</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Sinal</th><th>= 0</th><th>= 1</th></tr></thead>
+    <tbody>
+      <tr><td class="c">RegDst</td><td>destino é rt [20-16] (lw, tipo-I)</td><td>destino é rd [15-11] (tipo-R)</td></tr>
+      <tr><td class="c">ALUSrc</td><td>2ª entrada da ULA é o registrador rt</td><td>2ª entrada da ULA é o imediato estendido</td></tr>
+      <tr><td class="c">MemToReg</td><td>o banco recebe o resultado da ULA</td><td>o banco recebe o dado lido da memória</td></tr>
+      <tr><td class="c">RegWrite</td><td>não escreve no banco</td><td>escreve no banco na borda</td></tr>
+      <tr><td class="c">MemRead / MemWrite</td><td>não lê / não grava</td><td>lê / grava na memória de dados</td></tr>
+      <tr><td class="c">Branch</td><td>não é BEQ</td><td>é BEQ: desvia se Zero = 1 (AND com Zero)</td></tr>
+      <tr><td class="c">NBranch</td><td>não é BNE</td><td>é BNE: desvia se Zero = 0 (AND com Zero invertido). Nas anotações aparece como BranchNotEqual.</td></tr>
+      <tr><td class="c">DVI</td><td>próximo PC vem do mux do desvio</td><td>próximo PC é o endereço do J</td></tr>
+      <tr><td class="c">ALUOp</td><td colspan="2">diz à U.C. da ULA qual operação fazer (tabela abaixo)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Tabela de sinais do monociclo</h3>
+  <p>No padrão do quadro, com ALUOp de 3 bits.</p>
+  <div class="tbl"><table class="sig">
+    <thead><tr><th>Instr.</th><th>RegDst</th><th>ALUSrc</th><th>RegWrite</th><th>MemToReg</th><th>Branch</th><th>NBranch</th><th>DVI</th><th>MemRead</th><th>MemWrite</th><th>ALUOp</th></tr></thead>
+    <tbody id="monoSigBody"></tbody>
+  </table></div>
+  <div class="box regra"><span class="lab">A regra do X</span>
+    <p>Um sinal de <strong>mux</strong> vira X quando o resultado daquele mux não é usado (RegDst e MemToReg no sw e no beq; quase tudo no J). Um sinal de <strong>escrita</strong> (RegWrite, MemWrite) nunca é X: se não pode escrever, é 0, senão estraga um registrador ou a memória.</p>
+  </div>
+
+  <h3>U.C. da ULA</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>ALUOp (3 bits)</th><th>Quem usa</th><th>O que a ULA faz</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">000</td><td>lw, sw, addi</td><td>soma (controle 010)</td></tr>
+      <tr><td class="mono">001</td><td>beq, bne</td><td>subtração (controle 110)</td></tr>
+      <tr><td class="mono">010</td><td>tipo-R</td><td>olha o funct: add 010, sub 110, and 000, or 001, slt 111</td></tr>
+      <tr><td class="mono">livre</td><td>andi, ori, slti, lui</td><td>você escolhe um código não usado (011, 100, 101...) e escreve qual escolheu</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box prova"><span class="lab">2 bits ou 3 bits</span>
+    <p>Em sala ele confirmou os 3 bits acima. Nos slides e na correção de 2018 o ALUOp tem <strong>2 bits</strong>: 00 lw/sw, 01 beq, 10 tipo-R. Nas provas de 2016 e 2017 a própria questão trouxe uma tabela; quando trouxer, use a do enunciado.</p>
+  </div>
+
+  <h3>Tempo no monociclo</h3>
+  <pre class="rtl">Clock (fixo)       = tempo do LW = 2M + 2R + ULA
+Tempo do programa  = Nº de instruções executadas × Clock</pre>
+  <p>Só contam as instruções que <strong>executam</strong>. Se um desvio pula um trecho, as instruções puladas não entram; se um laço roda 4 vezes, o corpo entra 4 vezes.</p>
+  <h4>Clock de tamanho variável (slide 33)</h4>
+  <p>Comparação teórica: e se cada instrução durasse só o que precisa? O ciclo médio é a média ponderada pelo mix.</p>
+  <pre class="rtl">Mix: 24% lw, 12% sw, 44% R, 18% beq, 2% j     (M=2, R=1, ULA=2)
+Variável = 8×0,24 + 7×0,12 + 6×0,44 + 5×0,18 + 2×0,02 = 6,34 ≈ 6,3 ns
+Ganho    = 8 / 6,3 ≈ 1,27</pre>
+  <label class="done"><input type="checkbox" id="d-mono"> Entendi esta seção</label>
+</section>
+
+<!-- 05 -->
+<section class="sec" id="multi">
+  <header><span class="num">05</span><h2>Multiciclo</h2><span class="sub">A instrução quebrada em passos curtos</span></header>
+  <h3>Por que</h3>
+  <p>No monociclo o add espera o tempo do lw sem fazer nada. A ideia do multiciclo é <strong>quebrar cada instrução em passos</strong>, um por ciclo, e fazer o ciclo do tamanho do passo mais lento, não da instrução mais lenta. Cada instrução usa só os passos de que precisa: 3, 4 ou 5.</p>
+  <h3>O que muda no hardware</h3>
+  <ul>
+    <li><strong>Uma memória só</strong> para instruções e dados, porque a busca e o acesso ao dado acontecem em ciclos diferentes.</li>
+    <li><strong>Uma ULA só</strong>: ela também faz PC + 4 e o endereço de desvio, nos ciclos em que estaria parada. Os somadores do monociclo somem.</li>
+    <li><strong>Registradores internos</strong> guardam o resultado de um ciclo para o próximo:</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>Registrador</th><th>Guarda</th><th>Sinal de escrita?</th></tr></thead>
+    <tbody>
+      <tr><td class="w">IR</td><td>a instrução lida no ciclo 1. Precisa durar a instrução inteira, porque a memória vai ser usada de novo.</td><td><span class="c">IRWrite</span></td></tr>
+      <tr><td class="w">MDR</td><td>o dado lido da memória no lw</td><td>não, escrito todo ciclo</td></tr>
+      <tr><td class="w">A, B</td><td>os valores de rs e rt</td><td>não, escritos todo ciclo</td></tr>
+      <tr><td class="w">ALUOut</td><td>a saída da ULA: endereço, resultado ou destino do desvio</td><td>não, escrito todo ciclo</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Muxes e sinais novos</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Sinal</th><th>Valores</th></tr></thead>
+    <tbody>
+      <tr><td class="c">IorD</td><td>0 = endereço da memória vem do PC (busca) · 1 = vem do ALUOut (lw/sw)</td></tr>
+      <tr><td class="c">ALUSrcA</td><td>0 = PC · 1 = registrador A</td></tr>
+      <tr><td class="c">ALUSrcB</td><td>00 = B · 01 = constante 4 · 10 = ext(imm) · 11 = ext(imm) &lt;&lt; 2</td></tr>
+      <tr><td class="c">PCSource (FontePC)</td><td>00 = saída da ULA (PC+4) · 01 = ALUOut (desvio) · 10 = endereço do J · 11 = C000 0000 (exceção)</td></tr>
+      <tr><td class="c">PCWrite</td><td>grava no PC sem condição (busca e J)</td></tr>
+      <tr><td class="c">PCWriteCond</td><td>grava no PC só se Zero = 1 (BEQ)</td></tr>
+      <tr><td class="c">IRWrite</td><td>grava a instrução no IR (só na busca)</td></tr>
+      <tr><td class="c">MemRead, MemWrite, RegDst, RegWrite, MemToReg</td><td>como no monociclo; MemToReg = 1 agora pega o MDR</td></tr>
+    </tbody>
+  </table></div>
+  <p>O PC é escrito quando <code>PCWrite OR (PCWriteCond AND Zero)</code>.</p>
+  <div class="box regra"><span class="lab">A regra do ciclo</span>
+    <p>Num ciclo, <strong>nunca duas unidades lentas em série</strong>. Em paralelo pode. No ciclo de busca a memória lê a instrução e, ao mesmo tempo, a ULA faz PC + 4: são unidades diferentes e uma não espera a outra. Já "ler a memória e jogar o valor na ULA" no mesmo ciclo é proibido, porque daria M + ULA em série.</p>
+    <p>Por isso: <strong>ciclo = max(M, R, ULA)</strong>.</p>
+  </div>
+
+  <h3>Os 5 passos (slides 41 a 47)</h3>
+  <pre class="rtl"><span class="k">1. Busca (todas)</span>
+   IR ← Mem[PC] ;  PC ← PC + 4
+<span class="k">2. Decodificação e leitura (todas)</span>
+   A ← Reg[rs] ;  B ← Reg[rt] ;  ALUOut ← PC + (ext(imm) &lt;&lt; 2)
+<span class="k">3. Execução (depende da instrução)</span>
+   lw/sw : ALUOut ← A + ext(imm)
+   tipo-R: ALUOut ← A op B
+   beq   : se (A == B) PC ← ALUOut          (fim, 3 ciclos)
+   j     : PC ← PC[31-28] ‖ (IR[25-0] &lt;&lt; 2)  (fim, 3 ciclos)
+<span class="k">4. Memória ou escrita do tipo-R</span>
+   lw    : MDR ← Mem[ALUOut]
+   sw    : Mem[ALUOut] ← B                  (fim, 4 ciclos)
+   tipo-R: Reg[rd] ← ALUOut                 (fim, 4 ciclos)
+<span class="k">5. Escrita do lw</span>
+   lw    : Reg[rt] ← MDR                    (fim, 5 ciclos)</pre>
+  <p>Repare no passo 2: a ULA calcula o endereço de desvio <strong>antes</strong> de saber se a instrução é um desvio. É a "ação otimista" do slide 43. Se for beq, o endereço já está pronto no ALUOut; se não for, ninguém usa e não custou nada, porque a ULA estaria parada.</p>
+  <p>E no passo 1, o PC já vira PC + 4. Por isso, do passo 2 em diante, "PC" já é PC + 4. Isso explica a exceção (seção 06): o EPC recebe PC − 4 para voltar à instrução certa.</p>
+
+  <h3>Ciclos por classe e tempo</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Classe</th><th class="num">Ciclos</th><th>Estados</th></tr></thead>
+    <tbody>
+      <tr><td>LW</td><td class="num">5</td><td class="mono">0 → 1 → 2 → 3 → 4</td></tr>
+      <tr><td>SW</td><td class="num">4</td><td class="mono">0 → 1 → 2 → 5</td></tr>
+      <tr><td>Tipo-R</td><td class="num">4</td><td class="mono">0 → 1 → 6 → 7</td></tr>
+      <tr><td>Tipo-I aritmético (quadro: "ARIT. IMED. 4 ciclos")</td><td class="num">4</td><td class="mono">0 → 1 → novo → novo</td></tr>
+      <tr><td>BEQ / BNE</td><td class="num">3</td><td class="mono">0 → 1 → 8</td></tr>
+      <tr><td>J</td><td class="num">3</td><td class="mono">0 → 1 → 9</td></tr>
+    </tbody>
+  </table></div>
+  <pre class="rtl">Ciclo do clock      = max(M, R, ULA)        ("pior tempo de estado")
+Tempo do programa   = soma dos ciclos de cada instrução executada × Ciclo
+CPI médio           = Σ (fração da classe × ciclos da classe)</pre>
+  <p>Slide 55: mix 22% lw, 11% sw, 49% R, 16% beq, 2% j → CPI = 0,22×5 + 0,11×4 + 0,49×4 + 0,16×3 + 0,02×3 = <strong>4,04</strong>.</p>
+  <label class="done"><input type="checkbox" id="d-multi"> Entendi esta seção</label>
+</section>
+
+<!-- 06 -->
+<section class="sec" id="fsm">
+  <header><span class="num">06</span><h2>A máquina de estados</h2><span class="sub">Como a U.C. do multiciclo sabe o que ligar em cada ciclo</span></header>
+  <p>No monociclo os sinais dependem só do opcode. No multiciclo dependem do <strong>opcode e do passo</strong>. A U.C. vira uma máquina de estados finitos (FSM): cada estado é um ciclo, liga seus sinais e escolhe o próximo estado. Ela só olha o opcode no estado 1, porque é ali que a instrução já está no IR.</p>
+  <div class="fsmwrap"><svg viewBox="0 0 720 420" role="img" aria-label="Máquina de estados do multiciclo, estados 0 a 11">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow" d="M0,0 L10,5 L0,10 z"/></marker>
+      <marker id="arx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow ex" d="M0,0 L10,5 L0,10 z"/></marker>
+    </defs>
+    <path class="ed" d="M82,200 L168,200" marker-end="url(#ar)"/>
+    <path class="ed" d="M206,186 L312,96" marker-end="url(#ar)"/>
+    <path class="ed" d="M210,200 L308,200" marker-end="url(#ar)"/>
+    <path class="ed" d="M206,214 L312,284" marker-end="url(#ar)"/>
+    <path class="ed" d="M200,218 L318,358" marker-end="url(#ar)"/>
+    <path class="ed" d="M352,74 L448,46" marker-end="url(#ar)"/>
+    <path class="ed" d="M352,88 L448,114" marker-end="url(#ar)"/>
+    <path class="ed" d="M492,40 L588,40" marker-end="url(#ar)"/>
+    <path class="ed" d="M352,200 L448,200" marker-end="url(#ar)"/>
+    <path class="ed ex" d="M206,212 C260,265 520,280 588,298" marker-end="url(#arx)"/>
+    <path class="ed ex" d="M484,216 L594,356" marker-end="url(#arx)"/>
+    <text class="el" x="246" y="130">lw/sw</text>
+    <text class="el" x="234" y="193">tipo-R</text>
+    <text class="el" x="240" y="262">beq</text>
+    <text class="el" x="268" y="318">j</text>
+    <text class="el" x="398" y="50">lw</text>
+    <text class="el" x="398" y="122">sw</text>
+    <text class="el ex" x="430" y="258">Op desconhecido</text>
+    <text class="el ex" x="584" y="346" text-anchor="end">overflow</text>
+    <g class="nd"><circle cx="60" cy="200" r="22"/><text class="n" x="60" y="205">0</text><text class="t" x="60" y="242">Busca</text></g>
+    <g class="nd"><circle cx="190" cy="200" r="22"/><text class="n" x="190" y="205">1</text><text class="t" x="190" y="172">Decodifica</text></g>
+    <g class="nd"><circle cx="330" cy="80" r="22"/><text class="n" x="330" y="85">2</text><text class="t" x="330" y="122">Endereço</text></g>
+    <g class="nd"><circle cx="470" cy="40" r="22"/><text class="n" x="470" y="45">3</text><text class="t" x="470" y="80">Lê mem</text></g>
+    <g class="nd"><circle cx="610" cy="40" r="22"/><text class="n" x="610" y="45">4</text><text class="t" x="610" y="80">Escreve rt</text></g>
+    <g class="nd"><circle cx="470" cy="120" r="22"/><text class="n" x="470" y="125">5</text><text class="t" x="470" y="160">Grava mem</text></g>
+    <g class="nd"><circle cx="330" cy="200" r="22"/><text class="n" x="330" y="205">6</text><text class="t" x="330" y="240">Exec. R</text></g>
+    <g class="nd"><circle cx="470" cy="200" r="22"/><text class="n" x="470" y="205">7</text><text class="t" x="520" y="190">Escreve rd</text></g>
+    <g class="nd"><circle cx="330" cy="290" r="22"/><text class="n" x="330" y="295">8</text><text class="t" x="380" y="295">BEQ</text></g>
+    <g class="nd"><circle cx="330" cy="370" r="22"/><text class="n" x="330" y="375">9</text><text class="t" x="372" y="375">J</text></g>
+    <g class="nd ex"><circle cx="610" cy="300" r="22"/><text class="n" x="610" y="305">10</text><text class="t" x="640" y="305" style="text-anchor:start">Indefinida</text></g>
+    <g class="nd ex"><circle cx="610" cy="370" r="22"/><text class="n" x="610" y="375">11</text><text class="t" x="640" y="375" style="text-anchor:start">Overflow</text></g>
+    <path class="ed back" d="M60,222 L60,400 L300,400" />
+    <text class="el" x="70" y="392">4, 5, 7, 8, 9, 10, 11 voltam ao 0</text>
+  </svg></div>
+
+  <h3>Sinais de cada estado (slide 50)</h3>
+  <p>Só aparece o que é 1 ou o valor do mux. O que não aparece é 0 nos sinais de escrita e X nos muxes. ALUOp em 2 bits, como nos slides.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Estado</th><th>Sinais</th><th>O que acontece</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">0</td><td class="mono">MemRead, IorD=0, IRWrite, ALUSrcA=0, ALUSrcB=01, ALUOp=00, PCWrite, PCSource=00</td><td>IR ← Mem[PC]; PC ← PC+4</td></tr>
+      <tr><td class="mono">1</td><td class="mono">ALUSrcA=0, ALUSrcB=11, ALUOp=00</td><td>A, B ← rs, rt; ALUOut ← PC + ext&lt;&lt;2</td></tr>
+      <tr><td class="mono">2</td><td class="mono">ALUSrcA=1, ALUSrcB=10, ALUOp=00</td><td>ALUOut ← A + ext(imm)</td></tr>
+      <tr><td class="mono">3</td><td class="mono">MemRead, IorD=1</td><td>MDR ← Mem[ALUOut]</td></tr>
+      <tr><td class="mono">4</td><td class="mono">RegDst=0, RegWrite, MemToReg=1</td><td>Reg[rt] ← MDR</td></tr>
+      <tr><td class="mono">5</td><td class="mono">MemWrite, IorD=1</td><td>Mem[ALUOut] ← B</td></tr>
+      <tr><td class="mono">6</td><td class="mono">ALUSrcA=1, ALUSrcB=00, ALUOp=10</td><td>ALUOut ← A op B</td></tr>
+      <tr><td class="mono">7</td><td class="mono">RegDst=1, RegWrite, MemToReg=0</td><td>Reg[rd] ← ALUOut</td></tr>
+      <tr><td class="mono">8</td><td class="mono">ALUSrcA=1, ALUSrcB=00, ALUOp=01, PCWriteCond, PCSource=01</td><td>se A == B, PC ← ALUOut</td></tr>
+      <tr><td class="mono">9</td><td class="mono">PCWrite, PCSource=10</td><td>PC ← endereço do J</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Equações da U.C. (slides 51 e 54)</h3>
+  <p>Cada sinal é o OU dos estados em que ele vale 1. Sinais de 2 bits viram dois sinais de 1 bit. São 10 estados (0 a 9), então o registrador de estado tem <strong>4 bits</strong> (S3 S2 S1 S0); isso responde o "quantos bits para a U.C.?" do slide 50.</p>
+  <div class="tbl"><table class="sig">
+    <thead><tr><th>Sinal</th><th>Estados</th><th>Sinal</th><th>Estados</th></tr></thead>
+    <tbody>
+      <tr><td>PCWrite</td><td>S0 + S9</td><td>ALUSrcA</td><td>S2 + S6 + S8</td></tr>
+      <tr><td>PCWriteCond</td><td>S8</td><td>ALUSrcB1</td><td>S1 + S2</td></tr>
+      <tr><td>IorD</td><td>S3 + S5</td><td>ALUSrcB0</td><td>S0 + S1</td></tr>
+      <tr><td>MemRead</td><td>S0 + S3</td><td>ALUOp1</td><td>S6</td></tr>
+      <tr><td>MemWrite</td><td>S5</td><td>ALUOp0</td><td>S8</td></tr>
+      <tr><td>IRWrite</td><td>S0</td><td>PCSource1</td><td>S9</td></tr>
+      <tr><td>MemToReg</td><td>S4</td><td>PCSource0</td><td>S8</td></tr>
+      <tr><td>RegDst</td><td>S7</td><td>RegWrite</td><td>S4 + S7</td></tr>
+    </tbody>
+  </table></div>
+  <p>Próximo estado: vai para 0 a partir de 4, 5, 7, 8, 9; vai para 1 a partir do 0; vai para 2 a partir do 1 com Op = lw ou sw; para 6 com tipo-R; para 8 com beq; para 9 com j; do 2 vai para 3 (lw) ou 5 (sw). Em bits: estado 0 = <code>0000</code>, estado 9 = <code>1001</code>.</p>
+
+  <h3>Exceções (slides 66 a 71)</h3>
+  <p>O processador trata dois eventos: <strong>instrução indefinida</strong> (o Op não é conhecido, detectado no estado 1) e <strong>overflow aritmético</strong> (a ULA avisa no estado 7). Precisa de dois registradores novos: <strong>EPC</strong> (endereço da instrução que causou) e <strong>Causa</strong> (bit 0 = indefinida, 1 = overflow).</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Estado</th><th>Sinais</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">10 · indefinida</td><td class="mono">IntCausa=0, CausaEsc, ALUSrcA=0, ALUSrcB=01, ALUOp=01, EPCEsc, PCEsc, FontePC=11</td></tr>
+      <tr><td class="mono">11 · overflow</td><td class="mono">IntCausa=1, CausaEsc, ALUSrcA=0, ALUSrcB=01, ALUOp=01, EPCEsc, PCEsc, FontePC=11</td></tr>
+    </tbody>
+  </table></div>
+  <p>A ULA faz PC − 4 (ALUSrcA = 0 é o PC, ALUSrcB = 01 é o 4, ALUOp = 01 subtrai) e isso vai para o EPC, porque o PC já tinha sido somado no estado 0. FontePC = 11 manda o PC para <strong>C000 0000</strong>, onde fica o tratamento do sistema operacional. Depois volta ao estado 0.</p>
+  <label class="done"><input type="checkbox" id="d-fsm"> Entendi esta seção</label>
+</section>
+
+<!-- 07 -->
+<section class="sec" id="compara">
+  <header><span class="num">07</span><h2>Mono x Multi lado a lado</h2><span class="sub">Com M = 2, R = 1, ULA = 2</span></header>
+  <p>Cada barra está na mesma escala (1 ns = 1 unidade). Azul é o monociclo: a parte cheia é o trabalho, a hachurada é o tempo parado esperando o fim do ciclo de 8 ns. Âmbar é o multiciclo: ciclos de 2 ns.</p>
+  <div class="bars" id="bars"></div>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Monociclo</th><th>Multiciclo</th></tr></thead>
+    <tbody>
+      <tr><td>CPI</td><td>1</td><td>3 a 5 (média do slide: 4,04)</td></tr>
+      <tr><td>Ciclo</td><td>LW = 2M + 2R + ULA</td><td>max(M, R, ULA)</td></tr>
+      <tr><td>Memória</td><td>duas (instruções e dados)</td><td>uma</td></tr>
+      <tr><td>Somadores</td><td>ULA + 2 somadores</td><td>só a ULA</td></tr>
+      <tr><td>Registradores internos</td><td>nenhum</td><td>IR, MDR, A, B, ALUOut</td></tr>
+      <tr><td>Controle</td><td>combinacional (opcode → sinais)</td><td>máquina de estados (opcode + estado → sinais)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box peg"><span class="lab">O multiciclo nem sempre ganha</span>
+    <p>Com M = 2, R = 1, ULA = 2, o multiciclo médio dá 4,04 × 2 = 8,08 ns por instrução, quase igual aos 8 ns do monociclo. Na prova de 2016 (M = 5, R = 2, ULA = 4) o monociclo ganhou: 162 x 170 ns. No exercício MULT/DIV (M = 3, R = 1, ULA = 3) o multiciclo ganhou: 407 x 396 ns. Quem ganha depende do mix e de quão equilibrados são M, R e ULA. Sempre faça a conta; nunca responda de cabeça.</p>
+    <p>A vantagem garantida do multiciclo é o <strong>hardware menor</strong> (uma memória, uma ULA), e ele é a base para o pipeline.</p>
+  </div>
+  <label class="done"><input type="checkbox" id="d-compara"> Entendi esta seção</label>
+</section>
+
+<!-- 08 -->
+<section class="sec" id="novas">
+  <header><span class="num">08</span><h2>Instruções novas</h2><span class="sub">A questão de "modifique o caminho de dados"</span></header>
+  <p>Os slides só implementam lw, sw, tipo-R, beq e j. A prova de 2017 pediu "as modificações no caminho de dados e os novos estados" para Mult, BNE, LB, SB, ANDi e SLTi; a de 2018 cobrou estados novos para tipo-I e BNE. Não existe uma única resposta certa para o desenho: o que conta é a modificação ser coerente e você <strong>declarar</strong> os nomes e números que escolheu.</p>
+  <div class="box regra"><span class="lab">Roteiro para qualquer instrução nova</span>
+    <ol>
+      <li>Escreva o que a instrução faz em RTL (ex.: <code>Reg[rt] ← Reg[rs] AND ext(imm)</code>).</li>
+      <li>Compare com a instrução existente mais parecida. O que falta no hardware? Uma peça nova, uma entrada a mais num mux, nada?</li>
+      <li>Se criou sinal novo, diga o valor dele em todas as outras instruções (0 ou X, pela regra do X).</li>
+      <li>No multiciclo: quais estados novos, os sinais de cada um, de qual estado vem e para qual vai. Total de ciclos.</li>
+    </ol>
+  </div>
+  <p>Como os slides já usam 10 e 11 para as exceções, aqui os estados novos começam no 12. É a mesma numeração do seu Caminho de Dados.</p>
+
+  <details class="sol" open><summary>Tipo-I aritmético: addi, andi, ori, slti<span class="tag">2017 · 2018</span></summary><div class="in">
+    <p><strong>Monociclo:</strong> nenhuma peça nova. Sinais: RegDst = 0 (destino rt), ALUSrc = 1 (imediato), RegWrite = 1, MemToReg = 0, MemRead = 0, MemWrite = 0, Branch = 0. ALUOp: addi usa 000 (soma); andi, ori e slti usam um código livre que você declara (ex.: 011, 100, 101).</p>
+    <p><strong>Multiciclo, 4 ciclos:</strong> 0 → 1 → 12 → 13 → 0.</p>
+    <pre class="rtl">12 (exec. tipo-I) : ALUSrcA=1, ALUSrcB=10, ALUOp=código da instrução   ALUOut ← A op ext(imm)
+13 (escreve rt)   : RegDst=0, RegWrite, MemToReg=0                    Reg[rt] ← ALUOut</pre>
+    <p>Repare que o 13 é o 7 com RegDst = 0. Não dá para reaproveitar o 7, porque lá RegDst = 1.</p>
+    <p>O diagrama dele só tem extensão de sinal, então andi e ori usam ela. No MIPS real seriam extensão com zeros; com imediatos pequenos o resultado é igual.</p>
+  </div></details>
+
+  <details class="sol"><summary>BNE<span class="tag">2017 · 2018</span></summary><div class="in">
+    <p><strong>Monociclo:</strong> sinal novo <span class="c">NBranch</span> (ele já usa no quadro). Uma AND com o Zero <em>invertido</em>, e uma OR das duas ANDs comanda o mux do desvio:</p>
+    <pre class="rtl">desvia = (Branch AND Zero) OR (NBranch AND NOT Zero)</pre>
+    <p>Sinais do BNE: RegDst X, ALUSrc 0, RegWrite 0, MemToReg X, MemRead 0, MemWrite 0, Branch 0, NBranch 1, ALUOp 001. Nas outras instruções NBranch = 0 (no J pode ser X).</p>
+    <p><strong>Multiciclo, 3 ciclos:</strong> 0 → 1 → 14 → 0. Sinal novo PCWriteCondNE (nome meu):</p>
+    <pre class="rtl">14 (BNE) : ALUSrcA=1, ALUSrcB=00, ALUOp=01, PCWriteCondNE, PCSource=01
+escrita do PC = PCWrite OR (PCWriteCond AND Zero) OR (PCWriteCondNE AND NOT Zero)</pre>
+  </div></details>
+
+  <details class="sol"><summary>LB (load byte)<span class="tag">2017</span></summary><div class="in">
+    <p>Igual ao lw, mas lê 1 byte (em qualquer endereço) e estende o sinal para 32 bits.</p>
+    <p><strong>Monociclo:</strong> a memória devolve a palavra inteira. Peças novas: um seletor que usa os 2 bits de baixo do endereço (End.[1-0]) para escolher 1 dos 4 bytes, uma extensão 8 → 32 e um mux (sinal novo <span class="c">LByte</span>) antes do MemToReg. Sinais como o lw, com LByte = 1.</p>
+    <p><strong>Multiciclo, 5 ciclos:</strong> 0 → 1 → 2 → 15 → 4 → 0. O byte é escolhido no estado 15, antes de entrar no MDR, porque no estado 4 o ALUOut já não guarda o endereço.</p>
+    <pre class="rtl">15 (lê byte) : MemRead, IorD=1, LByte=1     MDR ← ext8(byte de Mem[ALUOut])</pre>
+  </div></details>
+
+  <details class="sol"><summary>SB (store byte)<span class="tag">2017</span></summary><div class="in">
+    <p><strong>Monociclo:</strong> sinal novo <span class="c">SByte</span> diz à memória para gravar só os 8 bits de baixo de rt no byte escolhido por End.[1-0]. Os outros 3 bytes não mudam. Sinais como o sw, com SByte = 1.</p>
+    <p><strong>Multiciclo, 4 ciclos:</strong> 0 → 1 → 2 → 16 → 0.</p>
+    <pre class="rtl">16 (grava byte) : MemWrite, IorD=1, SByte=1    byte de Mem[ALUOut] ← B[7-0]</pre>
+  </div></details>
+
+  <details class="sol"><summary>LUI<span class="tag">quadro</span></summary><div class="in">
+    <p>O quadro dá 4 ciclos (tipo-I). A ULA faria imediato &lt;&lt; 16 com um código de ALUOp livre. Como ele não mostrou como o LUI passa pelo caminho de dados, trate como tipo-I (estados 12 e 13) e declare a escolha.</p>
+  </div></details>
+
+  <details class="sol"><summary>J no monociclo<span class="tag">slide</span></summary><div class="in">
+    <p>O slide "Introdução do desvio incondicional" acrescenta: deslocador &lt;&lt;2 para os 26 bits [25-0] (viram 28), junção com PC+4[31-28] (endereço de 32 bits) e um último mux comandado por <span class="c">DVI</span>. No J: DVI = 1, RegWrite = 0, MemWrite = 0, o resto X. Tempo: só M.</p>
+  </div></details>
+
+  <details class="sol"><summary>Mult<span class="tag">2017</span></summary><div class="in">
+    <p>Na questão de tempo da prova de 2017 ele tratou o Mult como um tipo-R com a ULA mais lenta: use o tempo de multiplicação que o enunciado der no lugar da ULA. Lembre que no 1º exercício e nas listas o mult de hardware é proibido; aqui ele aparece só como instrução do caminho de dados.</p>
+  </div></details>
+  <label class="done"><input type="checkbox" id="d-novas"> Entendi esta seção</label>
+</section>
+
+<!-- 09 -->
+<section class="sec" id="receitas">
+  <header><span class="num">09</span><h2>Receitas de prova</h2><span class="sub">Um passo a passo por tipo de questão</span></header>
+
+  <h3>1. Tempo de um trecho, mono e multi</h3>
+  <ol>
+    <li>Escreva as instruções <strong>na ordem em que executam</strong>. Laço que roda 4 vezes aparece 4 vezes; trecho pulado por desvio some.</li>
+    <li>Um beq que <strong>não</strong> desvia executa do mesmo jeito: entra na conta.</li>
+    <li>Monociclo: <code>N × (2M + 2R + ULA)</code>.</li>
+    <li>Multiciclo: anote os ciclos de cada uma (5, 4, 4, 4, 3, 3), some, multiplique por <code>max(M, R, ULA)</code>.</li>
+    <li>Se pedir quem é mais rápido ou quanto, divida um tempo pelo outro.</li>
+  </ol>
+
+  <h3>2. "O que acontece no ciclo N"</h3>
+  <ol>
+    <li><strong>Monociclo:</strong> o ciclo N é a N-ésima instrução executada. Responda com a instrução e a linha dela na tabela de sinais.</li>
+    <li><strong>Multiciclo:</strong> monte a coluna de faixas como no quadro: [1-4], [5-8], [9-12]... Uma instrução de 3 ciclos ocupa 3 números, de 5 ocupa 5.</li>
+    <li>Ache a faixa que contém N. Calcule a posição: <code>k = N − início + 1</code>.</li>
+    <li>O k-ésimo estado da sequência da instrução é a resposta (ex.: lw, k = 4 → estado 3, MDR ← Mem[ALUOut]). Liste os sinais desse estado.</li>
+  </ol>
+  <div class="box peg"><span class="lab">Cuidado com a contagem</span>
+    <p>Escreva sempre o <strong>último</strong> ciclo de cada instrução e some a partir dele. Nas suas anotações do MULT/DIV, o <code>j DIV</code> aparece como "96 97 98", e daí em diante tudo fica 2 a mais. Pela conta correta, o ciclo 102 é o 2º ciclo do <code>bne</code>, não o <code>slt</code> (veja o resolvido 5).</p>
+  </div>
+
+  <h3>3. Tabela de sinais de controle</h3>
+  <p>Para cada instrução, responda em ordem:</p>
+  <ol>
+    <li>Escreve no banco? <strong>RegWrite</strong>. Se sim, o destino é rd ou rt? <strong>RegDst</strong>. O valor vem da ULA ou da memória? <strong>MemToReg</strong>.</li>
+    <li>A 2ª entrada da ULA é registrador ou imediato? <strong>ALUSrc</strong>.</li>
+    <li>Lê ou grava memória de dados? <strong>MemRead / MemWrite</strong>.</li>
+    <li>É desvio? <strong>Branch / NBranch / DVI</strong>.</li>
+    <li>Qual operação? <strong>ALUOp</strong>.</li>
+    <li>Passe a regra do X: mux sem uso vira X; escrita nunca.</li>
+  </ol>
+
+  <h3>4. Bits e valores nos fios</h3>
+  <ol>
+    <li>Codifique a instrução em binário por campos (op, rs, rt, rd/imediato).</li>
+    <li>Siga cada fio a partir da sua origem. <strong>Todo fio tem valor em todo ciclo</strong>: no lw, o somador do desvio calcula um endereço mesmo assim, e o mux descarta. Se a questão pergunta o valor de um fio "inútil", ele tem valor.</li>
+    <li>Confira no desenho da questão qual fio é a1, b1, c3: a posição muda de prova para prova. O resolvido 6 mostra um lw completo.</li>
+  </ol>
+
+  <h3>5. Instrução nova</h3>
+  <p>Use o roteiro da seção 08: RTL, comparação com a mais parecida, peças e sinais novos, valores nas outras instruções, estados novos com sinais e transições, total de ciclos.</p>
+
+  <h3>6. Desempenho</h3>
+  <ul>
+    <li><strong>Clock fixo x variável:</strong> calcule o tempo de cada classe, faça a média ponderada pelo mix, divida o fixo pela média.</li>
+    <li><strong>CPI do multiciclo:</strong> Σ fração × ciclos. Tempo por instrução = CPI × ciclo.</li>
+    <li><strong>Ganho:</strong> tempo do mais lento ÷ tempo do mais rápido. "1,27 vezes mais rápido".</li>
+  </ul>
+  <label class="done"><input type="checkbox" id="d-receitas"> Entendi esta seção</label>
+</section>
+
+<!-- 10 -->
+<section class="sec" id="calc">
+  <header><span class="num">10</span><h2>Contador de ciclos</h2><span class="sub">Para conferir os seus treinos</span></header>
+  <p>Cole as instruções <strong>na ordem em que executam</strong> (laços repetidos, desvios já resolvidos), uma por linha. Pode colar assembly inteiro ou só o nome (<code>lw</code>, <code>add</code>, <code>beq</code>...). Vem preenchido com o exercício do quadro, que dá 80 e 78 ns. Para rodar um programa com laço sem expandir na mão, use o simulador do Caminho de Dados.</p>
+  <div class="tool">
+    <div class="row">
+      <label for="tM">Memória (ns)<input id="tM" type="number" min="0" step="0.5" value="2"></label>
+      <label for="tR">Registradores (ns)<input id="tR" type="number" min="0" step="0.5" value="1"></label>
+      <label for="tA">ULA (ns)<input id="tA" type="number" min="0" step="0.5" value="2"></label>
+      <button class="btn ghost" type="button" id="ex2016">Carregar prova 2016</button>
+      <button class="btn ghost" type="button" id="exBoard">Carregar quadro</button>
+    </div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+        <label for="seq">Instruções executadas</label>
+        <textarea id="seq" spellcheck="false"></textarea>
+        <p class="err" id="seqErr" hidden></p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <div class="tots" id="tots"></div>
+        <div class="row">
+          <label for="qMono">Ciclo nº (mono)<input id="qMono" type="number" min="1" value="10"></label>
+          <label for="qMulti">Ciclo nº (multi)<input id="qMulti" type="number" min="1" value="21"></label>
+        </div>
+        <div class="ans" id="ansMono"></div>
+        <div class="ans" id="ansMulti"></div>
+      </div>
+    </div>
+    <div class="tbl" style="margin:0"><table id="trace"></table></div>
+  </div>
+  <label class="done"><input type="checkbox" id="d-calc"> Usei o contador</label>
+</section>
+
+<!-- 11 -->
+<section class="sec" id="resolvidos">
+  <header><span class="num">11</span><h2>Exercícios resolvidos</h2><span class="sub">Tente no papel antes de abrir</span></header>
+
+  <details class="sol"><summary>1 · Quadro: laço VOLTA/FIM<span class="tag">M=2 R=1 ULA=2</span></summary><div class="in">
+    <pre class="rtl">      addi $t0, $zero, 10
+      addi $t1, $zero, 15
+      lui  $a0, 0x8000
+      addi $a0, $a0, 0x0000
+      lw   $s1, 4($a0)          <span class="k"># Mem[0x80000004] = 8</span>
+VOLTA: beq  $t0, $s1, FIM
+      sw   $t1, 4($a0)
+      lw   $s1, 8($a0)          <span class="k"># Mem[0x80000008] = 10</span>
+      j    VOLTA
+FIM:</pre>
+    <p>Execução: 1º beq compara 10 com 8 e não desvia; o lw traz 10; o j volta; o 2º beq compara 10 com 10 e desvia para FIM. São <strong>10 instruções</strong>.</p>
+    <div class="tbl"><table>
+      <thead><tr><th class="num">#</th><th>Instrução</th><th class="num">Ciclos</th><th>Faixa multi</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td class="mono">addi $t0</td><td class="num">4</td><td class="mono">1-4</td></tr>
+        <tr><td class="num">2</td><td class="mono">addi $t1</td><td class="num">4</td><td class="mono">5-8</td></tr>
+        <tr><td class="num">3</td><td class="mono">lui</td><td class="num">4</td><td class="mono">9-12</td></tr>
+        <tr><td class="num">4</td><td class="mono">addi $a0</td><td class="num">4</td><td class="mono">13-16</td></tr>
+        <tr><td class="num">5</td><td class="mono">lw $s1, 4</td><td class="num">5</td><td class="mono">17-21</td></tr>
+        <tr><td class="num">6</td><td class="mono">beq (não)</td><td class="num">3</td><td class="mono">22-24</td></tr>
+        <tr><td class="num">7</td><td class="mono">sw</td><td class="num">4</td><td class="mono">25-28</td></tr>
+        <tr><td class="num">8</td><td class="mono">lw $s1, 8</td><td class="num">5</td><td class="mono">29-33</td></tr>
+        <tr><td class="num">9</td><td class="mono">j</td><td class="num">3</td><td class="mono">34-36</td></tr>
+        <tr><td class="num">10</td><td class="mono">beq (sim)</td><td class="num">3</td><td class="mono">37-39</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li>Monociclo: 10 × 8 = <strong>80 ns</strong>. O 10º ciclo é o 2º beq, que desvia: Branch = 1, ALUOp = 001.</li>
+      <li>Multiciclo: 39 ciclos × 2 = <strong>78 ns</strong>. O ciclo 21 é o 5º ciclo do 1º lw, estado 4: RegDst = 0, RegWrite = 1, MemToReg = 1.</li>
+    </ul>
+  </div></details>
+
+  <details class="sol"><summary>2 · Prova de 05/04/2016, questão 2.2<span class="tag">M=5 R=2 ULA=4</span></summary><div class="in">
+    <pre class="rtl">    sw   $t6, 4($s4)
+    sw   $t4, 8($s4)
+    beq  $t5, $t6, L1        <span class="k"># não desvia</span>
+    add  $t7, $t6, $t5
+L1: addi $t2, $t7, 6
+    and  $t3, $s2, $s2
+    beq  $t2, $t7, L2        <span class="k"># desvia (L2 é a linha seguinte)</span>
+L2: sub  $t2, $s3, $s3
+    and  $t6, $t2, $t2</pre>
+    <p>Executam as 9 instruções. Clock do mono = 2×5 + 2×2 + 4 = 18 ns.</p>
+    <ul>
+      <li>Monociclo: 9 × 18 = <strong>162 ns</strong>.</li>
+      <li>Multiciclo: 4 + 4 + 3 + 4 + 4 + 4 + 3 + 4 + 4 = 34 ciclos × 5 = <strong>170 ns</strong>. Aqui o monociclo ganha.</li>
+    </ul>
+  </div></details>
+
+  <details class="sol"><summary>3 · Slide 48: lw, lw, beq, add, sw<span class="tag">slide</span></summary><div class="in">
+    <pre class="rtl">lw  $t2, 0($t3)        <span class="k"># ciclos 1-5</span>
+lw  $t3, 4($t3)        <span class="k"># ciclos 6-10</span>
+beq $t2, $t3, Label    <span class="k"># ciclos 11-13</span>
+add $t5, $t2, $t3      <span class="k"># ciclos 14-17 (se não desviar)</span>
+sw  $t5, 8($t3)        <span class="k"># ciclos 18-21</span></pre>
+    <ul>
+      <li><strong>Quantos ciclos?</strong> 21 se o beq não desvia; 13 se desvia.</li>
+      <li><strong>Ciclo 10:</strong> 5º ciclo do 2º lw, estado 4: grava o MDR em $t3.</li>
+      <li><strong>Ciclo 15:</strong> 2º ciclo do add, estado 1: lê $t2 e $t3 para A e B.</li>
+      <li><strong>Em qual ciclo a soma acontece?</strong> No 16 (3º ciclo do add, estado 6). O resultado só é gravado em $t5 no 17.</li>
+      <li><strong>Em qual ciclo ocorre o desvio?</strong> No 13 (3º ciclo do beq, estado 8), se $t2 = $t3.</li>
+    </ul>
+  </div></details>
+
+  <details class="sol"><summary>4 · Slide 34: ponto flutuante, clock fixo x variável<span class="tag">slide com erro</span></summary><div class="in">
+    <p>Soma em ponto flutuante = 8 ns na ULA, multiplicação = 16 ns. Mix: 31% lw, 21% sw, 27% R, 5% beq, 2% j, 7% add/sub FP, 7% mult/div FP.</p>
+    <pre class="rtl">FP soma  = M + R + 8  + R = 2 + 1 + 8  + 1 = 12 ns
+FP mult  = M + R + 16 + R = 2 + 1 + 16 + 1 = 20 ns   → clock fixo = 20 ns
+Variável = 8×0,31 + 7×0,21 + 6×0,27 + 5×0,05 + 2×0,02 + 20×0,07 + 12×0,07
+         = 2,48 + 1,47 + 1,62 + 0,25 + 0,04 + 1,40 + 0,84 = 8,1 ns
+Ganho    = 20 / 8,1 ≈ 2,47</pre>
+    <div class="box peg"><span class="lab">O slide erra a soma</span><p>O slide escreve 7,0 ns e ganho de 2,9. Somando os mesmos termos dá 8,1 ns e 2,47. Se cair igual, mostre a conta.</p></div>
+  </div></details>
+
+  <details class="sol"><summary>5 · MULT/DIV (das suas anotações)<span class="tag">M=3 R=1 ULA=3</span></summary><div class="in">
+    <p>Código reconstruído das anotações: $a0 = 4 (multiplicando), $a1 = 2 (multiplicador), $a3 = 4 (divisor). Calcula 2 × 4 = 8 por somas e depois 8 ÷ 4 por subtrações.</p>
+    <pre class="rtl">INICIO:   addi $t1, $zero, 0
+          addi $v0, $zero, 0
+MULT:     beq  $t1, $a0, CONTINUE
+          add  $v0, $v0, $a1
+          addi $t1, $t1, 1
+          j    MULT
+CONTINUE: add  $a2, $v0, $zero
+          addi $t1, $zero, 0
+          bne  $a2, $a3, DIV
+DIV:      slt  $t2, $a2, $a3
+          bne  $t2, $zero, FINAL
+          sub  $a2, $a2, $a3
+          addi $t1, $t1, 1
+          j    DIV
+FINAL:    add  $v1, $t1, $zero
+          add  $v0, $a2, $zero
+          jr   $ra</pre>
+    <p>Execução: 2 do INICIO + 4 voltas do MULT (beq, add, addi, j) + beq final = 19; CONTINUE 3 = 22; DIV com 2 voltas (slt, bne, sub, addi, j) = 32; slt e bne que desvia = 34; FINAL 3 = <strong>37 instruções</strong>.</p>
+    <ul>
+      <li><strong>1.1 · 34º ciclo do mono:</strong> o bne que desvia para FINAL (0 &lt; 4, $t2 = 1). RegDst X, ALUSrc 0, MemToReg X, RegWrite 0, MemRead 0, MemWrite 0, Branch 0, NBranch 1, ALUOp 01 (2 bits, como nas anotações).</li>
+      <li><strong>1.4 · tempos:</strong> mono 37 × (2×3 + 2×1 + 3) = 37 × 11 = <strong>407 ns</strong>. Multi 132 ciclos × 3 = <strong>396 ns</strong>.</li>
+      <li><strong>Ciclo 102 do multi:</strong> 2º ciclo do bne da 2ª volta do DIV (faixa 101-103), estado 1: ALUSrcA = 0, ALUSrcB = 11, ALUOp = 00.</li>
+      <li><strong>Desvio para FINAL:</strong> no ciclo 121 (3º ciclo do bne, faixa 119-121). A busca do primeiro add do FINAL é o ciclo 122.</li>
+    </ul>
+    <div class="tbl"><table>
+      <thead><tr><th>Trecho (faixas multi)</th><th>Ciclos</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">addi 1-4 · addi 5-8</td><td class="num">8</td></tr>
+        <tr><td class="mono">MULT volta 1: beq 9-11 · add 12-15 · addi 16-19 · j 20-22</td><td class="num">+14</td></tr>
+        <tr><td class="mono">voltas 2, 3, 4 terminam em 36, 50, 64 · beq final 65-67</td><td class="num">67</td></tr>
+        <tr><td class="mono">add 68-71 · addi 72-75 · bne 76-78</td><td class="num">78</td></tr>
+        <tr><td class="mono">DIV volta 1: slt 79-82 · bne 83-85 · sub 86-89 · addi 90-93 · j 94-96</td><td class="num">96</td></tr>
+        <tr><td class="mono">DIV volta 2: slt 97-100 · bne 101-103 · sub 104-107 · addi 108-111 · j 112-114</td><td class="num">114</td></tr>
+        <tr><td class="mono">slt 115-118 · bne (desvia) 119-121</td><td class="num">121</td></tr>
+        <tr><td class="mono">add 122-125 · add 126-129 · jr 130-132</td><td class="num">132</td></tr>
+      </tbody>
+    </table></div>
+    <div class="box prova"><span class="lab">jr não está nos slides</span><p>A FSM dos slides não tem estado para o jr. Contando 3 ciclos, como o j, o total fecha nos 132 ciclos e 396 ns das suas anotações. Nas anotações, a contagem desliza 2 ciclos a partir do <code>j DIV</code> (96), e o jr aparece com 4: os dois erros se compensam no total, mas mudam a resposta do ciclo 102.</p></div>
+  </div></details>
+
+  <details class="sol"><summary>6 · Bits nos fios: lw no monociclo<span class="tag">conjuntos de bits</span></summary><div class="in">
+    <p><code>lw $s0, 8($t1)</code> com PC = 0x00400010, $t1 = 0x10010000, $s0 = 0x00000000 antes, Mem[0x10010008] = 0x0000002A.</p>
+    <pre class="rtl">op 100011 | rs 01001 ($t1 = 9) | rt 10000 ($s0 = 16) | imm 0000 0000 0000 1000
+instrução = 0x8D300008</pre>
+    <div class="tbl"><table>
+      <thead><tr><th>Fio</th><th>Valor</th><th>Usado?</th></tr></thead>
+      <tbody>
+        <tr><td>PC + 4</td><td class="mono">0x00400014</td><td>sim, é o próximo PC</td></tr>
+        <tr><td>Op [31-26] → U.C.</td><td class="mono">100011</td><td>sim</td></tr>
+        <tr><td>Saída rs</td><td class="mono">0x10010000</td><td>sim, base do endereço</td></tr>
+        <tr><td>Saída rt</td><td class="mono">0x00000000</td><td>não (ALUSrc = 1 descarta)</td></tr>
+        <tr><td>Extensão de sinal</td><td class="mono">0x00000008</td><td>sim</td></tr>
+        <tr><td>funct [5-0] → U.C. da ULA</td><td class="mono">001000</td><td>não (ALUOp = 000 manda somar)</td></tr>
+        <tr><td>Resultado da ULA</td><td class="mono">0x10010008</td><td>sim, endereço</td></tr>
+        <tr><td>Dado lido da memória</td><td class="mono">0x0000002A</td><td>sim, vai para $s0</td></tr>
+        <tr><td>Somador do desvio: PC+4 + (8 &lt;&lt; 2)</td><td class="mono">0x00400034</td><td>não (Branch = 0)</td></tr>
+        <tr><td>Endereço do J: PC+4[31-28] ‖ [25-0] &lt;&lt; 2</td><td class="mono">0x04C00020</td><td>não (DVI = 0)</td></tr>
+      </tbody>
+    </table></div>
+    <p>A lição: os fios "não usados" carregam valores de verdade. O controle só escolhe quais chegam ao resultado.</p>
+  </div></details>
+
+  <details class="sol"><summary>7 · Sinais do BNE nos 3 ciclos do multiciclo<span class="tag">estilo 2018</span></summary><div class="in">
+    <div class="tbl"><table class="sig">
+      <thead><tr><th>Ciclo</th><th>PCWrite</th><th>PCWriteCondNE</th><th>IorD</th><th>MemRead</th><th>IRWrite</th><th>ALUSrcA</th><th>ALUSrcB</th><th>ALUOp</th><th>PCSource</th></tr></thead>
+      <tbody>
+        <tr><td>1 · S0</td><td class="v1">1</td><td class="v0">0</td><td class="v0">0</td><td class="v1">1</td><td class="v1">1</td><td class="v0">0</td><td>01</td><td>00</td><td>00</td></tr>
+        <tr><td>2 · S1</td><td class="v0">0</td><td class="v0">0</td><td class="vx">X</td><td class="v0">0</td><td class="v0">0</td><td class="v0">0</td><td>11</td><td>00</td><td class="vx">XX</td></tr>
+        <tr><td>3 · S14</td><td class="v0">0</td><td class="v1">1</td><td class="vx">X</td><td class="v0">0</td><td class="v0">0</td><td class="v1">1</td><td>00</td><td>01</td><td>01</td></tr>
+      </tbody>
+    </table></div>
+    <p>RegWrite e MemWrite são 0 nos três; RegDst e MemToReg são X. Declare na resposta: "sinal novo PCWriteCondNE, AND com Zero invertido, OR com os outros sinais de escrita do PC".</p>
+  </div></details>
+  <label class="done"><input type="checkbox" id="d-resolvidos"> Refiz os resolvidos</label>
+</section>
+
+<!-- 12 -->
+<section class="sec" id="pegadinhas">
+  <header><span class="num">12</span><h2>Pegadinhas e erros dos slides</h2><span class="sub">O que mais derruba ponto</span></header>
+  <ul>
+    <li><strong>O clock do monociclo é sempre o do lw</strong>, mesmo que o trecho não tenha nenhum lw. O hardware não muda com o programa.</li>
+    <li><strong>O ciclo do multiciclo é o maior entre M, R e ULA</strong>, nunca a soma.</li>
+    <li><strong>Desvio não tomado também executa</strong> e conta (3 ciclos no multi, 1 instrução no mono).</li>
+    <li><strong>Escrita nunca é X</strong>: RegWrite, MemWrite, PCWrite, IRWrite são 0 quando não escrevem.</li>
+    <li><strong>No sw o rt é fonte</strong>: RegDst = X, RegWrite = 0.</li>
+    <li><strong>Do estado 1 em diante o PC já é PC + 4.</strong> O endereço de desvio no estado 1 usa esse PC; a exceção desconta 4.</li>
+    <li><strong>Só IR e PC têm sinal de escrita</strong> entre os registradores do multiciclo. MDR, A, B e ALUOut são escritos todo ciclo.</li>
+    <li><strong>A escrita acontece na borda, no fim do ciclo.</strong> No ciclo 16 do slide 48 a ULA soma; o $t5 só muda no 17.</li>
+    <li><strong>jr não está na FSM dos slides.</strong> Se aparecer, conte 3 ciclos como o j e escreva que assumiu isso.</li>
+  </ul>
+  <h3>Erros nos próprios slides</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Slide</th><th>Escrito</th><th>Certo</th></tr></thead>
+    <tbody>
+      <tr><td class="num">34</td><td>clock variável 7,0 ns, ganho 2,9</td><td>8,1 ns, ganho ≈ 2,47</td></tr>
+      <tr><td class="num">46</td><td>IorD = 1 (PC ← ALUOut)</td><td>endereço da memória ← ALUOut; o PC não muda</td></tr>
+      <tr><td class="num">51</td><td>IorD = estado0 + estado5</td><td>IorD = S3 + S5 (no estado 0 IorD = 0)</td></tr>
+      <tr><td class="num">55</td><td>"CPI = 21" no meio da conta</td><td>sujeira de diagramação; o resultado é 4,04</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Pontos a confirmar com o professor</h3>
+  <ul>
+    <li>Números dos estados novos (aqui 12 a 16) e nomes dos sinais novos (PCWriteCondNE, LByte, SByte): escolhas minhas, declare as suas.</li>
+    <li>ALUOp em 2 ou 3 bits na prova: use o que o enunciado trouxer; sem tabela, use os 3 bits confirmados em sala.</li>
+    <li>LUI: os 4 ciclos são do quadro; como a ULA faz imm &lt;&lt; 16 ele não mostrou.</li>
+  </ul>
+  <label class="done"><input type="checkbox" id="d-pegadinhas"> Li as pegadinhas</label>
+</section>
+
+<!-- 13 -->
+<section class="sec" id="autoteste">
+  <header><span class="num">13</span><h2>Autoteste</h2><span class="sub">Clique na resposta; a explicação aparece em seguida</span></header>
+  <p class="score" id="score">0 de 0</p>
+  <div class="quiz" id="quiz"></div>
+  <button class="btn ghost" type="button" id="quizReset">Recomeçar o autoteste</button>
+</section>
+
+<!-- 14 -->
+<section class="sec" id="cola">
+  <header><span class="num">14</span><h2>Revisão final</h2><span class="sub">Para ler na terça antes da prova</span></header>
+  <div class="cheat">
+    <div><h4>Fórmulas</h4><ul>
+      <li>Mono: clock = 2M + 2R + ULA; tempo = N × clock</li>
+      <li>Multi: ciclo = max(M, R, ULA); tempo = Σ ciclos × ciclo</li>
+      <li>Ciclos: LW 5 · SW 4 · R 4 · tipo-I 4 · BEQ/BNE 3 · J 3</li>
+      <li>CPI = Σ fração × ciclos · ganho = lento ÷ rápido</li>
+    </ul></div>
+    <div><h4>Sinais do monociclo</h4><ul>
+      <li>R: RegDst 1, ALUSrc 0, RegWrite 1, MemToReg 0, ALUOp 010</li>
+      <li>LW: 0, 1, 1, 1, MemRead 1, ALUOp 000</li>
+      <li>SW: X, 1, 0, X, MemWrite 1, ALUOp 000</li>
+      <li>BEQ: X, 0, 0, X, Branch 1, ALUOp 001</li>
+      <li>J: DVI 1, escritas 0, resto X</li>
+    </ul></div>
+    <div><h4>FSM 0 a 9</h4><ul>
+      <li>0 busca · 1 decod. (ALUSrcB 11)</li>
+      <li>2 endereço · 3 lê mem · 4 escreve rt · 5 grava mem</li>
+      <li>6 exec. R (ALUOp 10) · 7 escreve rd</li>
+      <li>8 beq (PCWriteCond, PCSource 01) · 9 j (PCSource 10)</li>
+      <li>10 indefinida · 11 overflow → C000 0000</li>
+    </ul></div>
+    <div><h4>Não esquecer</h4><ul>
+      <li>Escrita nunca X</li>
+      <li>Desvio não tomado conta</li>
+      <li>Estado novo: diga sinais, de onde vem, para onde vai</li>
+      <li>Declare toda escolha (ALUOp livre, nome de sinal, número de estado)</li>
+    </ul></div>
+  </div>
+</section>
+
+<footer class="end">Manual Mono + Multi · feito a partir da Aula 6 (slides 1 a 71), do quadro de 2026.2, das provas de 2016, 2017 e 2018 e das suas anotações. Material irmão: MIPS do Zero (introdução) e Caminho de Dados (diagramas e simulador).</footer>
+</div>
+</main>
+</div>
+
+<script>
+(function () {
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return null; }
+
+  const MSIG = [
+    ["Tipo-R", "1","0","1","0","0","0","0","0","0","010"],
+    ["LW",     "0","1","1","1","0","0","0","1","0","000"],
+    ["SW",     "X","1","0","X","0","0","0","0","1","000"],
+    ["BEQ",    "X","0","0","X","1","0","0","0","0","001"],
+    ["BNE",    "X","0","0","X","0","1","0","0","0","001"],
+    ["ADDi",   "0","1","1","0","0","0","0","0","0","000"],
+    ["ANDi / ORi / SLTi / LUi", "0","1","1","0","0","0","0","0","0","livre"],
+    ["J",      "X","X","0","X","X","X","1","X","0","XXX"]
+  ];
+  function vcls(v) { if (v === "1") return "v1"; if (v === "0") return "v0"; if (/^X+$/.test(v)) return "vx"; return ""; }
+  const mb = document.getElementById("monoSigBody");
+  mb.innerHTML = MSIG.map(r => "<tr><td>" + r[0] + "</td>" + r.slice(1).map(v => "<td class='" + vcls(v) + "'>" + v + "</td>").join("") + "</tr>").join("");
+
+  const BARS = [["Tipo-R", 6, 4], ["LW", 8, 5], ["SW", 7, 4], ["BEQ", 5, 3], ["J", 2, 3]];
+  const maxNs = 10;
+  document.getElementById("bars").innerHTML = BARS.map(b => {
+    const used = b[1], idle = 8 - b[1], multi = b[2] * 2;
+    let monoBar = "<div class='bar mono' style='width:" + (used / maxNs * 100) + "%'>" + used + " ns</div>";
+    if (idle > 0) monoBar += "<div class='bar idle' style='width:" + (idle / maxNs * 100) + "%'>+" + idle + "</div>";
+    return "<div class='bar-row'><span class='bl'>" + b[0] + "</span><div class='bar-pair'>" +
+      "<div class='bar-track' aria-label='monociclo " + used + " de 8 ns'>" + monoBar + "</div>" +
+      "<div class='bar multi' style='width:" + (multi / maxNs * 100) + "%'>" + b[2] + " × 2 = " + multi + " ns</div></div></div>";
+  }).join("");
+
+  /* contador de ciclos */
+  const CLS = { add:"R", sub:"R", and:"R", or:"R", slt:"R", mult:"R", nor:"R", xor:"R",
+    addi:"I", andi:"I", ori:"I", slti:"I", lui:"I", addiu:"I",
+    lw:"LW", lb:"LB", sw:"SW", sb:"SB", beq:"BEQ", bne:"BNE", j:"J", jr:"JR" };
+  const STEPS = { R:[0,1,6,7], I:[0,1,12,13], LW:[0,1,2,3,4], LB:[0,1,2,15,4], SW:[0,1,2,5], SB:[0,1,2,16], BEQ:[0,1,8], BNE:[0,1,14], J:[0,1,9], JR:[0,1,"jr"] };
+  const ST = {
+    0:["Busca","IR ← Mem[PC]; PC ← PC+4","MemRead, IorD=0, IRWrite, ALUSrcA=0, ALUSrcB=01, ALUOp=00, PCWrite, PCSource=00"],
+    1:["Decodificação","A ← rs; B ← rt; ALUOut ← PC + ext<<2","ALUSrcA=0, ALUSrcB=11, ALUOp=00"],
+    2:["Cálculo do endereço","ALUOut ← A + ext(imm)","ALUSrcA=1, ALUSrcB=10, ALUOp=00"],
+    3:["Leitura da memória","MDR ← Mem[ALUOut]","MemRead, IorD=1"],
+    4:["Escreve rt","Reg[rt] ← MDR","RegDst=0, RegWrite, MemToReg=1"],
+    5:["Grava na memória","Mem[ALUOut] ← B","MemWrite, IorD=1"],
+    6:["Execução tipo-R","ALUOut ← A op B","ALUSrcA=1, ALUSrcB=00, ALUOp=10"],
+    7:["Escreve rd","Reg[rd] ← ALUOut","RegDst=1, RegWrite, MemToReg=0"],
+    8:["Desvio BEQ","se A == B, PC ← ALUOut","ALUSrcA=1, ALUSrcB=00, ALUOp=01, PCWriteCond, PCSource=01"],
+    9:["Salto J","PC ← PC[31-28] ‖ IR[25-0]<<2","PCWrite, PCSource=10"],
+    12:["Execução tipo-I (novo)","ALUOut ← A op ext(imm)","ALUSrcA=1, ALUSrcB=10, ALUOp=código da instrução"],
+    13:["Escreve rt tipo-I (novo)","Reg[rt] ← ALUOut","RegDst=0, RegWrite, MemToReg=0"],
+    14:["Desvio BNE (novo)","se A ≠ B, PC ← ALUOut","ALUSrcA=1, ALUSrcB=00, ALUOp=01, PCWriteCondNE, PCSource=01"],
+    15:["Lê byte (novo)","MDR ← ext8(byte de Mem[ALUOut])","MemRead, IorD=1, LByte"],
+    16:["Grava byte (novo)","byte de Mem[ALUOut] ← B[7-0]","MemWrite, IorD=1, SByte"],
+    jr:["Salto jr (fora dos slides)","PC ← A ($ra)","contado como o J; declare na prova"]
+  };
+  const MSIGBY = { R:0, LW:1, LB:1, SW:2, SB:2, BEQ:3, BNE:4, I:5, J:7, JR:7 };
+  const COLS = ["RegDst","ALUSrc","RegWrite","MemToReg","Branch","NBranch","DVI","MemRead","MemWrite","ALUOp"];
+  const BOARD = "addi $t0, $zero, 10\naddi $t1, $zero, 15\nlui  $a0, 0x8000\naddi $a0, $a0, 0x0000\nlw   $s1, 4($a0)\nbeq  $t0, $s1, FIM     # 10 != 8, nao desvia\nsw   $t1, 4($a0)\nlw   $s1, 8($a0)\nj    VOLTA\nbeq  $t0, $s1, FIM     # 10 = 10, desvia";
+  const P2016 = "sw   $t6, 4($s4)\nsw   $t4, 8($s4)\nbeq  $t5, $t6, L1      # nao desvia\nadd  $t7, $t6, $t5\naddi $t2, $t7, 6\nand  $t3, $s2, $s2\nbeq  $t2, $t7, L2      # desvia\nsub  $t2, $s3, $s3\nand  $t6, $t2, $t2";
+  const $ = id => document.getElementById(id);
+  const seq = $("seq");
+  seq.value = BOARD;
+  function num(id) { const v = parseFloat($(id).value); if (isNaN(v) || v < 0) return 0; return v; }
+  function fmt(n) { return (Math.round(n * 100) / 100).toString().replace(".", ","); }
+  function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]); }
+  let RUN = [];
+  function calc() {
+    const M = num("tM"), R = num("tR"), A = num("tA");
+    const lines = seq.value.split("\n").map(l => l.replace(/#.*/, "").trim()).filter(Boolean);
+    const errs = []; RUN = []; let c = 0;
+    lines.forEach((l, i) => {
+      const m = l.replace(/^[A-Za-z_]\w*:\s*/, "").match(/^([a-zA-Z]+)/);
+      if (!m) { errs.push("linha " + (i + 1)); return; }
+      const cl = CLS[m[1].toLowerCase()];
+      if (!cl) { errs.push("'" + m[1] + "' na linha " + (i + 1)); return; }
+      const st = STEPS[cl];
+      RUN.push({ src: l, cl, from: c + 1, to: c + st.length, st }); c += st.length;
+    });
+    const er = $("seqErr");
+    if (errs.length) { er.textContent = "Não reconheci: " + errs.join(", ") + ". Use add, sub, and, or, slt, addi, andi, ori, slti, lui, lw, lb, sw, sb, beq, bne, j, jr."; er.hidden = false; }
+    else er.hidden = true;
+    const clock = 2 * M + 2 * R + A, Tc = Math.max(M, R, A), n = RUN.length;
+    let cpi = 0; if (n) cpi = c / n;
+    let who = "empate";
+    if (n && n * clock < c * Tc) who = "monociclo ganha (" + fmt(c * Tc / (n * clock)) + "×)";
+    if (n && n * clock > c * Tc) who = "multiciclo ganha (" + fmt(n * clock / (c * Tc)) + "×)";
+    $("tots").innerHTML =
+      "<div class='tot'><div class='k'>Monociclo</div><div class='v'>" + fmt(n * clock) + " ns</div><div class='f'>" + n + " instr. × " + fmt(clock) + " ns</div></div>" +
+      "<div class='tot'><div class='k'>Multiciclo</div><div class='v'>" + fmt(c * Tc) + " ns</div><div class='f'>" + c + " ciclos × " + fmt(Tc) + " ns</div></div>" +
+      "<div class='tot'><div class='k'>CPI do trecho</div><div class='v'>" + fmt(cpi) + "</div><div class='f'>" + who + "</div></div>";
+    $("trace").innerHTML = "<thead><tr><th class='num'>Mono</th><th>Instrução</th><th class='num'>Ciclos</th><th>Faixa multi</th><th>Estados</th></tr></thead><tbody>" +
+      RUN.map((r, i) => "<tr><td class='num'>" + (i + 1) + "º</td><td class='mono'>" + esc(r.src) + "</td><td class='num'>" + r.st.length + "</td><td class='mono'>" + r.from + "-" + r.to + "</td><td class='mono'>" + r.st.join(" → ") + "</td></tr>").join("") + "</tbody>";
+    answer();
+  }
+  function answer() {
+    const nm = parseInt($("qMono").value, 10), nx = parseInt($("qMulti").value, 10);
+    const r = RUN[nm - 1];
+    if (!r) $("ansMono").innerHTML = "Monociclo: o trecho tem " + RUN.length + " ciclos.";
+    else {
+      const row = MSIG[MSIGBY[r.cl]];
+      let s = COLS.map((c, i) => c + " " + row[i + 1]).join(", ");
+      if (r.cl === "LB") s += ", LByte 1"; if (r.cl === "SB") s += ", SByte 1";
+      $("ansMono").innerHTML = "<b>Mono, ciclo " + nm + ":</b> <span class='mono'>" + esc(r.src) + "</span><br><span class='s'>" + s + "</span>";
+    }
+    const x = RUN.find(q => nx >= q.from && nx <= q.to);
+    if (!x) { $("ansMulti").innerHTML = "Multiciclo: o trecho tem " + (RUN.length ? RUN[RUN.length - 1].to : 0) + " ciclos."; return; }
+    const k = nx - x.from, st = x.st[k], d = ST[st];
+    $("ansMulti").innerHTML = "<b>Multi, ciclo " + nx + ":</b> <span class='mono'>" + esc(x.src) + "</span>, ciclo " + (k + 1) + " de " + x.st.length + " → estado " + st + " (" + d[0] + ")<br><span class='mono'>" + esc(d[1]) + "</span><br><span class='s'>" + d[2] + "</span>";
+  }
+  ["tM","tR","tA"].forEach(id => $(id).addEventListener("input", calc));
+  seq.addEventListener("input", calc);
+  ["qMono","qMulti"].forEach(id => $(id).addEventListener("input", answer));
+  $("ex2016").onclick = () => { $("tM").value = 5; $("tR").value = 2; $("tA").value = 4; seq.value = P2016; $("qMono").value = 3; $("qMulti").value = 12; calc(); };
+  $("exBoard").onclick = () => { $("tM").value = 2; $("tR").value = 1; $("tA").value = 2; seq.value = BOARD; $("qMono").value = 10; $("qMulti").value = 21; calc(); };
+  calc();
+
+  /* autoteste */
+  const Q = [
+    ["Com M = 2, R = 1, ULA = 2, qual o período do clock do monociclo?", ["6 ns", "8 ns", "5 ns", "2 ns"], 1, "O clock é o do lw: 2M + 2R + ULA = 4 + 2 + 2 = 8 ns."],
+    ["Com os mesmos tempos, qual o ciclo do multiciclo?", ["2 ns", "5 ns", "8 ns", "1 ns"], 0, "Ciclo = max(M, R, ULA) = 2 ns. Nunca a soma."],
+    ["Quantos ciclos o sw leva no multiciclo?", ["3", "4", "5", "1"], 1, "0 → 1 → 2 → 5: busca, decodificação, endereço, grava."],
+    ["IorD = 1 significa:", ["o PC recebe o ALUOut", "o endereço da memória vem do ALUOut", "a ULA recebe o registrador A", "a instrução vai para o IR"], 1, "IorD escolhe o endereço da memória: 0 = PC (busca), 1 = ALUOut (lw/sw). O slide 46 escreve PC ← ALUOut, mas é um erro."],
+    ["Por que a ULA calcula PC + (ext << 2) no estado 1?", ["porque toda instrução desvia", "para deixar o endereço do desvio pronto antes de saber se é desvio", "para calcular PC + 4", "para ler o rt"], 1, "É a ação otimista: a ULA estaria parada, então já calcula. Se for beq, o endereço está pronto no ALUOut."],
+    ["Num sw do monociclo, RegDst vale:", ["0", "1", "X", "depende do rt"], 2, "Nada é escrito no banco, então o mux RegDst não importa: X."],
+    ["No J do monociclo, MemWrite vale:", ["X", "1", "0", "depende do endereço"], 2, "Sinal de escrita nunca é X: se fosse lixo, poderia gravar na memória."],
+    ["ALUSrcB = 11 escolhe:", ["o registrador B", "a constante 4", "ext(imm)", "ext(imm) << 2"], 3, "00 = B, 01 = 4, 10 = ext(imm), 11 = ext(imm) << 2."],
+    ["Quais registradores internos do multiciclo NÃO têm sinal de escrita?", ["IR e PC", "MDR, A, B e ALUOut", "só o ALUOut", "todos têm"], 1, "MDR, A, B e ALUOut são escritos todo ciclo. IR (IRWrite) e PC (PCWrite/PCWriteCond) precisam guardar por vários ciclos."],
+    ["Trecho com 3 lw, 2 tipo-R e 1 beq: quantos ciclos no multiciclo?", ["24", "26", "6", "28"], 1, "3 × 5 + 2 × 4 + 1 × 3 = 15 + 8 + 3 = 26."],
+    ["Mix 22% lw, 11% sw, 49% R, 16% beq, 2% j. CPI do multiciclo?", ["4,04", "4,00", "3,96", "21"], 0, "0,22×5 + 0,11×4 + 0,49×4 + 0,16×3 + 0,02×3 = 1,1 + 0,44 + 1,96 + 0,48 + 0,06 = 4,04."],
+    ["No estado 0, a memória e a ULA trabalham no mesmo ciclo. Isso quebra a regra do multiciclo?", ["sim, por isso o estado 0 dura dois ciclos", "não, estão em paralelo; proibido é em série", "sim, a ULA espera a memória", "não, porque a ULA é combinacional"], 1, "PC + 4 só precisa do PC, não da instrução lida. As duas unidades correm lado a lado, então o ciclo continua com 2 ns."],
+    ["Qual ALUOp de 3 bits é fixo para o beq?", ["000", "001", "010", "livre"], 1, "Fixos: 000 lw/sw, 001 beq/bne, 010 tipo-R. Os de andi, ori, slti, lui são livres."],
+    ["Na exceção, por que o EPC recebe PC − 4?", ["porque o PC já virou PC + 4 no estado 0", "porque a exceção pula uma instrução", "porque C000 0000 − 4 é o endereço de retorno", "porque a ULA sempre subtrai"], 0, "O PC é incrementado na busca. Para apontar a instrução que causou a exceção, a ULA desconta 4."],
+    ["Equação do ALUSrcA na FSM dos slides:", ["S0 + S1", "S2 + S6 + S8", "S6", "S3 + S5"], 1, "ALUSrcA = 1 quando a ULA usa A: endereço (2), tipo-R (6) e beq (8). É a tabela-verdade do slide 53."],
+    ["O beq do trecho não desvia. Ele entra na contagem de tempo?", ["não, só desvios tomados contam", "sim, executa do mesmo jeito", "conta meio ciclo", "só no monociclo"], 1, "A instrução executou: busca, decodifica e compara. 1 ciclo no mono, 3 no multi."],
+    ["Prova de 2016 (M = 5, R = 2, ULA = 4), 9 instruções, 34 ciclos. Quem ganha?", ["multiciclo, 170 contra 162 ns", "monociclo, 162 contra 170 ns", "empate", "multiciclo, 34 contra 162"], 1, "Mono 9 × 18 = 162 ns. Multi 34 × 5 = 170 ns. O monociclo ganha aqui: sempre faça a conta."],
+    ["Quantos bits tem o registrador de estado da FSM com os estados 0 a 9?", ["3", "4", "5", "10"], 1, "10 estados cabem em 4 bits (S3 S2 S1 S0), de 0000 a 1001."]
+  ];
+  const quiz = $("quiz");
+  let answered = {};
+  try { answered = JSON.parse(store("mm-quiz") || "{}") || {}; } catch (e) { answered = {}; }
+  function renderQuiz() {
+    quiz.innerHTML = "";
+    let right = 0, done = 0;
+    Q.forEach((q, i) => {
+      const box = document.createElement("div"); box.className = "q";
+      const t = document.createElement("div"); t.className = "qt"; t.innerHTML = "<span class='qn'>" + (i + 1) + "</span>" + esc(q[0]); box.appendChild(t);
+      const opts = document.createElement("div"); opts.className = "opts"; box.appendChild(opts);
+      const pick = answered[i];
+      q[1].forEach((o, j) => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.textContent = o;
+        if (pick !== undefined) {
+          if (j === q[2]) b.classList.add("right");
+          else if (j === pick) b.classList.add("wrong");
+        }
+        b.onclick = () => { if (answered[i] !== undefined) return; answered[i] = j; store("mm-quiz", JSON.stringify(answered)); renderQuiz(); };
+        opts.appendChild(b);
+      });
+      if (pick !== undefined) {
+        done++; if (pick === q[2]) right++;
+        const w = document.createElement("p"); w.className = "why"; w.textContent = (pick === q[2] ? "Certo. " : "Não. ") + q[3]; box.appendChild(w);
+      }
+      quiz.appendChild(box);
+    });
+    $("score").textContent = right + " de " + done + " certas · " + (Q.length - done) + " sem responder";
+  }
+  $("quizReset").onclick = () => { answered = {}; store("mm-quiz", "{}"); renderQuiz(); };
+  renderQuiz();
+
+  /* checklists */
+  document.querySelectorAll(".plan input, .done input").forEach(cb => {
+    if (store("mm-" + cb.id) === "1") cb.checked = true;
+    cb.addEventListener("change", () => { store("mm-" + cb.id, cb.checked ? "1" : "0"); marks(); });
+  });
+  function marks() {
+    document.querySelectorAll("#tocList a").forEach(a => {
+      const id = a.getAttribute("href").slice(1);
+      const cb = document.getElementById("d-" + id);
+      let ck = a.querySelector(".ck");
+      if (cb && cb.checked) { if (!ck) { ck = document.createElement("span"); ck.className = "ck"; ck.textContent = "✓"; a.appendChild(ck); } }
+      else if (ck) ck.remove();
+    });
+  }
+  marks();
+
+  /* índice ativo */
+  const links = [...document.querySelectorAll("#tocList a")];
+  const secs = links.map(a => document.getElementById(a.getAttribute("href").slice(1))).filter(Boolean);
+  function onScroll() {
+    let cur = secs[0];
+    secs.forEach(s => { if (s.getBoundingClientRect().top < 140) cur = s; });
+    links.forEach(a => {
+      const on = a.getAttribute("href") === "#" + cur.id;
+      a.classList.toggle("on", on);
+      if (on && window.innerWidth <= 960) { const nav = a.closest("nav"); const l = a.offsetLeft - 16; if (Math.abs(nav.scrollLeft - l) > 40) nav.scrollLeft = l; }
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+})();
+</script>
