@@ -277,6 +277,50 @@ svg text{font-family:var(--f-mono)}
 .fsm .el{font-size:9px;fill:var(--muted)}
 table.eqs td{font-family:var(--f-mono);text-align:left}
 table.eqs td:nth-child(odd){font-family:var(--f-sans);font-weight:600}
+
+.ctrlbar{position:sticky;top:0;z-index:6;background:var(--panel);margin:-10px -10px 8px;padding:10px 12px 10px;border-bottom:1px solid var(--rule);border-radius:12px 12px 0 0;display:flex;flex-direction:column;gap:8px;box-shadow:0 6px 12px -10px rgba(0,0,0,.35)}
+.ctrlbar .animbar{padding:0;border:0;margin:0}
+.ctrlbar .animbar .msg{min-height:0}
+.ctrlbar .animbar .msg:empty{display:none}
+.stepper{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap}
+.stepper .slbl{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stepper .pills{flex:1 1 auto}
+.kbd{margin-left:auto;font:500 11.5px var(--f-mono);color:var(--muted);white-space:nowrap}
+.kbd kbd{font:inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--bg)}
+@media (max-width:700px){.kbd{display:none}.stepper .pills{flex-wrap:nowrap;overflow-x:auto;min-width:0;width:100%;padding-bottom:2px}.stepper .pill{white-space:nowrap}}
+.animbar details.opts{position:relative}
+.animbar details.opts summary{list-style:none;cursor:pointer;font:600 13px var(--f-sans);padding:6px 12px;border-radius:7px;border:1px solid var(--ink);color:var(--ink)}
+.animbar details.opts summary::-webkit-details-marker{display:none}
+.animbar details.opts summary::after{content:" ▾"}
+.animbar details[open].opts summary{background:var(--bg)}
+.opts-body{position:absolute;top:calc(100% + 6px);left:0;z-index:20;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:250px;box-shadow:0 10px 28px rgba(0,0,0,.16)}
+.now{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px 24px;padding:14px 10px 10px;border-top:1px solid var(--rule);margin-top:6px}
+@media (max-width:920px){.now{grid-template-columns:minmax(0,1fr)}}
+.now-main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.now-sig{display:flex;flex-direction:column;gap:6px;min-width:0}
+.sigchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.sc{display:inline-flex;align-items:center;gap:6px;font:500 12px var(--f-mono);padding:3px 8px;border-radius:6px;border:1px solid var(--ctrl);color:var(--ctrl);background:var(--panel)}
+.sc b{font-weight:700}
+.sc.one{background:var(--ctrl);color:var(--panel)}
+.sc.x{border-style:dashed;border-color:var(--faint);color:var(--muted)}
+.howto{margin:8px 10px 4px;border-top:1px solid var(--rule);padding-top:8px}
+.howto summary{cursor:pointer;font-size:13px;color:var(--muted);padding:2px 0 6px}
+.howto .legend{padding-left:0}
+.timeline .seg[data-step]{cursor:pointer}
+.tabset{overflow:hidden}
+.tabset-bar{display:flex;flex-wrap:wrap;gap:4px;padding:6px;border-bottom:1px solid var(--rule);background:var(--bg)}
+.tsbtn{font:600 14px var(--f-cond);padding:7px 14px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer}
+.tsbtn:hover{color:var(--ink)}
+.tsbtn[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 0 0 1px var(--rule)}
+.tsbtn:focus-visible{outline:2px solid var(--data);outline-offset:2px}
+.tabpane{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.tabpane .sub{color:var(--muted);font-size:13.5px}
+@media (max-width:1300px){.ctrlbar{padding-left:56px}}
+.tabpane .scroll{max-width:820px;width:100%;margin:0 auto}
+.page,.page>*,.card{min-width:0}
+.page .page{width:100%;max-width:none;margin:0}
+@media (max-width:700px){.ctrlbar .animbar .msg{display:none}.stepper .pills{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}.stepper .pill{white-space:nowrap;flex:none}}
+.ctrlbar .animbar .msg{font-size:12.5px;color:var(--muted)}
 </style>
 
 <div class="page">
@@ -310,8 +354,27 @@ table.eqs td:nth-child(odd){font-family:var(--f-sans);font-weight:600}
 
   <section id="viewMono" class="page">
     <div class="card diagram">
+      <div class="ctrlbar">
+        <div class="stepper"><span class="slbl">Fase</span><div class="pills" id="monoPhases"></div><span class="kbd"><kbd>←</kbd> <kbd>→</kbd> trocam a fase</span></div>
+      </div>
       <div class="scroll"><svg id="svgMono" viewBox="0 0 1110 640" role="img" aria-label="Caminho de dados monociclo"></svg></div>
-      <div class="legend">
+      <div class="now">
+        <div class="now-main">
+          <div class="explain" id="monoExplain"></div>
+          <div>
+            <div class="timeline" id="monoTimeline"></div>
+            <div class="tline-cap" id="monoTcap" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="now-sig">
+          <h3>Sinais de controle desta instrução</h3>
+          <p class="note">No monociclo os sinais valem o ciclo inteiro.</p>
+          <div class="sigchips" id="monoNowSig"></div>
+        </div>
+      </div>
+      <details class="howto">
+        <summary>Legenda e como ler o diagrama</summary>
+        <div class="legend">
         <span><i class="sw"></i>valor que afeta o resultado desta instrução</span>
         <span><i class="sw off"></i>valor presente no fio, mas ignorado nesta instrução</span>
         <span><svg width="30" height="14" viewBox="0 0 30 14" aria-hidden="true"><path d="M2,10 H10 A5,5 0 0 1 20,10 H28" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15,1 V14" stroke="currentColor" stroke-width="1.6"/></svg>fio pula: cruza sem conectar</span>
@@ -323,58 +386,74 @@ table.eqs td:nth-child(odd){font-family:var(--f-sans);font-weight:600}
         <span><svg width="44" height="14" viewBox="0 0 44 14" aria-hidden="true"><rect x="1" y="1" width="42" height="12" rx="3" fill="none" stroke="var(--ink)" stroke-dasharray="3 2"/><text x="22" y="10" text-anchor="middle" font-size="8.5" font-family="var(--f-mono)" fill="currentColor">nº $t1</text></svg>número do registrador (5 bits), não o valor</span>
         <span><svg width="44" height="14" viewBox="0 0 44 14" aria-hidden="true"><rect x="1" y="1" width="42" height="12" rx="3" fill="none" stroke="var(--data)"/><text x="22" y="10" text-anchor="middle" font-size="8.5" font-family="var(--f-mono)" fill="var(--data)">0x…</text></svg>valor que passa no fio</span>
       </div>
-      <p class="hwnote"><b>Fios de controle.</b> Saem da U.C. pelo feixe vermelho (cada sinal é um fio separado; o feixe é só desenho agrupado). Passe o mouse numa etiqueta para destacar o caminho daquele sinal. O funct [5-0] é dado da instrução, não controle: ele entra na U.C. da ULA junto com o ALUOp, e a U.C. da ULA gera o controle de 3 bits da ULA. O botão "ver" no banco abre a lupa.</p>
-      <p class="hwnote"><b>Como ler o destaque.</b> No hardware nada "acende": todo fio carrega algum valor em todo ciclo. Os 32 bits da instrução chegam a todos os destinos sempre. Num tipo R, o campo [15-0] passa pela extensão de sinal mesmo assim; num LW, o [5-0] chega à U.C. da ULA mesmo assim. Quem decide qual valor conta são os sinais de controle (muxes, RegWrite, MemWrite, MemRead). O azul marca só os caminhos cujo valor chega ao resultado; o tronco da instrução fica azul até o último campo usado.</p>
+        <p class="hwnote"><b>Fios de controle.</b> Saem da U.C. pelo feixe vermelho (cada sinal é um fio separado; o feixe é só desenho agrupado). Passe o mouse numa etiqueta para destacar o caminho daquele sinal. O funct [5-0] é dado da instrução, não controle: ele entra na U.C. da ULA junto com o ALUOp, e a U.C. da ULA gera o controle de 3 bits da ULA. O botão "ver" no banco abre a lupa.</p><p class="hwnote"><b>Como ler o destaque.</b> No hardware nada "acende": todo fio carrega algum valor em todo ciclo. Os 32 bits da instrução chegam a todos os destinos sempre. Num tipo R, o campo [15-0] passa pela extensão de sinal mesmo assim; num LW, o [5-0] chega à U.C. da ULA mesmo assim. Quem decide qual valor conta são os sinais de controle (muxes, RegWrite, MemWrite, MemRead). O azul marca só os caminhos cujo valor chega ao resultado; o tronco da instrução fica azul até o último campo usado.</p>
+      </details>
     </div>
-    <div class="grid">
-      <article class="card panel">
-        <div><h2>Passo a passo dentro do ciclo</h2><p class="sub">No monociclo tudo acontece num ciclo só. As fases mostram a ordem em que o sinal atravessa as unidades.</p></div>
-        <div class="pills" id="monoPhases"></div>
-        <div class="explain" id="monoExplain"></div>
-        <div>
-          <div class="timeline" id="monoTimeline"></div>
-          <div class="tline-cap" id="monoTcap" style="margin-top:8px"></div>
-        </div>
+    <div class="card tabset" id="refMono">
+      <div class="tabset-bar" role="tablist" aria-label="Referência do monociclo"></div>
+      <div class="tabpane" data-title="Tempo por instrução">
+        <p class="sub">Quanto cada instrução usaria de verdade e quanto ela espera por causa do clock fixo.</p>
         <div class="tbl-wrap"><table id="monoTimes"></table></div>
-      </article>
-      <article class="card panel">
-        <div><h2>Sinais de controle</h2><p class="sub">Tabela do quadro, com a linha da instrução atual marcada.</p></div>
+      </div>
+      <div class="tabpane" data-title="Tabela de sinais">
+        <p class="sub">Tabela do quadro, com a linha da instrução atual marcada.</p>
         <div class="tbl-wrap"><table id="monoSig"></table></div>
         <p class="note">* ALUOp livre. O padrão fixo do professor é só 000 (lw/sw, soma), 001 (beq/bne, subtração) e 010 (tipo-R, usa o funct). Para ANDi, ORi, SLTi e LUi você escolhe qualquer código ainda não usado e declara na resposta; ele mesmo já usou 011 e 100 para o ORi em aulas diferentes.</p>
-        <div><h3>U.C. da ULA</h3><p class="sub" id="aluNote"></p></div>
+      </div>
+      <div class="tabpane" data-title="U.C. da ULA">
+        <p class="sub" id="aluNote"></p>
         <div class="tbl-wrap"><table id="aluTbl"></table></div>
-      </article>
+      </div>
     </div>
   </section>
 
   <section id="viewMulti" class="page" hidden>
     <div class="card diagram">
+      <div class="ctrlbar">
+        <div class="stepper"><span class="slbl">Ciclo</span><div class="pills" id="multiSteps"></div><span class="kbd"><kbd>←</kbd> <kbd>→</kbd> trocam a fase</span></div>
+      </div>
       <div class="scroll"><svg id="svgMulti" viewBox="0 0 1110 640" role="img" aria-label="Caminho de dados multiciclo"></svg></div>
-      <div class="legend">
+      <div class="now">
+        <div class="now-main">
+          <div class="explain" id="multiExplain"></div>
+          <div>
+            <div class="timeline" id="multiTimeline"></div>
+            <div class="tline-cap" id="multiTcap" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="now-sig">
+          <h3>Sinais de controle deste ciclo</h3>
+          <p class="note">Cheio = 1, contorno = 0, tracejado = X.</p>
+          <div class="sigchips" id="multiNowSig"></div>
+        </div>
+      </div>
+      <details class="howto">
+        <summary>Legenda</summary>
+        <div class="legend">
         <span><i class="sw"></i>fio usado neste ciclo</span>
         <span><svg width="30" height="14" viewBox="0 0 30 14" aria-hidden="true"><path d="M2,10 H10 A5,5 0 0 1 20,10 H28" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15,1 V14" stroke="currentColor" stroke-width="1.6"/></svg>fio pula: cruza sem conectar</span>
         <span><svg width="16" height="14" viewBox="0 0 16 14" aria-hidden="true"><path d="M1,7 H15 M8,7 V14" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="7" r="3" fill="currentColor"/></svg>bolinha: fios conectados</span>
         <span><i class="sw wr"></i>registrador escrito no fim do ciclo</span>
         <span><i class="sw ctl"></i>sinal da U.C. (cheio = 1, contorno = 0, tracejado = X)</span>
       </div>
+      </details>
     </div>
-    <div class="grid">
-      <article class="card panel">
-        <div><h2>Ciclo a ciclo</h2><p class="sub">Cada ciclo usa no máximo uma unidade lenta. O resultado fica guardado em IR, MDR, A, B ou ALUOut para o próximo ciclo.</p></div>
-        <div class="pills" id="multiSteps"></div>
-        <div class="explain" id="multiExplain"></div>
-        <div>
-          <div class="timeline" id="multiTimeline"></div>
-          <div class="tline-cap" id="multiTcap" style="margin-top:8px"></div>
-        </div>
-        <div class="tbl-wrap"><table id="multiCycles"></table></div>
-      </article>
-      <article class="card panel">
-        <div><h2>Máquina de estados</h2><p class="sub">0 a 9 são os do slide 50. 10 e 11 (pontilhados em vermelho) são as exceções dos slides 69-70. 12 a 16 (tracejados) são os que precisam ser criados para tipo-I aritmético, BNE, LB e SB.</p></div>
+    <div class="card tabset" id="refMulti">
+      <div class="tabset-bar" role="tablist" aria-label="Referência do multiciclo"></div>
+      <div class="tabpane" data-title="Máquina de estados">
+        <p class="sub">0 a 9 são os do slide 50. 10 e 11 (pontilhados em vermelho) são as exceções dos slides 69-70. 12 a 16 (tracejados) são os que precisam ser criados para tipo-I aritmético, BNE, LB e SB.</p>
         <div class="scroll"><svg id="svgFsm" viewBox="0 0 640 380" style="min-width:520px" role="img" aria-label="Máquina de estados da unidade de controle"></svg></div>
-        <div><h3>Sinais em cada ciclo desta instrução</h3></div>
+      </div>
+      <div class="tabpane" data-title="Sinais em todos os ciclos">
+        <p class="sub">Uma linha por ciclo desta instrução, com o ciclo atual marcado.</p>
         <div class="tbl-wrap"><table id="multiSig"></table></div>
-        <div><h3>Equações da U.C. (slides 51 e 54)</h3><p class="sub">Cada sinal = OU dos estados em que ele vale 1. Só os estados 0 a 9 do slide, com ALUOp em 2 bits como na PLA. 10 estados cabem em 4 bits (S3 S2 S1 S0).</p></div>
+      </div>
+      <div class="tabpane" data-title="Ciclos por classe">
+        <p class="sub">Quantos ciclos cada classe de instrução gasta e quanto isso dá em ns com os tempos atuais.</p>
+        <div class="tbl-wrap"><table id="multiCycles"></table></div>
+      </div>
+      <div class="tabpane" data-title="Equações da U.C.">
+        <p class="sub">Cada sinal = OU dos estados em que ele vale 1. Só os estados 0 a 9 do slide, com ALUOp em 2 bits como na PLA. 10 estados cabem em 4 bits (S3 S2 S1 S0).</p>
         <div class="tbl-wrap"><table class="eqs">
           <thead><tr><th>Sinal</th><th>Estados</th><th>Sinal</th><th>Estados</th></tr></thead>
           <tbody>
@@ -389,24 +468,14 @@ table.eqs td:nth-child(odd){font-family:var(--f-sans);font-weight:600}
           </tbody>
         </table></div>
         <p class="note">Próximo estado (slide 51): vai para 0 a partir de S4, S5, S7, S8, S9; vai para 1 a partir de S0; vai para 2 a partir de S1 com Op = lw ou sw; vai para 9 a partir de S1 com Op = j. Atenção: o slide 51 escreve IorD = estado0 + estado5, mas no estado 0 IorD = 0 (o endereço vem do PC). O certo é S3 + S5, como na própria FSM do slide 50.</p>
-      </article>
+      </div>
     </div>
   </section>
 
-  <section class="card panel" id="bits">
-    <div><h2>Bits e valores nos fios</h2><p class="sub">O que a questão de "conjuntos de bits" pede: a instrução codificada e o valor que passa em cada fio do monociclo. Preencha os valores dos registradores (hex) para ver ULA, endereço e próximo PC.</p></div>
-    <div class="fields" id="fields"></div>
-    <div class="vals" id="vals">
-      <label for="vPC">PC (hex)<input id="vPC" value="FA000000" spellcheck="false"></label>
-      <label for="vRs" id="lRs">valor de Rs (hex)<input id="vRs" value="8AFF0000" spellcheck="false"></label>
-      <label for="vRt" id="lRt">valor de Rt (hex)<input id="vRt" value="00000019" spellcheck="false"></label>
-      <label for="vMem" id="lMem">lido da memória (hex)<input id="vMem" value="0000000C" spellcheck="false"></label>
-    </div>
-    <div class="tbl-wrap"><table class="wires" id="wireTbl"></table></div>
-    <p class="note" id="bitsNote"></p>
-  </section>
+  <div class="card tabset" id="tools">
+    <div class="tabset-bar" role="tablist" aria-label="Ferramentas"></div>
 
-  <section class="card panel" id="simSec">
+  <section class="tabpane" id="simSec" data-title="Simulador de programa">
     <div><h2>Simulador de programa</h2><p class="sub">Cole o código inteiro, com rótulos. O simulador executa seguindo os desvios, numera os ciclos como no quadro ([1-4], [5-8]...) e responde o que acontece no ciclo N. Clique numa linha da execução para abrir a instrução no diagrama com os valores daquele momento.</p></div>
     <div class="prog">
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
@@ -448,7 +517,19 @@ FIM:</textarea>
       </div>
     </div>
   </section>
-  <section class="card panel" id="confirm">
+  <section class="tabpane" id="bits" data-title="Bits nos fios">
+    <div><h2>Bits e valores nos fios</h2><p class="sub">O que a questão de "conjuntos de bits" pede: a instrução codificada e o valor que passa em cada fio do monociclo. Preencha os valores dos registradores (hex) para ver ULA, endereço e próximo PC.</p></div>
+    <div class="fields" id="fields"></div>
+    <div class="vals" id="vals">
+      <label for="vPC">PC (hex)<input id="vPC" value="FA000000" spellcheck="false"></label>
+      <label for="vRs" id="lRs">valor de Rs (hex)<input id="vRs" value="8AFF0000" spellcheck="false"></label>
+      <label for="vRt" id="lRt">valor de Rt (hex)<input id="vRt" value="00000019" spellcheck="false"></label>
+      <label for="vMem" id="lMem">lido da memória (hex)<input id="vMem" value="0000000C" spellcheck="false"></label>
+    </div>
+    <div class="tbl-wrap"><table class="wires" id="wireTbl"></table></div>
+    <p class="note" id="bitsNote"></p>
+  </section>
+  <section class="tabpane" id="confirm" data-title="Pontos a confirmar">
     <div><h2>Pontos a confirmar com o professor</h2><p class="sub">O que segue o quadro e os slides está na página como ele faz. Abaixo está o que tive que supor ou que muda de prova para prova.</p></div>
     <ul class="conf">
       <li><b>ALUOp de 3 bits (confirmado em sala).</b> Fixos: 000 lw/sw (soma), 001 beq/bne (subtração), 010 tipo-R (usa o funct). Os de ANDi, ORi, SLTi e LUi são livres: a página usa 011, 100, 101 e 110, mas qualquer código não usado vale se você declarar na resposta. Nas provas de 2016 e 2017 a questão traz a própria tabela de 2 bits; aí vale a do enunciado.</li>
@@ -465,6 +546,7 @@ FIM:</textarea>
       <li><b>a1, a2, b1… c3.</b> A posição desses rótulos muda de prova para prova. A tabela de bits mostra cada fio pelo nome do diagrama; confira no desenho da questão qual fio é qual letra.</li>
     </ul>
   </section>
+  </div>
 </div>
 
 <dialog id="lupa" class="lupa" aria-labelledby="lupaTitle">
@@ -1686,6 +1768,7 @@ function renderMono() {
   const s = msig(p.cls);
   ["RegDst","RegWrite","ALUSrc","ALUOp","MemWrite","MemRead","MemToReg","Branch","NBranch","DVI","LByte","SByte"].forEach(k => setBadge(DM, k, k, s[k]));
   setCtrl(DM, s);
+  sigChips("monoNowSig", MSIG_COLS, s, p);
   DM.ucOp.textContent = "Op " + p.op.toString(2).padStart(6, "0");
   let sym = p.sym; if (p.cls === "J") sym = "";
   DM.aluOp.textContent = sym;
@@ -1823,9 +1906,13 @@ function renderMulti() {
   let un = { M: "memória", R: "registradores", A: "ULA", "": "nenhuma unidade lenta" }[XUNIT[st]];
   ex.appendChild(h("div", "unit", "Unidade usada: " + un + " (" + fmt(tv(XUNIT[st])) + " ns), mas o ciclo dura sempre " + fmt(Tc) + " ns, a unidade mais lenta."));
 
+  sigChips("multiNowSig", XSIG_COLS, s, p);
   const tl = document.getElementById("multiTimeline"); tl.innerHTML = "";
   steps.forEach((x, i) => {
     const sg = h("div", "seg" + (i === S.step ? " cur" : ""));
+    sg.dataset.step = i;
+    sg.title = "Ir para o ciclo " + (i + 1);
+    sg.onclick = () => { animOff(); S.step = i; renderMulti(); };
     sg.style.width = (100 / steps.length) + "%";
     sg.innerHTML = "S" + x + "<small>" + fmt(Tc) + " ns</small>";
     tl.appendChild(sg);
@@ -2577,9 +2664,15 @@ function buildBar(cardId, tab) {
     ck.onchange = () => setCtrlVisible(DM, ck.checked);
     items.push(cl);
   }
-  items.push(pl, clock, msg);
-  items.forEach(x => bar.appendChild(x));
-  card.insertBefore(bar, card.firstChild);
+  items.push(pl);
+  const opts = document.createElement("details"); opts.className = "opts";
+  const sm = document.createElement("summary"); sm.textContent = "Opções";
+  const ob = h("div", "opts-body");
+  items.slice(4).forEach(x => ob.appendChild(x));
+  opts.appendChild(sm); opts.appendChild(ob);
+  [play, next, prev, reset, opts, clock, msg].forEach(x => bar.appendChild(x));
+  const host = document.querySelector("#" + cardId + " .ctrlbar");
+  host.insertBefore(bar, host.firstChild);
   play.onclick = () => { stopPlay(); animPlay(); };
   next.onclick = () => { stopPlay(); A.playing = false; animNext(); };
   prev.onclick = animPrev;
@@ -2635,6 +2728,77 @@ document.getElementById("asm").addEventListener("input", onAsm);
 let saved = "mono";
 try { const v = localStorage.getItem("mips-tab"); if (v === "multi") saved = "multi"; } catch (e) {}
 setTab(saved);
+
+function sigChips(boxId, cols, vals, p) {
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  const byte = p.cls === "LB" || p.cls === "SB";
+  box.innerHTML = "";
+  cols.forEach(c => {
+    if (!byte && (c === "LByte" || c === "SByte")) return;
+    const v = vals[c];
+    let k = "sc";
+    if (/1/.test(v)) {
+      k += " one";
+    } else if (/^X+$/.test(v)) {
+      k += " x";
+    }
+    const sp = h("span", k);
+    sp.innerHTML = c + " <b>" + v + "</b>";
+    box.appendChild(sp);
+  });
+}
+document.addEventListener("keydown", e => {
+  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  const t = e.target;
+  if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+  if (document.querySelector("dialog[open]")) return;
+  let d = 1;
+  if (e.key === "ArrowLeft") d = -1;
+  if (S.tab === "multi") {
+    const n = xsteps(S.p).length;
+    const k = Math.min(n - 1, Math.max(0, S.step + d));
+    if (k === S.step) return;
+    animOff(); S.step = k; renderMulti();
+  } else {
+    const list = [0].concat(MPHASES[group(S.p.cls)]);
+    let i = list.indexOf(S.ph);
+    i = Math.min(list.length - 1, Math.max(0, i + d));
+    if (list[i] === S.ph) return;
+    animOff(); S.ph = list[i]; renderMono();
+  }
+  e.preventDefault();
+});
+document.addEventListener("click", e => {
+  document.querySelectorAll("details.opts[open]").forEach(dt => { if (!dt.contains(e.target)) dt.open = false; });
+});
+document.querySelectorAll(".tabset").forEach(ts => {
+  const bar = ts.querySelector(".tabset-bar");
+  const panes = Array.from(ts.children).filter(c => c.classList.contains("tabpane"));
+  const key = "tabset-" + ts.id;
+  let cur = 0;
+  try {
+    const v = parseInt(localStorage.getItem(key), 10);
+    if (v >= 0 && v < panes.length) cur = v;
+  } catch (e) {}
+  const btns = panes.map((pn, i) => {
+    const b = h("button", "tsbtn", pn.dataset.title);
+    b.type = "button";
+    b.setAttribute("role", "tab");
+    b.onclick = () => show(i);
+    bar.appendChild(b);
+    return b;
+  });
+  function show(i) {
+    panes.forEach((pn, j) => {
+      pn.hidden = j !== i;
+      btns[j].setAttribute("aria-selected", String(j === i));
+    });
+    try { localStorage.setItem(key, String(i)); } catch (e) {}
+  }
+  show(cur);
+});
 </script>
 
 <script src="nav.js" defer></script>

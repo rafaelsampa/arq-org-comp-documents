@@ -1,7 +1,7 @@
 # arq-org-comp-documents
 
 > [!WARNING]
-> **Pode conter informações erradas.** Todo o conteúdo foi montado a partir de mais de 10 arquivos .md de anotações feitas em sala de aula, de provas antigas, do livro *Organização e Projeto de Computadores* (Patterson e Hennessy, 2ª edição), dos slides e dos materiais de estudo da disciplina. **Na dúvida, vale o que o professor ensinou em sala.**
+> **Pode conter informações erradas.** Todo o conteúdo foi montado a partir de mais de 10 arquivos .md de anotações feitas em sala de aula, de provas antigas, do livro *Organização e Projeto de Computadores* (Patterson e Hennessy, 2ª edição), dos slides antigos e dos materiais de estudo da disciplina. **Na dúvida, vale o que o professor ensinou em sala.**
 
 Material de estudo de **Arquitetura e Organização de Computadores** (UNICAP): MIPS, tradução de C para MIPS e caminho de dados monociclo e multiciclo.
 

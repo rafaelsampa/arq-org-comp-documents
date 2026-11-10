@@ -111,7 +111,7 @@ html.kbn-instant #kbn-panel,html.kbn-instant body{transition:none!important}
   body.appendChild(secTitle);
   body.appendChild(secList);
 
-  const foot = el("div", { class: "kbn-foot" }, "Pode conter erros. Baseado em provas antigas, no Patterson (2ª ed.), nos slides e nos materiais da disciplina.");
+  const foot = el("div", { class: "kbn-foot" }, "Pode conter erros. Baseado em provas antigas, no Patterson (2ª ed.), nos slides antigos e nos materiais da disciplina.");
 
   panel.appendChild(head);
   panel.appendChild(body);
