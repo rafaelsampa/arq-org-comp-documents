@@ -56,3 +56,8 @@ Também dá para abrir os `.html` com dois cliques, sem servidor nenhum. Só nã
 ```bash
 git pull
 ```
+
+---
+
+> [!NOTE]
+> Todo o código gerado foi feito com auxílio do modelo **Claude Opus 5.5**.
