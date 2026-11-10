@@ -9,12 +9,24 @@ body{font-family:system-ui,sans-serif;max-width:560px;margin:48px auto;padding:0
 a{display:block;padding:14px 16px;margin:10px 0;background:#fff;border:1px solid #e2e6ec;border-radius:10px;color:#1f37a3;text-decoration:none;font-weight:600}
 a:hover{border-color:#2b49c9}
 span{display:block;font-weight:400;font-size:.88rem;color:#6a7480}
+em{font:600 .8rem ui-monospace,Consolas,monospace;font-style:normal;color:#6a7480;margin-right:10px}
+small{margin-left:10px;padding:2px 8px;border-radius:999px;background:#eef1f6;color:#566072;font-size:.72rem;font-weight:600;vertical-align:2px}
+.warn{margin:18px 0 24px;padding:14px 16px;background:#fdf6e3;border:1px solid #e9cf8f;border-left:4px solid #c8901a;border-radius:10px;color:#4a3608;font-size:.92rem;line-height:1.5}
+.warn b{display:block;margin-bottom:4px;color:#7a5307;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+.warn p{margin:6px 0 0}
 </style>
 </head>
 <body>
 <h1>Arquitetura de Computadores</h1>
-<a href="manual-mono-multi.html">Manual Mono + Multi<span>Do zero à prova: monociclo, multiciclo, FSM, receitas, resolvidos e autoteste</span></a>
-<a href="mips-do-zero.html">MIPS do Zero ao 10<span>Registradores, formatos, tradução C para MIPS, pilha, exercícios</span></a>
-<a href="caminho-de-dados.html">Caminho de Dados MIPS<span>Circuitos monociclo e multiciclo, sinais de controle, temporização</span></a>
+<div class="warn" role="note">
+<b>Aviso</b>
+Pode conter informações erradas.
+<p>Este material foi construído a partir de mais de 10 arquivos .md de anotações feitas em sala de aula, de provas antigas, do livro <i>Organização e Projeto de Computadores</i> (Patterson e Hennessy, 2ª edição), dos slides e dos materiais de estudo da disciplina.</p>
+<p><strong>Na dúvida, vale o que o professor ensinou em sala.</strong></p>
+</div>
+<a href="mips-do-zero.html"><em>01</em>MIPS do Zero ao 10<span>Registradores, formatos, tradução C para MIPS, pilha, exercícios</span></a>
+<a href="caminho-de-dados.html"><em>02</em>Caminho de Dados MIPS<span>Circuitos monociclo e multiciclo, sinais de controle, temporização</span></a>
+<a href="manual-mono-multi.html"><em>03</em>Manual Mono + Multi<small>Conteúdo extra</small><span>Monociclo, multiciclo, FSM, receitas, resolvidos e autoteste</span></a>
+<script src="nav.js" defer></script>
 </body>
 </html>

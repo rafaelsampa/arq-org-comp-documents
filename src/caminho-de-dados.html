@@ -178,6 +178,9 @@ svg.noctrl .cw-trunk,svg.noctrl .cw-own:not(.tail),svg.noctrl .cw-hl:not(.tail),
 .wire.ctl.on .w-base{stroke:var(--ctrl);opacity:1;stroke-dasharray:none;stroke-width:2.2}
 .wire.ctl.on.z .w-base{stroke-dasharray:4 3;stroke-width:1.4}
 .tag rect{fill:var(--panel);stroke:var(--data);stroke-width:1.1}
+.tag rect{fill-opacity:.7}
+.tag{transition:opacity .15s}
+.tag:hover{opacity:.12}
 .tag text{font:600 9.5px var(--f-mono);fill:var(--data)}
 .tag.n rect{stroke-dasharray:3 2}
 .tag.n text{fill:var(--ink)}
@@ -1031,13 +1034,22 @@ function drawTags(D, onMap) {
   if (!A.tags) return;
   let V = null;
   if (A.on && A.vals) V = A.vals; else V = calcVals(S.p);
-  for (const id in TAGPOS) {
+  let pos = TAGPOS;
+  let linesOf = id => tagLines(id, S.p, V);
+  let kindOf = tagKind;
+  if (D.isMulti) {
+    const st = xsteps(S.p)[S.step];
+    pos = XTAGPOS;
+    linesOf = id => xTagLines(id, st, S.p, V);
+    kindOf = xTagKind;
+  }
+  for (const id in pos) {
     if (!onMap[id]) continue;
     if (A.flying && A.flying[id]) continue;
-    const lines = tagLines(id, S.p, V);
+    const lines = linesOf(id);
     if (!lines) continue;
-    const x = TAGPOS[id][0], y = TAGPOS[id][1];
-    const g = E("g", { class: "tag " + tagKind(id, lines) }, D.L.tags);
+    const x = pos[id][0], y = pos[id][1];
+    const g = E("g", { class: "tag " + kindOf(id, lines) }, D.L.tags);
     const w = Math.max.apply(null, lines.map(t => t.length)) * 5.75 + 8;
     const hh = lines.length * 11 + 3;
     E("rect", { x: x - w / 2, y: y - hh / 2, width: w, height: hh, rx: 3 }, g);
@@ -1045,6 +1057,52 @@ function drawTags(D, onMap) {
   }
 }
 
+const XTAGPOS = {
+  pc_a: [52, 425], iord_out: [205, 325], mem_ir: [381, 345], mem_mdr: [372, 455],
+  ir_rs: [485, 251], ir_rt_b: [495, 291], regdst_out: [582, 330], ir_imm_b: [500, 556], ir_funct: [530, 588],
+  rd1: [622, 302], rd2: [622, 357], a_out: [725, 240], b_out: [704, 415], se_b: [696, 498], sh_b: [790, 548],
+  alu_res: [958, 388], zero: [942, 290], mtr_out: [600, 434], b_mem: [300, 562], pcs_out: [760, 32]
+};
+function xTagLines(id, st, p, V) {
+  function r(n) { return "$" + REGNAMES[n]; }
+  if (id === "pc_a") { if (st === 0) return ["PC = " + tagHex(V.PC)]; return ["PC = " + tagHex(V.pc4)]; }
+  if (id === "iord_out") { if (st === 0) return ["End. = " + tagHex(V.PC)]; return ["End. = " + tagHex(V.res)]; }
+  if (id === "mem_ir") return [tagHex(V.word)];
+  if (id === "mem_mdr") return [tagHex(V.vMem)];
+  if (id === "ir_rs") return ["nº " + r(p.rs)];
+  if (id === "ir_rt_b") return ["nº " + r(p.rt)];
+  if (id === "regdst_out") return ["nº " + r(V.wreg)];
+  if (id === "ir_imm_b") return ["imm = 0x" + (p.imm & 0xFFFF).toString(16).toUpperCase().padStart(4, "0")];
+  if (id === "ir_funct") return ["funct = " + p.funct.toString(2).padStart(6, "0")];
+  if (id === "rd1") return [r(p.rs), tagHex(V.vRs)];
+  if (id === "rd2") return [r(p.rt), tagHex(V.vRt)];
+  if (id === "a_out") return [tagHex(V.vRs)];
+  if (id === "b_out") return [tagHex(V.vRt)];
+  if (id === "se_b") return [tagHex(V.ext)];
+  if (id === "sh_b") return [tagHex((V.ext << 2) >>> 0)];
+  if (id === "alu_res") {
+    if (st === 0) return ["PC + 4", tagHex(V.pc4)];
+    if (st === 1) return ["End. desvio", tagHex(V.bt)];
+    if (st === 2) return ["End. memória", tagHex(V.res)];
+    if (st === 8 || st === 14) return ["A − B", tagHex(V.res)];
+    return ["Resultado", tagHex(V.res)];
+  }
+  if (id === "zero") return ["Zero = " + V.zero];
+  if (id === "mtr_out") { if (V.wreg === 0) return ["$zero: escrita descartada"]; return [r(V.wreg) + " ← " + tagHex(V.wbv)]; }
+  if (id === "b_mem") { if (st === 16) return ["Mem ← byte " + tagHex(V.vRt & 0xFF)]; return ["Mem ← " + tagHex(V.vRt)]; }
+  if (id === "pcs_out") {
+    if (st === 0) return ["PC ← " + tagHex(V.pc4)];
+    if (st === 9) return ["PC ← " + tagHex(V.ja)];
+    if (V.taken) return ["PC ← " + tagHex(V.bt)];
+    return ["não desvia: PC fica " + tagHex(V.pc4)];
+  }
+  return null;
+}
+function xTagKind(id, lines) {
+  if (id === "mtr_out" || id === "b_mem" || id === "pcs_out") return "w";
+  if (lines[0].indexOf("nº") === 0) return "n";
+  return "d";
+}
 const LUPA = { REG: { title: "Dentro do Banco de Registradores", render: renderLupaReg }, DM: { title: "Dentro da Memória de Dados", render: renderLupaDM } };
 function lupaBtn(D, compId, x, y) {
   const g = E("g", { class: "lupa-btn", tabindex: "0", role: "button", "aria-label": "Abrir a lupa: " + LUPA[compId].title }, D.L.badges);
@@ -1526,6 +1584,9 @@ const DX = makeDiagram(document.getElementById("svgMulti"));
   [["IR", 395, 226], ["MDR", 400, 528], ["A", 718, 256], ["B", 718, 351], ["ALUOUT", 965, 314], ["PC", 48, 392], ["REG", 640, 486], ["MEM", 225, 474]].forEach(a => {
     D.wtags[a[0]] = E("text", { x: a[1], y: a[2], "text-anchor": "middle", class: "wtag" }, D.L.badges, "");
   });
+  D.L.tags = E("g", {}, D.svg);
+  D.hasTags = true;
+  D.isMulti = true;
 })();
 
 /* FSM */
@@ -2308,7 +2369,7 @@ function snapTo(k) {
 function overlayAnim() {
   const D = curD();
   if (S.tab === "multi" && A.k === 0 && !A.busy) { applyWires(D, {}, {}); }
-  if (S.tab === "multi" && A.busy && !A.edge) { for (const k in DX.wtags) DX.wtags[k].textContent = ""; }
+  if (S.tab === "multi" && A.busy && !A.edge) { for (const k in DX.wtags) DX.wtags[k].textContent = ""; drawTags(DX, A.lit); }
   else applyWires(D, A.lit, A.now);
   for (const id in D.comps) {
     let c = (D.comps[id].getAttribute("class") || "comp").replace(" act", "");
@@ -2502,11 +2563,15 @@ function buildBar(cardId, tab) {
   const clock = h("span", "clock");
   const msg = h("p", "msg");
   const items = [play, next, prev, reset, spl, lbl2];
+  const tl = h("label", "opt"); const tk = document.createElement("input"); tk.type = "checkbox"; tk.checked = true; tk.id = "tags-" + tab;
+  tl.appendChild(tk); tl.appendChild(document.createTextNode(" plaquinhas nos fios"));
+  tk.onchange = () => {
+    A.tags = tk.checked;
+    ["mono", "multi"].forEach(t => { const o = document.getElementById("tags-" + t); if (o) o.checked = tk.checked; });
+    if (A.on) overlayAnim(); else if (S.tab === "multi") renderMulti(); else renderMono();
+  };
+  items.push(tl);
   if (tab === "mono") {
-    const tl = h("label", "opt"); const tk = document.createElement("input"); tk.type = "checkbox"; tk.checked = true; tk.id = "tags-" + tab;
-    tl.appendChild(tk); tl.appendChild(document.createTextNode(" plaquinhas nos fios"));
-    tk.onchange = () => { A.tags = tk.checked; if (A.on) overlayAnim(); else renderMono(); };
-    items.push(tl);
     const cl = h("label", "opt"); const ck = document.createElement("input"); ck.type = "checkbox"; ck.checked = true; ck.id = "ctl-" + tab;
     cl.appendChild(ck); cl.appendChild(document.createTextNode(" fios de controle"));
     ck.onchange = () => setCtrlVisible(DM, ck.checked);
@@ -2572,4 +2637,5 @@ try { const v = localStorage.getItem("mips-tab"); if (v === "multi") saved = "mu
 setTab(saved);
 </script>
 
+<script src="nav.js" defer></script>
 </body></html>
