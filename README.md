@@ -5,9 +5,9 @@
 
 Material de estudo de **Arquitetura e Organização de Computadores** (UNICAP): MIPS, tradução de C para MIPS e caminho de dados monociclo, multiciclo e pipeline.
 
-**Acessar online, sem instalar nada:** https://rafaelsampa.github.io/arq-org-comp-documents/
+**Site no ar, sem instalar nada:** https://rafaelsampa.github.io/arq-org-comp-documents/
 
-O site é publicado pelo GitHub Pages a partir da pasta `src/` a cada push na `main` (`.github/workflows/pages.yml`). As páginas têm `noindex`, então não aparecem em buscadores: quem chega é pelo link ou por este repositório.
+O site é publicado pelo GitHub Pages a partir da pasta `src/` a cada push na `main`. As páginas têm `noindex`, então não aparecem em buscadores: quem chega é pelo link ou por este repositório.
 
 ## O que tem aqui
 
