@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex, nofollow"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Caminho de Dados MIPS</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -359,6 +359,71 @@ table.pchart{width:auto;min-width:100%}
 pre.cond{margin:0;padding:12px 14px;background:var(--bg);border:1px solid var(--rule);border-radius:8px;font:500 12.5px/1.6 var(--f-mono);white-space:pre-wrap;overflow-x:auto}
 table.wires tr.rtop td{border-top:2px solid var(--line)}
 #pipeTime .note{margin-top:8px}
+.pchk{display:flex;align-items:flex-start;gap:8px;font:500 13.5px var(--f-sans);cursor:pointer}
+.pchk input{margin-top:3px}
+.pchk .note{display:inline;margin-left:4px;font-weight:400}
+div.pchk{flex-wrap:wrap;align-items:center;cursor:default}
+#pipeModeNote{margin:2px 0 0;font-weight:400;font-size:12.5px;line-height:1.5}
+:root{--ic0:#0f766e;--ic1:#b45309;--ic2:#be185d;--ic3:#4d7c0f;--ic4:#6d28d9;--ic5:#0369a1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ic0:#2dd4bf;--ic1:#fbbf24;--ic2:#f472b6;--ic3:#a3e635;--ic4:#c4b5fd;--ic5:#7dd3fc}}
+:root[data-theme="dark"]{--ic0:#2dd4bf;--ic1:#fbbf24;--ic2:#f472b6;--ic3:#a3e635;--ic4:#c4b5fd;--ic5:#7dd3fc}
+.pband rect{pointer-events:none;transition:fill .25s}
+.pband .bb{fill-opacity:.06}
+.pband .bh{fill-opacity:.15}
+.pdim rect{fill:var(--panel);opacity:.66;pointer-events:none}
+.stghd.clk{cursor:pointer}
+.stghd.clk:hover .sn{text-decoration:underline}
+svg.ua-off [data-ua],svg.udc-off [data-udc]{opacity:.16}
+#svgPipe [data-omit] .sh{stroke-dasharray:4 3}
+.pnow{display:flex;flex-direction:column;gap:6px;padding:12px 10px 10px;border-top:1px solid var(--rule);margin-top:6px}
+.pnow-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:2px}
+.pnow-head .cc{font:600 15px var(--f-mono)}
+.pnow-head .hint{font-size:12.5px;color:var(--muted);flex:1;min-width:220px}
+.pnow-head .btn{padding:3px 10px;font-size:12px}
+.pnr{border:1px solid var(--rule);border-radius:9px;background:var(--panel)}
+.pnr.foc{border-color:var(--c);box-shadow:0 0 0 1px var(--c)}
+.pnr-h{display:grid;grid-template-columns:42px minmax(120px,200px) minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:7px 10px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;border-radius:9px}
+.pnr-h:hover{background:var(--bg)}
+.pnr-h:focus-visible{outline:2px solid var(--data);outline-offset:-2px}
+.pnr .tg{font:700 11px var(--f-mono);color:var(--panel);background:var(--c);border-radius:4px;padding:2px 0;text-align:center}
+.pnr .nm{font:600 12.5px var(--f-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pnr.empty .nm,.pnr.empty .sm{color:var(--faint)}
+.pnr .sm{font-size:13px;color:var(--muted)}
+.pnr .evs{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.evb{font:600 11px var(--f-sans);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.evb.bad{color:var(--ctrl);background:var(--ctrl-soft)}
+.evb.warn{color:var(--write);background:var(--write-soft)}
+.evb.ok{color:var(--go);background:color-mix(in srgb,var(--go) 12%,transparent)}
+.pnr-b{display:none;padding:0 12px 10px 62px;font-size:13.5px;flex-direction:column;gap:8px}
+.pnr.open .pnr-b{display:flex}
+.pnr .sigs{display:flex;flex-wrap:wrap;gap:5px}
+.pnr .sigs i{font-style:normal;font-size:10.5px;opacity:.8}
+@media (max-width:760px){.pnr-h{grid-template-columns:40px minmax(0,1fr)}.pnr .sm,.pnr .evs{grid-column:1/-1}.pnr .evs{justify-content:flex-start}.pnr-b{padding-left:12px}}
+.pchart-box{position:relative;width:max-content;min-width:100%}
+.pchart-arrows{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.pchart-arrows path{fill:none;stroke-width:1.8}
+.pchart-arrows path.ok{stroke:var(--go)}
+.pchart-arrows path.bad{stroke:var(--ctrl);stroke-dasharray:4 3}
+.pchart-arrows .mk-ok{fill:var(--go);stroke:none;stroke-dasharray:none}
+.pchart-arrows .mk-bad{fill:var(--ctrl);stroke:none;stroke-dasharray:none}
+.pchart-arrows text{font:600 10px var(--f-mono);paint-order:stroke;stroke:var(--panel);stroke-width:3px}
+.pchart-arrows text.ok{fill:var(--go)}
+.pchart-arrows text.bad{fill:var(--ctrl)}
+.pchart tr[data-ci] td.s{background:color-mix(in srgb,var(--c) 15%,transparent)}
+.pchart tr[data-ci] td.s.now{background:var(--c);color:var(--panel)}
+.pchart tr[data-ci] td.nm{box-shadow:inset 4px 0 0 var(--c);padding-left:10px}
+.legend .sw.band{background:color-mix(in srgb,var(--ic0) 18%,transparent);border-color:var(--ic0)}
+.legend .sw.faded{opacity:.25}
+.lzc .bitb{cursor:pointer}
+.lzc .bitb rect{fill:var(--panel);stroke:var(--line);stroke-width:1.3}
+.lzc .bitb.one rect{stroke:var(--data);fill:var(--data-soft)}
+.lzc .bitb:hover rect,.lzc .bitb:focus-visible rect{stroke:var(--ink)}
+.lzc .bitb:focus{outline:none}
+.lzc .bitb text{font:600 13px var(--f-mono);fill:var(--ink);pointer-events:none}
+.lzc .gate{stroke:var(--faint);stroke-width:1.4}
+.lzc .gl{font-size:11px;fill:var(--muted)}
+.lzc .big{font:700 22px var(--f-mono);fill:var(--ink)}
+.lzc .vOn,.lzc .rq{font-size:12px}
 </style>
 
 <div class="page">
@@ -516,13 +581,17 @@ table.wires tr.rtop td{border-top:2px solid var(--line)}
       <div class="pprog-head">
         <div>
           <h2>Programa no pipeline</h2>
-          <p class="sub">Uma instrução por linha, como nos slides. Só tipo-R (add, sub, and, or, slt), lw, sw e beq, que são as linhas da tabela de controle do slide 27, e nop. O endereço no começo da linha é opcional (ex.: <span class="mono">40 beq $1, $3, 7</span>, como nos slides 41 e 46); sem ele, a primeira instrução fica no endereço 0.</p>
+          <p class="sub">Uma instrução por linha, como nos slides. Tipo-R (add, sub, and, or, slt), lw, sw e beq, que são as linhas da tabela de controle do slide 27, e nop. Com o desvio no DI também aceita bne (NBranch, quadro de 17/11). O endereço no começo da linha é opcional (ex.: <span class="mono">40 beq $1, $3, 7</span>, como nos slides 41 e 46); sem ele, a primeira instrução fica no endereço 0.</p>
         </div>
         <div class="pmodes">
-          <label class="pmode" for="pipeFw"><input type="checkbox" id="pipeFw"><span>UA e UDC no EX<span class="note">Unidade de adiantamento (slides 34-36) e detecção de conflito do lw, que gera a bolha (slides 37-40). Desmarcado: sem tratamento de conflito de dados.</span></span></label>
-          <div class="pmode col"><span>Desvio condicional decidido no</span>
-            <div class="chips" id="pipeBr" role="group" aria-label="Estágio do desvio"><button type="button" class="chip" data-br="mem" aria-pressed="true">MEM (tradicional)</button><button type="button" class="chip" data-br="di" aria-pressed="false">DI (antecipado)</button></div>
-            <span class="note">MEM: circuito do slide 28; descarta BI, DI e EX quando desvia (slide 42). DI: comparador e somador no DI; descarta só o BI com o IF.Flush (slide 45).</span>
+          <div class="pmode col">
+            <span>Circuito final (slide 45 + quadro de 17/11)</span>
+            <label class="pchk" for="pipeFw"><input type="checkbox" id="pipeFw"><span>UA · unidade de adiantamento <span class="note">slides 34-36</span></span></label>
+            <label class="pchk" for="pipeHdu"><input type="checkbox" id="pipeHdu"><span>UDC · detecção de conflito do lw <span class="note">slides 37-40</span></span></label>
+            <div class="pchk"><span>Desvio decidido no</span>
+              <div class="chips" id="pipeBr" role="group" aria-label="Estágio do desvio"><button type="button" class="chip" data-br="di" aria-pressed="true">DI (final)</button><button type="button" class="chip" data-br="mem" aria-pressed="false">MEM (slide 28)</button></div>
+            </div>
+            <p class="note" id="pipeModeNote"></p>
           </div>
         </div>
       </div>
@@ -553,18 +622,12 @@ $9 = 2</textarea></label>
         <div class="stepper"><span class="slbl">Ciclo</span><div class="pills" id="pipeSteps"></div><span class="kbd"><kbd>←</kbd> <kbd>→</kbd> trocam o ciclo</span></div>
       </div>
       <div class="scroll"><svg id="svgPipe" viewBox="0 0 1290 716" role="img" aria-label="Caminho de dados pipeline"></svg></div>
-      <div class="now">
-        <div class="now-main"><div class="explain" id="pipeExplain"></div></div>
-        <div class="now-sig">
-          <h3>Sinais de controle neste ciclo</h3>
-          <p class="note">Cada sinal vale para a instrução que está no estágio dele. A U.C. gera todos no DI e eles andam junto com a instrução nos campos WB, M e EX dos registradores de pipeline (slides 26 e 27).</p>
-          <div id="pipeNowSig"></div>
-        </div>
-      </div>
+      <div class="pnow" id="pipeExplain"></div>
       <div class="pchart-wrap">
         <h3>Diagrama de ciclos</h3>
-        <p class="note">Como nos slides 23, 31 e 38: uma linha por instrução, uma coluna por ciclo. Clique numa coluna para ver aquele ciclo no circuito.</p>
-        <div class="tbl-wrap"><table id="pipeChart" class="pchart"></table></div>
+        <p class="note">Como nos slides 23, 31 e 38: uma linha por instrução, uma coluna por ciclo, cada instrução com a mesma cor que ela tem no circuito. Clique numa coluna para ver aquele ciclo. Seta verde: valor adiantado, de quem produz para quem usa. Seta vermelha tracejada: lê valor velho ou errado.</p>
+        <label class="opt"><input type="checkbox" id="pipeArrowsOn" checked> setas de dependência</label>
+        <div class="tbl-wrap"><div class="pchart-box"><table id="pipeChart" class="pchart"></table><svg id="pipeArrows" class="pchart-arrows" aria-hidden="true"></svg></div></div>
         <div class="tline-cap" id="pipeTcap"></div>
       </div>
       <details class="howto">
@@ -578,8 +641,13 @@ $9 = 2</textarea></label>
         <span><svg width="30" height="10" viewBox="0 0 30 10" aria-hidden="true"><path d="M1,5 H29" stroke="var(--ctrl)" stroke-width="1.2" stroke-dasharray="4 3"/></svg>fio de controle = 0</span>
         <span><i class="sw ctl"></i>etiqueta do sinal (cheia = 1, contorno = 0, tracejada = X)</span>
         <span><i class="sw wr"></i>banco ou memória escrito neste ciclo</span>
+        <span><i class="sw band"></i>faixa colorida: a instrução que está naquele estágio (mesma cor da tabela de ciclos)</span>
+        <span><i class="sw faded"></i>apagado: peça tirada (UA ou UDC desligada)</span>
+        <span><svg width="26" height="14" viewBox="0 0 26 14" aria-hidden="true"><rect x="2" y="1" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 3"/></svg>mux tracejado: o do ALUSrc, que os slides 36, 40 e 45 não desenham</span>
         </div>
         <p class="hwnote"><b>Como ler.</b> Em cada ciclo há uma instrução diferente em cada estágio; o nome dela aparece em cima de cada estágio. Cada fio e cada sinal mostram o valor da instrução do estágio em que estão. Os registradores de pipeline (BI/DI, DI/EX, EX/MEM, MEM/ER) separam os estágios e são escritos em todo ciclo, sem sinal de escrita (slide 25). Não existe registrador depois do ER (slide 21): o resultado volta para o banco no DI.</p>
+        <p class="hwnote"><b>Foco.</b> Clique no nome de um estágio em cima do circuito, ou numa linha do painel do ciclo, para escurecer o resto. No modo "um estágio por vez" a animação faz isso sozinha: BI, DI, EX, MEM e ER em sequência. No hardware os 5 acontecem ao mesmo tempo; a sequência é só para ler.</p>
+        <p class="hwnote"><b>Comparador.</b> Com o desvio no DI, o botão "ver" ao lado do "=" abre o comparador por dentro: um XOR por bit e um NOR, como no quadro de 17/11.</p>
         <p class="hwnote"><b>Banco de registradores.</b> O ER escreve na 1ª metade do ciclo e o DI lê na 2ª metade. Por isso, no slide 33, o $2 aparece como 10/–20 no CC5: quem lê no CC5 já pega o valor novo.</p>
       </details>
     </div>
@@ -588,6 +656,7 @@ $9 = 2</textarea></label>
       <div class="tabpane" data-title="Sinais por estágio">
         <p class="sub">Tabela do slide 27, separada pelo estágio em que cada sinal é usado. As linhas das instruções que estão no pipeline neste ciclo ficam marcadas.</p>
         <div class="tbl-wrap"><table id="pipeSig"></table></div>
+        <p class="note" id="pipeSigDi"></p>
         <p class="note">ALUOp em 3 bits para ficar igual ao monociclo (000 lw/sw, 001 beq, 010 tipo-R). No slide 27 ele aparece em 2 bits (ALUOp1, ALUOp0): 10, 00, 00 e 01, o mesmo código sem o 0 da frente. Bolha e nop: todos os sinais = 0 (slide 39).</p>
       </div>
       <div class="tabpane" data-title="Registradores do pipeline">
@@ -701,13 +770,14 @@ FIM:</textarea>
       <li><b>andi / ori.</b> O diagrama dele só tem extensão de sinal, então usei extensão de sinal. No MIPS real elas estendem com zeros.</li>
       <li><b>Tempos no monociclo.</b> J = só M e BEQ = M + R + ULA seguem o exemplo do slide (DvI = 2, DvC = 5). Somadores e muxes contam 0 ns, como nas provas.</li>
       <li><b>Pipeline: ALUOp.</b> Mostrei com 3 bits (000, 001, 010) para ficar igual ao monociclo. O slide 27 usa 2 bits (ALUOp1, ALUOp0): 10, 00, 00, 01.</li>
-      <li><b>Pipeline: o que não implementei.</b> Exceções (slides 50-51): o desenho não mostra onde o 4000 0040 entra no PC nem como EPC e Causa se ligam. UA na decodificação (desenho 3 do colega): a estrutura aparece, mas não as condições de quando adiantar. Predição de 2 bits e desvio retardado (slides 47-49). bne, j e tipo-I no pipeline, que não estão na tabela do slide 27.</li>
+      <li><b>Pipeline: o que não implementei.</b> Exceções (slides 50-51): o desenho não mostra onde o 4000 0040 entra no PC nem como EPC e Causa se ligam. UA na decodificação (desenho 3 do colega): a estrutura aparece, mas não as condições de quando adiantar. Predição de 2 bits e desvio retardado (slides 47-49). j e tipo-I no pipeline, que não estão na tabela do slide 27, e bne com o desvio no MEM.</li>
       <li><b>Pipeline: posição do ALUSrc.</b> Os slides 36 e 40 omitem o mux do ALUSrc. Pus ele depois do mux do Adianta.B, como no desenho "UA na execução" do colega; o dado do sw sai depois do mux de adiantamento, também como no desenho.</li>
       <li><b>Pipeline: Adianta = 00.</b> Os slides só dão 10 (do EX/MEM) e 01 (do MEM/ER). O 00 para o valor que vem do banco é dedução.</li>
       <li><b>Pipeline: slide 35.</b> A condição está truncada (falta um operador entre as duas comparações). Segui o texto: quando EX/MEM e MEM/ER batem ao mesmo tempo, vence o EX/MEM, o mais recente.</li>
       <li><b>Pipeline: slide 32.</b> Ele escreve EX/MEM.RegistradorRd = DI/EX.RegistradorRt = $2 para sub $2 / and $12, $2, $5. No and, o $2 está no campo Rs ([25-21]), então quem dispara é a condição do Rs (Adianta.A = 10), como no slide 33.</li>
       <li><b>Pipeline: detecção do lw (slide 39).</b> A condição compara com o Rt da instrução no BI/DI mesmo quando ela não lê o Rt (ex.: outro lw). Segui o slide ao pé da letra, então pode haver bolha a mais nesses casos. O nome "Bolha" do sinal que escolhe entre os sinais da U.C. e os zeros é meu; o slide não dá nome.</li>
-      <li><b>Pipeline: desvio no DI.</b> O slide 45 diz que a linha Elimina.BI (IF.Flush) sai da U.C.; desenhei saindo do PCSrc, porque ela vale 1 exatamente quando o desvio no DI acontece. O desenho 4 do colega tem duas portas AND e um OR (provavelmente beq e bne); como o slide 27 só tem beq, desenhei uma AND. Se o beq no DI depende de uma instrução que ainda está no EX ou no MEM, os slides não dizem como resolver: o simulador avisa e usa o valor velho.</li>
+      <li><b>Pipeline: desvio no DI.</b> Segui o quadro de 17/11: o "=" sai para duas AND (Branch · (=) para o beq e NBranch · ¬(=) para o bne) e um OR junta as duas. Pela foto, a saída do OR vai para o mux do PC (PCSrc) e para o BI/DI (Elimina.BI); o slide 45 escreve que o Elimina.BI sai da U.C., o que dá no mesmo valor. Não tenho certeza de onde termina cada tracejado da foto. O bne só existe nesse modo, porque o slide 28 (desvio no MEM) só tem o beq. Se o beq no DI depende de uma instrução que ainda está no EX ou no MEM, os slides não dizem como resolver: o simulador avisa e usa o valor velho.</li>
+      <li><b>Pipeline: circuito único.</b> A aba mostra sempre o circuito final (slide 45 + quadro). Tirar a UA deixa os muxes antes da ULA travados em 00; no slide 28 esses muxes nem existem, mas o resultado é o mesmo. Tirar a UDC deixa o mux depois da U.C. sempre no 1 e PCWrite = IF/IDWrite = 1. Sem a UDC, a UA entrega o que está no EX/MEM quando o lw está no MEM, que é o endereço e não o dado; é o problema do slide 37.</li>
       <li><b>Pipeline: descarte no desvio no MEM.</b> O slide 28 não desenha o hardware que zera BI, DI e EX; o slide 42 só diz que essas instruções são eliminadas. O simulador descarta, mas o desenho não tem essas linhas.</li>
       <li><b>Pipeline: nop.</b> Tratei nop como uma instrução com todos os sinais = 0, igual à bolha.</li>
       <li><b>a1, a2, b1… c3.</b> A posição desses rótulos muda de prova para prova. A tabela de bits mostra cada fio pelo nome do diagrama; confira no desenho da questão qual fio é qual letra.</li>
@@ -1977,6 +2047,8 @@ const PW_FW = { hz_in:1, hz_rt:1, rs_idex:1, rd1_fa:1, fa_out:1, rd2_fb:1, fb_ou
   fwd10_t:1, fwd10_a:1, fwd10_b:1, fwd01_t:1, fwd01_a:1, fwd01_b:1, c_pcwrite:1, c_ifidwrite:1, c_bolha:1, c_hzmr:1,
   c_ctl_uc:1, c_ctl_zero:1, c_ctl_mux:1, c_adA:1, c_adB:1 };
 const PW_BASE = { rd1_ex:1, rd2_ex:1, c_ctl_out:1 };
+const PW_UA = { rs_idex:1, rs_ex:1, rt_fu:1, exmem_rd:1, memer_rd:1, fwd10_t:1, fwd10_a:1, fwd10_b:1, fwd01_t:1, fwd01_a:1, fwd01_b:1, c_adA:1, c_adB:1 };
+const PW_UDC = { hz_in:1, hz_rt:1, c_hzmr:1, c_pcwrite:1, c_ifidwrite:1, c_bolha:1 };
 const PDOTS = [
   [93,368,"pc_add","",""],
   [178,190,"pc4_mux","",""],
@@ -2011,35 +2083,46 @@ const PSIG = {
   NOP: { RegDst:"0", ALUOp:"000", ALUSrc:"0", Branch:"0", MemRead:"0", MemWrite:"0", RegWrite:"0", MemToReg:"0" },
   BUB: { RegDst:"0", ALUOp:"000", ALUSrc:"0", Branch:"0", MemRead:"0", MemWrite:"0", RegWrite:"0", MemToReg:"0" }
 };
+for (const k in PSIG) PSIG[k].NBranch = "0";
+PSIG.BNE = Object.assign({}, PSIG.BEQ, { Branch: "0", NBranch: "1" });
 const PSTG = [["IF","BI"],["ID","DI"],["EX","EX"],["MEM","MEM"],["WB","ER"]];
+const PFINAL = { fw: true, hdu: true, br: "di" };
 const PEX = [
-  { n: "Slide 29 · sem conflito", br: "mem", code: "lw  $10, 20($1)\nsub $11, $2, $3\nand $12, $4, $5\nor  $13, $6, $7\nadd $14, $8, $9", regs: "$1 = 0\n$2 = 9\n$3 = 4\n$4 = 12\n$5 = 10\n$6 = 3\n$7 = 5\n$8 = 8\n$9 = 2", mem: "20: 7" },
-  { n: "Slides 30-33 · conflito de dados", code: "sub $2, $1, $3\nand $12, $2, $5\nor  $13, $6, $2\nadd $14, $2, $2\nsw  $15, 100($2)", regs: "$1 = 10\n$2 = 10\n$3 = 30\n$5 = 7\n$6 = 3\n$15 = 99", mem: "" },
-  { n: "Slide 35 · três add no $1", fw: true, code: "add $1, $1, $2\nadd $1, $1, $3\nadd $1, $1, $4", regs: "$1 = 1\n$2 = 2\n$3 = 3\n$4 = 4", mem: "" },
-  { n: "Slides 37-38 · lw e bolha", fw: true, code: "lw  $2, 20($1)\nand $4, $2, $5\nor  $8, $2, $6\nadd $9, $4, $2\nslt $1, $6, $7", regs: "$1 = 0\n$5 = 12\n$6 = 3\n$7 = 5", mem: "20: 6" },
-  { n: "Slide 16 · antes de reordenar", fw: true, code: "lw $t0, 0($t1)\nlw $t2, 4($t1)\nsw $t2, 0($t1)\nsw $t0, 4($t1)", regs: "$t1 = 100", mem: "100: 1\n104: 2" },
-  { n: "Slide 16 · reordenado", fw: true, code: "lw $t0, 0($t1)\nlw $t2, 4($t1)\nsw $t0, 4($t1)\nsw $t2, 0($t1)", regs: "$t1 = 100", mem: "100: 1\n104: 2" },
-  { n: "Slide 41 · desvio no MEM", br: "mem", code: "40 beq $1, $3, 7\n44 and $12, $2, $5\n48 or  $13, $6, $2\n52 add $14, $2, $2\n72 lw  $4, 50($7)", regs: "$1 = 5\n$3 = 5", mem: "" },
-  { n: "Slide 46 · desvio no DI", br: "di", code: "36 sub $10, $4, $8\n40 beq $1, $3, 7\n44 and $12, $2, $5\n48 or  $13, $2, $6\n52 add $14, $4, $2\n56 slt $15, $6, $7\n72 lw  $4, 50($7)", regs: "$1 = 5\n$3 = 5\n$4 = 9\n$8 = 2", mem: "" },
-  { n: "Quadro 17/11 · nop por software", fw: true, br: "mem", code: "lw  $t0, 8($s0)\nnop\nadd $t2, $t1, $t0", regs: "$s0 = 100\n$t1 = 2", mem: "108: 5" },
-  { n: "Quadro 17/11 · bolha por hardware", fw: true, br: "mem", code: "lw  $t0, 8($s0)\nadd $t2, $t1, $t0\nor  $t3, $t4, $t5", regs: "$s0 = 100\n$t1 = 2\n$t4 = 12\n$t5 = 3", mem: "108: 5" },
-  { n: "Desenho UA · add e beq", fw: true, code: "add $t0, $t1, $t2\nbeq $t0, $s0, 5", regs: "$t1 = 3\n$t2 = 4\n$s0 = 7", mem: "" }
+  { n: "Slide 29 · sem conflito", m: PFINAL, code: "lw  $10, 20($1)\nsub $11, $2, $3\nand $12, $4, $5\nor  $13, $6, $7\nadd $14, $8, $9", regs: "$1 = 0\n$2 = 9\n$3 = 4\n$4 = 12\n$5 = 10\n$6 = 3\n$7 = 5\n$8 = 8\n$9 = 2", mem: "20: 7" },
+  { n: "Slide 31 · sem UA", m: { fw: false, hdu: true, br: "di" }, code: "sub $2, $1, $3\nand $12, $2, $5\nor  $13, $6, $2\nadd $14, $2, $2\nsw  $15, 100($2)", regs: "$1 = 10\n$2 = 10\n$3 = 30\n$5 = 7\n$6 = 3\n$15 = 99", mem: "" },
+  { n: "Slide 33 · com UA", m: PFINAL, code: "sub $2, $1, $3\nand $12, $2, $5\nor  $13, $6, $2\nadd $14, $2, $2\nsw  $15, 100($2)", regs: "$1 = 10\n$2 = 10\n$3 = 30\n$5 = 7\n$6 = 3\n$15 = 99", mem: "" },
+  { n: "Slide 35 · três add no $1", m: PFINAL, code: "add $1, $1, $2\nadd $1, $1, $3\nadd $1, $1, $4", regs: "$1 = 1\n$2 = 2\n$3 = 3\n$4 = 4", mem: "" },
+  { n: "Slide 37 · lw sem UDC", m: { fw: true, hdu: false, br: "di" }, code: "lw  $2, 20($1)\nand $4, $2, $5\nor  $8, $2, $6\nadd $9, $4, $2\nslt $1, $6, $7", regs: "$1 = 0\n$5 = 12\n$6 = 3\n$7 = 5", mem: "20: 6" },
+  { n: "Slide 38 · lw e bolha", m: PFINAL, code: "lw  $2, 20($1)\nand $4, $2, $5\nor  $8, $2, $6\nadd $9, $4, $2\nslt $1, $6, $7", regs: "$1 = 0\n$5 = 12\n$6 = 3\n$7 = 5", mem: "20: 6" },
+  { n: "Slide 16 · antes de reordenar", m: PFINAL, code: "lw $t0, 0($t1)\nlw $t2, 4($t1)\nsw $t2, 0($t1)\nsw $t0, 4($t1)", regs: "$t1 = 100", mem: "100: 1\n104: 2" },
+  { n: "Slide 16 · reordenado", m: PFINAL, code: "lw $t0, 0($t1)\nlw $t2, 4($t1)\nsw $t0, 4($t1)\nsw $t2, 0($t1)", regs: "$t1 = 100", mem: "100: 1\n104: 2" },
+  { n: "Slide 41 · desvio no MEM", m: { fw: true, hdu: true, br: "mem" }, code: "40 beq $1, $3, 7\n44 and $12, $2, $5\n48 or  $13, $6, $2\n52 add $14, $2, $2\n72 lw  $4, 50($7)", regs: "$1 = 5\n$3 = 5", mem: "" },
+  { n: "Slide 46 · desvio no DI", m: PFINAL, code: "36 sub $10, $4, $8\n40 beq $1, $3, 7\n44 and $12, $2, $5\n48 or  $13, $2, $6\n52 add $14, $4, $2\n56 slt $15, $6, $7\n72 lw  $4, 50($7)", regs: "$1 = 5\n$3 = 5\n$4 = 9\n$8 = 2", mem: "" },
+  { n: "Quadro 17/11 · bne no DI", m: PFINAL, code: "40 bne $1, $3, 7\n44 and $12, $2, $5\n48 or  $13, $2, $6\n72 lw  $4, 50($7)", regs: "$1 = 5\n$3 = 6\n$2 = 4\n$5 = 7\n$6 = 1", mem: "" },
+  { n: "Quadro 17/11 · nop por software", m: { fw: true, hdu: false, br: "di" }, code: "lw  $t0, 8($s0)\nnop\nadd $t2, $t1, $t0", regs: "$s0 = 100\n$t1 = 2", mem: "108: 5" },
+  { n: "Quadro 17/11 · bolha por hardware", m: PFINAL, code: "lw  $t0, 8($s0)\nadd $t2, $t1, $t0\nor  $t3, $t4, $t5", regs: "$s0 = 100\n$t1 = 2\n$t4 = 12\n$t5 = 3", mem: "108: 5" },
+  { n: "Desenho UA · add e beq", m: { fw: true, hdu: true, br: "mem" }, code: "add $t0, $t1, $t2\nbeq $t0, $s0, 5", regs: "$t1 = 3\n$t2 = 4\n$s0 = 7", mem: "" }
 ];
 Object.assign(PW, {
   pc4_di:[[225,190],[424,190]], ext_di:[[403,490],[403,236]], sh_di:[[416,226],[424,226]],
   bt_di:[[452,207],[470,207],[470,36],[4,36],[4,240],[20,240]],
-  cmp_a:[[430,300],[430,342]], cmp_b:[[430,408],[430,366]], cmp_out:[[442,354],[450,354],[450,366],[462,366]],
-  c_branch_di:[[448,145],[448,162],[458,162],[458,380],[462,380]],
-  c_pcsrc_di:[[486,373],[496,373],[496,43],[31,43],[31,182]],
+  cmp_a:[[430,300],[430,342]], cmp_b:[[430,408],[430,366]], cmp_out:[[442,354],[448,354],[448,249],[492,249]],
+  cmp_n:[[448,267],[486,267]],
+  c_branch_di:[[452,140],[484,140],[484,239],[492,239]],
+  c_nbranch_di:[[445,148],[476,148],[476,277],[492,277]],
+  c_and1_di:[[510,244],[514,244],[514,252],[521,252]],
+  c_and2_di:[[510,272],[514,272],[514,264],[521,264]],
+  c_pcsrc_di:[[538,258],[542,258],[542,43],[31,43],[31,182]],
   c_ifflush:[[220,43],[220,164]]
 });
 const PW_BR = {
   pc4_id:"mem", pc4_ex:"mem", sh_in:"mem", sh_addb:"mem", bt_ex:"mem", zero_ex:"mem", zero_mem:"mem", bt_back:"mem", c_branch:"mem", c_pcsrc:"mem",
-  pc4_di:"di", ext_di:"di", sh_di:"di", bt_di:"di", cmp_a:"di", cmp_b:"di", cmp_out:"di", c_branch_di:"di", c_pcsrc_di:"di", c_ifflush:"di"
+  pc4_di:"di", ext_di:"di", sh_di:"di", bt_di:"di", cmp_a:"di", cmp_b:"di", cmp_out:"di", c_branch_di:"di", c_pcsrc_di:"di", c_ifflush:"di",
+  cmp_n:"di", c_nbranch_di:"di", c_and1_di:"di", c_and2_di:"di"
 };
-PDOTS.push([403,490,"ext_di","","di"], [430,300,"cmp_a","","di"], [430,408,"cmp_b","","di"], [220,43,"c_ifflush","","di"]);
+PDOTS.push([403,490,"ext_di","","di"], [430,300,"cmp_a","","di"], [430,408,"cmp_b","","di"], [220,43,"c_ifflush","","di"], [448,267,"cmp_n","","di"]);
 PDOTS.forEach(d => { if (d[2] === "sh_in") d[4] = "mem"; });
-const PIPE = { fw: true, br: "mem" };
+const PIPE = { fw: true, hdu: true, br: "di", seq: true };
 let PSIM = null;
 
 const DP = makeDiagram(document.getElementById("svgPipe"));
@@ -2048,6 +2131,8 @@ const DP = makeDiagram(document.getElementById("svgPipe"));
   D.wmode = {}; D.wbr = {}; D.ctlW = {};
   for (const id in PW) {
     wire(D, id, PW[id]);
+    if (PW_UA[id]) D.wires[id].setAttribute("data-ua", "1");
+    if (PW_UDC[id]) D.wires[id].setAttribute("data-udc", "1");
     if (PW_FW[id]) { D.wmode[id] = "fw"; D.wires[id].setAttribute("data-mode", "fw"); }
     if (PW_BASE[id]) { D.wmode[id] = "base"; D.wires[id].setAttribute("data-mode", "base"); }
     if (PW_BR[id]) { D.wbr[id] = PW_BR[id]; D.wires[id].setAttribute("data-br", PW_BR[id]); }
@@ -2057,7 +2142,10 @@ const DP = makeDiagram(document.getElementById("svgPipe"));
     const c = E("circle", { cx: x, cy: y, r: 3.6, class: "dot" }, D.L.dots);
     if (m) c.setAttribute("data-mode", m);
     if (br) c.setAttribute("data-br", br);
-    D.dots.push({ c, ids: ids.split(" ") });
+    const il = ids.split(" ");
+    if (il.some(i => PW_UA[i])) c.setAttribute("data-ua", "1");
+    if (il.some(i => PW_UDC[i])) c.setAttribute("data-udc", "1");
+    D.dots.push({ c, ids: il });
   });
   function fwOnly(g) { g.setAttribute("data-mode", "fw"); return g; }
   function brOnly(g, b) { g.setAttribute("data-br", b); return g; }
@@ -2103,19 +2191,25 @@ const DP = makeDiagram(document.getElementById("svgPipe"));
   ellC(D, "SE", 360, 490, 30, 20, "16→32", "ext. sinal");
   fwOnly(muxC(D, "MUXCTL", 556, 98, 18, 48, [[110, "0"], [134, "1"]]));
   const hdu = fwOnly(rectC(D, "HDU", 244, 56, 108, 40, "", ""));
+  hdu.setAttribute("data-udc", "1");
   E("text", { x: 298, y: 73, "text-anchor": "middle", class: "t1" }, hdu, "UDC");
   E("text", { x: 298, y: 87, "text-anchor": "middle", class: "t2" }, hdu, "det. de conflito");
   brOnly(ellC(D, "SH2DI", 403, 226, 13, 10, "<<2"), "di");
   brOnly(aluC(D, "ADDDI", 424, 180, 28, 54, "+"), "di");
   brOnly(ellC(D, "CMP", 430, 354, 12, 12, "="), "di");
-  const gdi = brOnly(comp(D, "GATEDI"), "di");
-  andShape(gdi, 462, 360, 22, 26);
+  const ga1 = brOnly(comp(D, "GAND1"), "di");
+  andShape(ga1, 492, 234, 18, 20);
+  const ga2 = brOnly(comp(D, "GAND2"), "di");
+  andShape(ga2, 492, 262, 18, 20);
+  E("circle", { cx: 489, cy: 267, r: 3, class: "sh" }, ga2);
+  const gor = brOnly(comp(D, "GOR"), "di");
+  orShape(gor, 518, 246, 20, 24);
 
   brOnly(ellC(D, "SH2", 690, 240, 22, 13, "<<2"), "mem");
   brOnly(aluC(D, "ADDB", 740, 168, 46, 88, "+"), "mem");
   fwOnly(muxC(D, "FA", 685, 288, 22, 72, [[300, "00"], [324, "01"], [348, "10"]]));
   fwOnly(muxC(D, "FB", 685, 396, 22, 72, [[408, "00"], [432, "01"], [456, "10"]]));
-  muxC(D, "MUXALU", 752, 418, 22, 60, [[432, "0"], [464, "1"]]);
+  muxC(D, "MUXALU", 752, 418, 22, 60, [[432, "0"], [464, "1"]]).setAttribute("data-omit", "1");
   const alu = aluC(D, "ALU", 802, 290, 80, 180, "ULA");
   D.aluOp = alu._op;
   brOnly(E("text", { x: 878, y: 349, "text-anchor": "end", class: "t2" }, alu, "Zero"), "mem");
@@ -2123,6 +2217,7 @@ const DP = makeDiagram(document.getElementById("svgPipe"));
   ellC(D, "ALUC", 822, 528, 34, 20, "U.C.", "ULA");
   muxC(D, "MUXRD", 868, 565, 22, 66, [[580, "0"], [616, "1"]]);
   const fu = fwOnly(rectC(D, "FU", 686, 646, 174, 42, "", ""));
+  fu.setAttribute("data-ua", "1");
   E("text", { x: 773, y: 661, "text-anchor": "middle", class: "t1" }, fu, "UA · adiantamento");
 
   const dm = rectC(D, "DM", 1010, 330, 110, 170, "", "");
@@ -2142,19 +2237,26 @@ const DP = makeDiagram(document.getElementById("svgPipe"));
   lbl(D, 326, 483, "16", "end", "bits"); lbl(D, 440, 483, "32", "start", "bits");
   lbl(D, 706, 508, "[5-0]"); lbl(D, 706, 520, "6 bits", "start", "bits");
   lbl(D, 1042, 240, "PCSrc = Branch·Zero"); lastLbl("data-br", "mem");
-  lbl(D, 486, 440, "PCSrc = Branch·(=)"); lastLbl("data-br", "di");
-  lbl(D, 216, 120, "IF.Flush", "end"); lastLbl("data-br", "di");
-  lbl(D, 474, 200, "End. desvio"); lastLbl("data-br", "di");
+  lbl(D, 452, 438, "PCSrc = Branch·(=)"); lastLbl("data-br", "di");
+  lbl(D, 452, 450, "+ NBranch·¬(=)"); lastLbl("data-br", "di");
+  lbl(D, 216, 120, "Elimina.BI", "end"); lastLbl("data-br", "di");
+  lbl(D, 472, 243, "End. desvio", "end"); lastLbl("data-br", "di");
+  lbl(D, 494, 230, "Branch"); lastLbl("data-br", "di"); lastLbl("class", "lbl ctl");
+  lbl(D, 478, 291, "NBranch"); lastLbl("data-br", "di"); lastLbl("class", "lbl ctl");
   const fwl = [[242, 544, "[25-21]", "start"], [506, 138, "0", "end"], [634, 110, "DI/EX.MemRead", "start"], [625, 180, "DI/EX.Rt", "start"],
     [864, 660, "EX/MEM.Rd", "start"], [864, 688, "MEM/ER.Rd", "start"], [656, 642, "Rs", "end"]];
-  fwl.forEach(([x, y, t, a]) => { lbl(D, x, y, t, a); lastLbl("data-mode", "fw"); });
+  fwl.forEach(([x, y, t, a]) => {
+    lbl(D, x, y, t, a); lastLbl("data-mode", "fw");
+    if (t === "DI/EX.MemRead" || t === "DI/EX.Rt") lastLbl("data-udc", "1");
+    else if (t !== "0") lastLbl("data-ua", "1");
+  });
 
   badge(D, "PCSrc", 36, 150, "start");
   badge(D, "RegDst", 905, 540); badge(D, "ALUSrc", 763, 404); badge(D, "ALUOp", 890, 500);
   badge(D, "Branch", 995, 186); D.badges.Branch.g.setAttribute("data-br", "mem");
   badge(D, "MemWrite", 1040, 318); badge(D, "MemRead", 1090, 300);
   badge(D, "MemToReg", 1201, 352); badge(D, "RegWrite", 340, 238);
-  [["PCWrite", 150, 64, "middle"], ["IF/IDWrite", 212, 100, "end"], ["Bolha", 540, 172, "middle"], ["Adianta.A", 730, 677, "middle"], ["Adianta.B", 818, 677, "middle"]].forEach(([k, x, y, a]) => {
+  [["PCWrite", 150, 64, "middle"], ["IF/IDWrite", 212, 100, "end"], ["Bolha", 385, 172, "middle"], ["Adianta.A", 730, 677, "middle"], ["Adianta.B", 818, 677, "middle"]].forEach(([k, x, y, a]) => {
     badge(D, k, x, y, a);
     D.badges[k].g.setAttribute("data-mode", "fw");
   });
@@ -2168,7 +2270,7 @@ const DP = makeDiagram(document.getElementById("svgPipe"));
 
 function pipeVisible(D, id) {
   const m = D.wmode[id], b = D.wbr[id];
-  if (m && (m === "fw") !== PIPE.fw) return false;
+  if (m === "base") return false;
   if (b && b !== PIPE.br) return false;
   return true;
 }
@@ -2224,13 +2326,14 @@ function parsePipe(text) {
       const mn = low.split(" ")[0];
       const args = low.slice(mn.length).split(",").map(x => x.trim()).filter(Boolean);
       let canon = low;
-      if (mn === "beq" && args.length === 3 && !/^-?(0x[0-9a-f]+|\d+)$/.test(args[2])) {
+      if ((mn === "beq" || mn === "bne") && args.length === 3 && !/^-?(0x[0-9a-f]+|\d+)$/.test(args[2])) {
         if (!(args[2] in labels)) throw new Error("rótulo não encontrado: " + args[2]);
-        canon = "beq " + args[0] + ", " + args[1] + ", " + ((labels[args[2]] - (it.addr + 4)) / 4);
+        canon = mn + " " + args[0] + ", " + args[1] + ", " + ((labels[args[2]] - (it.addr + 4)) / 4);
         it.target = args[2].toUpperCase();
       }
       const p = parse(canon);
-      if (p.cls !== "R" && p.cls !== "LW" && p.cls !== "SW" && p.cls !== "BEQ") throw new Error(p.mn + " não está na tabela de controle do pipeline (slide 27 tem só tipo-R, lw, sw e beq)");
+      if (p.cls === "BNE" && PIPE.br !== "di") throw new Error("bne só com o desvio no DI: o NBranch aparece no quadro de 17/11, mas o slide 28 (desvio no MEM) só tem o beq");
+      if (p.cls !== "R" && p.cls !== "LW" && p.cls !== "SW" && p.cls !== "BEQ" && p.cls !== "BNE") throw new Error(p.mn + " não está na tabela de controle do pipeline (slide 27 tem só tipo-R, lw, sw e beq; o bne vem do quadro de 17/11)");
       it.p = p;
     } catch (e) { errs.push("linha " + it.line + ": " + e.message); }
   });
@@ -2240,6 +2343,7 @@ function pInst(it, uid) {
   const p = it.p;
   let name = it.src.replace(/\s+/g, " ").replace(/\s*,\s*/g, ", ");
   if (it.explicit) name = it.addr + " " + name;
+  if (p.cls === "BNE") return { uid, it, p, cls: "BEQ", ne: true, addr: it.addr, sig: PSIG.BNE, rows: {}, name, bub: false };
   return { uid, it, p, cls: p.cls, addr: it.addr, sig: PSIG[p.cls], rows: {}, name, bub: false };
 }
 function pBubble(uid, why) { return { uid, cls: "BUB", sig: PSIG.BUB, rows: {}, name: "bolha", bub: true, why, p: { rs: 0, rt: 0, rd: 0, imm: 0, funct: 0, word: 0, sym: "" } }; }
@@ -2259,7 +2363,7 @@ function pAlu(i, a, b) {
   if ((a | 0) < (b | 0)) return 1;
   return 0;
 }
-function simPipe(prog, fw, br) {
+function simPipe(prog, fw, br, hdu) {
   const R = new Array(32).fill(0);
   const ri = parseKV(document.getElementById("pipeRegs").value, k => regOf(k));
   for (const k in ri) R[k] = ri[k];
@@ -2304,6 +2408,7 @@ function simPipe(prog, fw, br) {
         I.zero = 0;
         if (I.vRs === I.vRt) I.zero = 1;
         I.taken = I.zero === 1;
+        if (I.ne) I.taken = I.zero === 0;
       }
     }
     const X = c.EX;
@@ -2320,6 +2425,9 @@ function simPipe(prog, fw, br) {
         c.fwA = fa[0]; c.fwB = fb[0];
         if (fa[1] !== null) a = fa[1];
         if (fb[1] !== null) b = fb[1];
+        [[fa, "A", X.p.rs, true], [fb, "B", X.p.rt, X.cls !== "LW"]].forEach(([f, sd, reg, use]) => {
+          if (f[0] === "10" && f[2].cls === "LW" && use) c.ev.push({ k: "fwlw", s: sd, to: X, from: f[2], reg, val: f[1] });
+        });
         if (fa[2]) c.ev.push({ k: "fw", s: "A", v: fa[0], to: X, from: fa[2], reg: X.p.rs, val: a, used: !(br === "di" && X.cls === "BEQ") });
         if (fb[2]) c.ev.push({ k: "fw", s: "B", v: fb[0], to: X, from: fb[2], reg: X.p.rt, val: b, used: X.cls !== "LW" && !(br === "di" && X.cls === "BEQ") });
       }
@@ -2354,7 +2462,7 @@ function simPipe(prog, fw, br) {
         if (M.taken) { c.pcsrc = 1; c.brI = M; }
       }
     }
-    if (fw && X && X.sig.MemRead === "1" && I && !I.bub && I.cls !== "NOP" && (X.p.rt === I.p.rs || X.p.rt === I.p.rt)) c.stall = true;
+    if (hdu && X && X.sig.MemRead === "1" && I && !I.bub && I.cls !== "NOP" && (X.p.rt === I.p.rs || X.p.rt === I.p.rt)) c.stall = true;
     if (c.pcsrc) c.stall = false;
     if (br === "di" && I && !I.bub && I.cls === "BEQ" && I.taken && !c.stall) { c.pcsrc = 1; c.brI = I; }
     if (c.stall) c.ev.push({ k: "stall", lw: X, who: I, reg: X.p.rt });
@@ -2404,7 +2512,7 @@ function simPipe(prog, fw, br) {
     seen[key] = e;
     conf.push(e);
   }));
-  return { cycles, insts, R, R0, mem, mem0, capped, conf, fw, br };
+  return { cycles, insts, R, R0, mem, mem0, capped, conf, fw, br, hdu };
 }
 function runPipe() {
   const err = document.getElementById("pipeErr");
@@ -2412,7 +2520,8 @@ function runPipe() {
   if (pr.errs.length) { err.textContent = pr.errs.join(" · "); err.hidden = false; PSIM = null; return; }
   if (!pr.items.length) { err.textContent = "Escreva pelo menos uma instrução."; err.hidden = false; PSIM = null; return; }
   err.hidden = true;
-  PSIM = simPipe(pr, PIPE.fw, PIPE.br);
+  PSIM = simPipe(pr, PIPE.fw, PIPE.br, PIPE.hdu);
+  pipeColors();
   if (S.pcyc >= PSIM.cycles.length) S.pcyc = PSIM.cycles.length - 1;
   if (S.pcyc < 0) S.pcyc = 0;
 }
@@ -2423,19 +2532,19 @@ function pcur() { if (!PSIM || !PSIM.cycles.length) return null; return PSIM.cyc
 function pReal(i) { return !!i && !i.bub && i.cls !== "NOP"; }
 function pIs(i, k, v) { if (!i) return false; return i.sig[k] === v; }
 function pName(i) { if (!i) return "vazio"; if (i.bub && i.why === "desvio") return "bolha (descarte)"; if (i.bub) return "bolha"; return i.name; }
-function pipeOn(c, fw) {
+function pipeOn(c, fw, stg) {
   const on = {};
-  function add(l) { l.forEach(id => { on[id] = 1; }); }
+  let cur = "IF";
+  function add(l) { l.forEach(id => { on[id] = 1; if (stg && !(id in stg)) stg[id] = cur; }); }
   if (c.IF || c.pcsrc) add(["mux_pc"]);
   if (c.IF) { add(["pc_im", "pc_add", "four", "pc4_if", "ibus_if"]); if (!c.pcsrc) add(["pc4_mux"]); }
   const I = c.ID, di = PIPE.br === "di";
+  cur = "ID";
   if (I) {
-    add(["ibus_id", "c_ctl_wb", "c_ctl_m", "c_ctl_ex"]);
-    if (di) add(["c_branch_di", "c_pcsrc_di", "c_ifflush"]);
-    if (fw) {
-      add(["hz_in", "hz_rt", "c_hzmr", "c_pcwrite", "c_ifidwrite", "c_bolha", "c_ctl_mux"]);
-      if (c.stall) add(["c_ctl_zero"]); else add(["c_ctl_uc"]);
-    } else add(["c_ctl_out"]);
+    add(["ibus_id", "c_ctl_wb", "c_ctl_m", "c_ctl_ex", "c_ctl_mux"]);
+    if (di) add(["c_branch_di", "c_nbranch_di", "c_and1_di", "c_and2_di", "c_pcsrc_di", "c_ifflush"]);
+    if (c.stall) add(["c_ctl_zero"]); else add(["c_ctl_uc"]);
+    if (PIPE.hdu) add(["hz_in", "hz_rt", "c_hzmr", "c_pcwrite", "c_ifidwrite", "c_bolha"]);
     if (pReal(I)) {
       add(["op"]);
       if (I.cls === "R") add(["rs", "rt", "rd1", "rd2", "rd_idex"]);
@@ -2443,21 +2552,19 @@ function pipeOn(c, fw) {
       if (I.cls === "SW") add(["rs", "rt", "imm", "se_out", "rd1", "rd2"]);
       if (I.cls === "BEQ") add(["rs", "rt", "imm", "se_out", "rd1", "rd2"]);
       if (I.cls === "BEQ" && !di) add(["pc4_id"]);
-      if (I.cls === "BEQ" && di) { add(["pc4_di", "ext_di", "sh_di", "cmp_a", "cmp_b", "cmp_out"]); if (c.pcsrc) add(["bt_di"]); }
+      if (I.cls === "BEQ" && di) { add(["pc4_di", "ext_di", "sh_di", "cmp_a", "cmp_b", "cmp_out", "cmp_n"]); if (c.pcsrc) add(["bt_di"]); }
       if (fw) { add(["rs_idex"]); if (I.cls !== "LW") add(["rt_idex"]); }
     }
   }
   const X = c.EX;
+  cur = "EX";
   if (X) {
     add(["c_extrunk", "c_alusrc", "c_aluop", "c_regdst", "c_wbpass", "c_mpass"]);
     if (fw) add(["c_adA", "c_adB", "rs_ex", "rt_fu", "exmem_rd", "memer_rd"]);
     if (pReal(X) && !(di && X.cls === "BEQ")) {
-      let ra = ["rd1_ex"], rb = ["rd2_ex"];
-      if (fw) {
-        ra = ["fa_out"]; rb = ["fb_out"];
-        if (c.fwA === "00") ra.push("rd1_fa");
-        if (c.fwB === "00") rb.push("rd2_fb");
-      }
+      const ra = ["fa_out"], rb = ["fb_out"];
+      if (c.fwA === "00") ra.push("rd1_fa");
+      if (c.fwB === "00") rb.push("rd2_fb");
       add(["mux_alu", "aluctrl"]);
       add(ra);
       if (X.cls === "R") add(rb.concat(["funct", "res_ex", "rd_ex", "dest_ex"]));
@@ -2474,6 +2581,7 @@ function pipeOn(c, fw) {
     }
   }
   const M = c.MEM;
+  cur = "MEM";
   if (M) {
     add(["c_mtrunk", "c_memwrite", "c_memread", "c_wbpass2"]);
     if (!di) add(["c_branch", "c_pcsrc"]);
@@ -2485,6 +2593,7 @@ function pipeOn(c, fw) {
     }
   }
   const W = c.WB;
+  cur = "WB";
   if (W) {
     add(["c_wbtrunk", "c_memtoreg", "c_regwrite"]);
     if (pReal(W)) {
@@ -2494,27 +2603,31 @@ function pipeOn(c, fw) {
   }
   return on;
 }
-function pipeComps(c, fw) {
+function pipeComps(c, fw, cst) {
   const cm = {}, wr = {};
-  function add(l) { l.forEach(id => { cm[id] = 1; }); }
+  let cur = "IF";
+  function add(l) { l.forEach(id => { cm[id] = 1; if (cst && !(id in cst)) cst[id] = cur; }); }
   if (c.IF) add(["PC", "IM", "ADD4", "MUXPC"]);
   if (c.pcsrc) add(["MUXPC", "PC"]);
   const I = c.ID, X = c.EX, M = c.MEM, W = c.WB;
-  if (I) { add(["BIDI"]); if (fw) add(["HDU", "MUXCTL"]); }
   const di = PIPE.br === "di";
+  cur = "ID";
+  if (I) { add(["BIDI", "MUXCTL"]); if (PIPE.hdu) add(["HDU"]); }
   if (pReal(I)) { add(["UC", "REG"]); if (I.cls !== "R") add(["SE"]); }
-  if (di && pReal(I) && I.cls === "BEQ") add(["SH2DI", "ADDDI", "CMP", "GATEDI"]);
+  if (di && pReal(I) && I.cls === "BEQ") add(["SH2DI", "ADDDI", "CMP", "GAND1", "GAND2", "GOR"]);
+  cur = "EX";
   if (X) { add(["DIEX", "DIEX_WB", "DIEX_M", "DIEX_EX"]); if (fw) add(["FU"]); }
   if (pReal(X) && !(di && X.cls === "BEQ")) {
-    add(["ALU", "ALUC", "MUXALU"]);
-    if (fw) add(["FA", "FB"]);
+    add(["ALU", "ALUC", "MUXALU", "FA", "FB"]);
     if (X.cls === "R" || X.cls === "LW") add(["MUXRD"]);
     if (X.cls === "BEQ") add(["SH2", "ADDB"]);
   }
+  cur = "MEM";
   if (M) add(["EXMEM", "EXMEM_WB", "EXMEM_M"]);
   if (M && !di) add(["GATE"]);
   if (pReal(M) && (M.cls === "LW" || M.cls === "SW")) add(["DM"]);
   if (pReal(M) && M.cls === "SW") wr.DM = 1;
+  cur = "WB";
   if (W) add(["MEMER", "MEMER_WB"]);
   if (pReal(W) && (W.cls === "R" || W.cls === "LW")) { add(["MUXMR", "REG"]); wr.REG = 1; }
   return { cm, wr };
@@ -2527,14 +2640,12 @@ function pipeSignals(c, fw) {
   ["Branch", "MemRead", "MemWrite"].forEach(k => { s[k] = pSig(c.MEM, k); });
   ["RegWrite", "MemToReg"].forEach(k => { s[k] = pSig(c.WB, k); });
   s.PCSrc = String(c.pcsrc);
-  if (PIPE.br === "di") { s.BranchDI = pSig(c.ID, "Branch"); s["IF.Flush"] = String(c.pcsrc); }
-  if (fw) {
-    s["Adianta.A"] = "XX"; s["Adianta.B"] = "XX";
-    if (c.EX) { s["Adianta.A"] = c.fwA; s["Adianta.B"] = c.fwB; }
-    s.PCWrite = pBit(c.stall, "0", "1");
-    s["IF/IDWrite"] = pBit(c.stall, "0", "1");
-    s.Bolha = pBit(c.stall, "1", "0");
-  }
+  if (PIPE.br === "di") { s.BranchDI = pSig(c.ID, "Branch"); s.NBranchDI = pSig(c.ID, "NBranch"); s["Elimina.BI"] = String(c.pcsrc); }
+  s["Adianta.A"] = "XX"; s["Adianta.B"] = "XX";
+  if (c.EX) { s["Adianta.A"] = c.fwA; s["Adianta.B"] = c.fwB; }
+  s.PCWrite = pBit(c.stall, "0", "1");
+  s["IF/IDWrite"] = pBit(c.stall, "0", "1");
+  s.Bolha = pBit(c.stall, "1", "0");
   return s;
 }
 function anyOne(i, ks) { if (!i) return false; return ks.some(k => /1/.test(i.sig[k])); }
@@ -2544,7 +2655,7 @@ function pipeCtlVal(id) {
   const I = c.ID, X = c.EX, M = c.MEM, W = c.WB;
   const ex = ["RegDst", "ALUSrc", "ALUOp"], mm = ["Branch", "MemRead", "MemWrite"], wb = ["RegWrite", "MemToReg"];
   let idSig = I;
-  if (PIPE.fw && c.stall) idSig = null;
+  if (c.stall) idSig = null;
   const m = {
     c_pcsrc: c.pcsrc === 1, c_pcwrite: !c.stall, c_ifidwrite: !c.stall, c_bolha: c.stall, c_hzmr: pIs(X, "MemRead", "1"),
     c_ctl_out: anyOne(I, ex.concat(mm, wb)), c_ctl_uc: anyOne(I, ex.concat(mm, wb)), c_ctl_zero: false, c_ctl_mux: anyOne(idSig, ex.concat(mm, wb)),
@@ -2555,7 +2666,10 @@ function pipeCtlVal(id) {
     c_wbpass2: anyOne(M, wb), c_mtrunk: anyOne(M, mm), c_branch: pIs(M, "Branch", "1"),
     c_memwrite: pIs(M, "MemWrite", "1"), c_memread: pIs(M, "MemRead", "1"),
     c_wbtrunk: anyOne(W, wb), c_memtoreg: pIs(W, "MemToReg", "1"), c_regwrite: pIs(W, "RegWrite", "1"),
-    c_branch_di: pIs(I, "Branch", "1"), c_pcsrc_di: c.pcsrc === 1, c_ifflush: c.pcsrc === 1
+    c_branch_di: pIs(I, "Branch", "1"), c_pcsrc_di: c.pcsrc === 1, c_ifflush: c.pcsrc === 1,
+    c_nbranch_di: pIs(I, "NBranch", "1"),
+    c_and1_di: pIs(I, "Branch", "1") && I.zero === 1 && !c.stall,
+    c_and2_di: pIs(I, "NBranch", "1") && I.zero === 0 && !c.stall
   };
   if (id in m) return m[id];
   return true;
@@ -2633,24 +2747,51 @@ function pLbl(id) {
 }
 const PWAVE = {
   IF: [["pc_im", "pc_add", "four"], ["ibus_if", "pc4_if", "pc4_mux"], ["mux_pc"]],
-  ID: [["ibus_id", "bus_up", "bus_dn", "hz_in"], ["op", "rs", "rt", "imm", "rs_idex", "rt_idex", "rd_idex", "pc4_id", "pc4_di", "hz_rt", "c_hzmr"], ["rd1", "rd2", "se_out", "ext_di", "cmp_a", "cmp_b", "c_ctl_out", "c_ctl_uc", "c_ctl_zero", "c_ctl_mux", "c_bolha", "c_pcwrite", "c_ifidwrite", "c_branch_di"], ["c_ctl_wb", "c_ctl_m", "c_ctl_ex", "sh_di", "cmp_out", "c_pcsrc_di", "c_ifflush", "bt_di"]],
+  ID: [["ibus_id", "bus_up", "bus_dn", "hz_in"], ["op", "rs", "rt", "imm", "rs_idex", "rt_idex", "rd_idex", "pc4_id", "pc4_di", "hz_rt", "c_hzmr"], ["rd1", "rd2", "se_out", "ext_di", "cmp_a", "cmp_b", "c_ctl_out", "c_ctl_uc", "c_ctl_zero", "c_ctl_mux", "c_bolha", "c_pcwrite", "c_ifidwrite", "c_branch_di", "c_nbranch_di"], ["c_ctl_wb", "c_ctl_m", "c_ctl_ex", "sh_di", "cmp_out", "cmp_n"], ["c_and1_di", "c_and2_di"], ["c_pcsrc_di", "c_ifflush", "bt_di"]],
   EX: [["rd1_ex", "rd1_fa", "rd2_ex", "rd2_fb", "ext_alu", "pc4_ex", "sh_in", "funct", "rt_ex", "rd_ex", "rs_ex", "rt_fu", "c_extrunk", "c_wbpass", "c_mpass"], ["fa_out", "fb_out", "sh_addb", "c_alusrc", "c_aluop", "c_regdst", "c_adA", "c_adB", "exmem_rd", "memer_rd"], ["mux_alu", "aluctrl", "data_w", "dest_ex"], ["res_ex", "zero_ex", "bt_ex"]],
   MEM: [["res_mem", "zero_mem", "dest_mem", "wdata_mem", "c_mtrunk", "c_wbpass2", "fwd10_t"], ["addr", "byp", "c_branch", "c_memread", "c_memwrite", "fwd10_a", "fwd10_b"], ["rdata", "c_pcsrc"], ["bt_back"]],
   WB: [["rdata_er", "alu_er", "c_wbtrunk"], ["c_memtoreg", "c_regwrite"], ["wb_out", "wreg_er", "fwd01_t"], ["fwd01_a", "fwd01_b"]]
 };
+const PORD = { IF: 0, ID: 1, EX: 2, MEM: 3, WB: 4 };
+const PSN = { IF: "BI", ID: "DI", EX: "EX", MEM: "MEM", WB: "ER" };
+const PSEQ = (function () {
+  const q = {};
+  for (const k in PWAVE) q[k] = PWAVE[k].map(w => w.filter(id => id.indexOf("fwd") !== 0));
+  q.EX = [q.EX[0].concat(["fwd10_t", "fwd01_t"]), ["fwd10_a", "fwd10_b", "fwd01_a", "fwd01_b"]].concat(q.EX.slice(1));
+  return q;
+})();
+function pipeUnits(c) {
+  let units = ["PC", "BIDI", "DIEX", "EXMEM", "MEMER"];
+  if (c.stall) units = ["DIEX", "EXMEM", "MEMER"];
+  const pc = pipeComps(c, PIPE.fw);
+  if (pc.wr.REG) units.push("REG");
+  if (pc.wr.DM) units.push("DM");
+  return units;
+}
 function pipeAnimSteps() {
   if (!PSIM) return [];
-  return PSIM.cycles.map((c, i) => {
-    const on = pipeOn(c, PIPE.fw);
-    const waves = [[], [], [], []];
-    for (const k in PWAVE) PWAVE[k].forEach((w, j) => w.forEach(id => { if (on[id]) waves[j].push(id); }));
-    let units = ["PC", "BIDI", "DIEX", "EXMEM", "MEMER"];
-    if (c.stall) units = ["DIEX", "EXMEM", "MEMER"];
-    const pc = pipeComps(c, PIPE.fw);
-    if (pc.wr.REG) units.push("REG");
-    if (pc.wr.DM) units.push("DM");
-    return { t: "CC" + c.t + ": " + pipeSummary(c), idx: i, waves: waves.filter(w => w.length), units, wait: "C" };
+  if (!PIPE.seq) {
+    return PSIM.cycles.map((c, i) => {
+      const on = pipeOn(c, PIPE.fw);
+      const waves = [];
+      for (const k in PWAVE) PWAVE[k].forEach((w, j) => { if (!waves[j]) waves[j] = []; w.forEach(id => { if (on[id]) waves[j].push(id); }); });
+      return { t: "CC" + c.t + ": " + pipeSummary(c), idx: i, waves: waves.filter(w => w.length), units: pipeUnits(c), wait: "C" };
+    });
+  }
+  const out = [];
+  PSIM.cycles.forEach((c, i) => {
+    const stg = {};
+    const on = pipeOn(c, PIPE.fw, stg);
+    const keys = PSTG.map(p => p[0]).filter(k => c[k] || (k === "IF" && c.pcsrc));
+    const pre = [];
+    keys.forEach((k, j) => {
+      const waves = PSEQ[k].map(w => w.filter(id => on[id] && stg[id] === k)).filter(w => w.length);
+      const last = j === keys.length - 1;
+      out.push({ t: "CC" + c.t + " · " + PSN[k] + ": " + pName(c[k]) + " (" + (j + 1) + "/" + keys.length + ")", idx: i, stage: k, waves, pre: pre.slice(), units: last ? pipeUnits(c) : [], wait: last ? "C" : 0, hold: 900 });
+      for (const id in stg) if (stg[id] === k) pre.push(id);
+    });
   });
+  return out;
 }
 function pipeSummary(c) {
   const parts = [];
@@ -2661,11 +2802,13 @@ function pipeSummary(c) {
 /* ---------- Pipeline: render ---------- */
 function renderPipe() {
   const D = DP, fw = PIPE.fw;
-  D.svg.classList.toggle("pmode-fw", fw);
-  D.svg.classList.toggle("pmode-base", !fw);
+  D.svg.classList.add("pmode-fw");
+  D.svg.classList.remove("pmode-base");
+  D.svg.classList.toggle("ua-off", !fw);
+  D.svg.classList.toggle("udc-off", !PIPE.hdu);
   D.svg.classList.toggle("pbr-di", PIPE.br === "di");
   D.svg.classList.toggle("pbr-mem", PIPE.br !== "di");
-  const hk = fw + PIPE.br;
+  const hk = PIPE.br;
   if (D.hopKey !== hk) { pipeHopify(D); D.hopKey = hk; }
   const box = document.getElementById("pipeSteps"); box.innerHTML = "";
   const c = pcur();
@@ -2673,7 +2816,9 @@ function renderPipe() {
     applyWires(D, {}, {}); applyComps(D, {}, {});
     for (const k in D.stg) D.stg[k].textContent = "";
     document.getElementById("pipeExplain").innerHTML = "<p class='err'>Corrija o programa acima para ver o pipeline.</p>";
-    ["pipeNowSig", "pipeChart", "pipeTcap", "pipeRegsTbl", "pipeHaz", "pipeTime"].forEach(id => { document.getElementById(id).innerHTML = ""; });
+    ["pipeChart", "pipeTcap", "pipeRegsTbl", "pipeHaz", "pipeTime"].forEach(id => { document.getElementById(id).innerHTML = ""; });
+    pipeDecor(null);
+    pipeArrows();
     renderPipeSigTbl(null);
     return;
   }
@@ -2687,10 +2832,19 @@ function renderPipe() {
     b.onclick = () => { animOff(); S.pcyc = i; renderPipe(); };
     box.appendChild(b);
   });
-  const on = pipeOn(c, fw);
+  const stg = {}, cst = {};
+  let on = pipeOn(c, fw, stg);
+  const pc = pipeComps(c, fw, cst);
+  if (A.on && PIPE.seq && A.pst) {
+    const lim = PORD[A.pst], o2 = {}, c2 = {}, w2 = {};
+    for (const id in on) if (PORD[stg[id]] <= lim) o2[id] = 1;
+    for (const id in pc.cm) if (PORD[cst[id]] <= lim) c2[id] = 1;
+    if (pc.wr.DM && lim >= PORD.MEM) w2.DM = 1;
+    if (pc.wr.REG && lim >= PORD.WB) w2.REG = 1;
+    on = o2; pc.cm = c2; pc.wr = w2;
+  }
   setBusP(D, on, c);
   applyWires(D, on, on);
-  const pc = pipeComps(c, fw);
   applyComps(D, pc.cm, pc.wr);
   const sg = pipeSignals(c, fw);
   for (const k in D.badges) { let v = sg[k]; if (v === undefined) v = "X"; setBadge(D, k, k, v); }
@@ -2715,9 +2869,9 @@ function renderPipe() {
     t.textContent = txt;
     t.setAttribute("class", cls);
   });
-  renderPipeExplain(c, fw);
+  pipeDecor(c);
+  renderPipeExplain(c, fw, sg);
   renderPipeSigTbl(c);
-  renderPipeSig(c, fw, sg);
   renderPipeChart(c);
   renderPipeRegs(c, fw);
   renderPipeHaz(fw);
@@ -2727,9 +2881,8 @@ function renderPipe() {
 function pLine(stage, html) { return "<div class='pst'><span class='tg'>" + stage + "</span><span>" + html + "</span></div>"; }
 function pn(i) { return "<b class='mono'>" + escapeHtml(i.name) + "</b>"; }
 function pList(arr) { if (!arr.length) return "nada"; return arr.map(i => escapeHtml(i.name)).join(", "); }
-function renderPipeExplain(c, fw) {
-  const ex = document.getElementById("pipeExplain");
-  const rows = [];
+function renderPipeExplain(c, fw, sg) {
+  const L = {};
   const I = c.ID, X = c.EX, M = c.MEM, W = c.WB, di = PIPE.br === "di";
   const SRC = { "10": "do EX/MEM", "01": "do MEM/ER", "00": "do banco, via DI/EX" };
   let where = "MEM";
@@ -2741,11 +2894,11 @@ function renderPipeExplain(c, fw) {
     if (c.pcsrc) t += " PCSrc = 1 (vem do " + where + "): no fim do ciclo o PC recebe " + c.brI.bt + ", o endereço do desvio.";
     if (c.flush && di) t += " <span class='bad'>Descartada: IF.Flush (Elimina.BI) zera a instrução no BI/DI (slide 45).</span>";
     else if (c.flush) t += " <span class='bad'>Descartada no fim do ciclo.</span>";
-    rows.push(pLine("BI", t));
+    L.IF = t;
   } else {
     let t = "Nenhuma instrução nova (o programa acabou ou o endereço está vazio).";
     if (c.pcsrc) t = "PCSrc = 1 (vem do " + where + "): no fim do ciclo o PC recebe " + c.brI.bt + ".";
-    rows.push(pLine("BI", t));
+    L.IF = t;
   }
   if (I) {
     let t = pName(I) + ": sinais = 0.";
@@ -2759,10 +2912,12 @@ function renderPipeExplain(c, fw) {
       if (I.cls === "BEQ" && di) {
         let eq = "diferentes";
         if (I.zero) eq = "iguais";
-        t += " O comparador (=) vê que são " + eq + "; o somador do DI calcula PC + 4 + (imm << 2) = " + I.bt + ".";
+        t += " O comparador (=) vê que são " + eq + ": (=) = " + I.zero + ". O somador do DI calcula PC + 4 + (imm << 2) = " + I.bt + ".";
+        let f = "Branch = 1 e (=) = " + I.zero;
+        if (I.ne) f = "NBranch = 1 e ¬(=) = " + (1 - I.zero);
         if (c.stall) t += " Como está parada, o desvio só é decidido quando ela sair da parada.";
-        else if (I.taken) t += " Branch = 1 e (=) = 1 → PCSrc = 1: desvia já no DI.";
-        else t += " PCSrc = 0: não desvia (a predição de não desviar acertou).";
+        else if (I.taken) t += " " + f + ": a AND dá 1, o OR dá 1 → PCSrc = 1 e Elimina.BI = 1. Desvia já no DI.";
+        else t += " " + f + ": as duas AND dão 0 → PCSrc = 0. Não desvia (a predição de não desviar acertou).";
       }
       if (c.idAgain) t += " Está no DI pela segunda vez (parada).";
     }
@@ -2772,7 +2927,7 @@ function renderPipeExplain(c, fw) {
       else t += " <span class='bad'>Conflito: lê $" + k.reg + " antes de " + escapeHtml(k.p.name) + " escrever. Pega o valor antigo.</span>";
     });
     if (c.flush && !I.bub && !di) t += " <span class='bad'>Descartada no fim do ciclo.</span>";
-    rows.push(pLine("DI", t));
+    L.ID = t;
   }
   if (X) {
     let t = pName(X) + ": sinais EX, M e WB = 0. Nada é escrito por ela.";
@@ -2781,18 +2936,22 @@ function renderPipeExplain(c, fw) {
     else if (pReal(X)) {
       const op = { R: "A " + X.p.sym + " B", LW: "A + imm (endereço)", SW: "A + imm (endereço)", BEQ: "A − B (só para o Zero)" }[X.cls];
       t = pn(X) + ": a ULA faz " + op + " = " + fmtV(X.res) + ".";
+      if (!fw) t += " Sem a UA, os muxes antes da ULA ficam em 00: A e B são os valores lidos do banco no DI.";
       if (fw) {
         t += " Adianta.A = " + c.fwA + " (A = " + fmtV(X.A) + " " + SRC[c.fwA] + ")";
         if (X.cls !== "LW") t += ", Adianta.B = " + c.fwB + " (B = " + fmtV(X.Bf) + " " + SRC[c.fwB] + ").";
         else if (c.fwB !== "00") t += ". Adianta.B = " + c.fwB + ", mas ALUSrc = 1 escolhe o imediato: o valor adiantado é ignorado.";
         else t += ".";
       }
+      c.ev.filter(e => e.k === "fwlw").forEach(e => {
+        t += " <span class='bad'>Valor errado em Adianta." + e.s + ": o EX/MEM tem o endereço que o " + escapeHtml(e.from.name) + " calculou (" + fmtV(e.val) + "), não o dado da memória. Sem a UDC, o adiantamento não resolve lw seguido de uso (slide 37).</span>";
+      });
       if (X.cls === "BEQ") t += " Em paralelo: PC + 4 + (imm << 2) = " + X.bt + ". Zero = " + X.zero + " vai para o EX/MEM.";
       if (X.cls === "R" || X.cls === "LW") t += " RegDst = " + X.sig.RegDst + ": destino $" + X.dest + ".";
       if (X.cls === "SW") t += " O dado a gravar (" + fmtV(X.Bf) + ") segue para o EX/MEM.";
     }
     if (c.flush && !X.bub && !di) t += " <span class='bad'>Descartada no fim do ciclo.</span>";
-    rows.push(pLine("EX", t));
+    L.EX = t;
   }
   if (M) {
     let t = pName(M) + ": MemRead = 0 e MemWrite = 0.";
@@ -2808,7 +2967,7 @@ function renderPipeExplain(c, fw) {
         t += " Desvia para " + M.bt + ". A predição de não desviar errou: " + pList(gone) + " (BI, DI e EX) são descartadas (slide 42).";
       } else t += " Não desvia: segue PC + 4 (a predição de não desviar acertou).";
     }
-    rows.push(pLine("MEM", t));
+    L.MEM = t;
   }
   if (W) {
     let t = pName(W) + ": RegWrite = 0.";
@@ -2818,47 +2977,33 @@ function renderPipeExplain(c, fw) {
       if (W.dest === 0) t += "o destino é $0, a escrita é descartada.";
       else t += "$" + W.dest + " ← " + fmtV(W.wbv) + " na 1ª metade do ciclo.";
     } else if (pReal(W)) t = pn(W) + ": RegWrite = 0, não escreve no banco.";
-    rows.push(pLine("ER", t));
+    L.WB = t;
   }
-  const Tc = Math.max(T.M, T.R, T.A);
-  ex.innerHTML = "<div class='rtl'>CC" + c.t + " · " + escapeHtml(pipeSummary(c)) + "</div>" + rows.join("") +
-    "<div class='unit'>Cada estágio dura um ciclo = max(M, R, ULA) = " + fmt(Tc) + " ns (slide 5). Os 5 estágios trabalham ao mesmo tempo, cada um com uma instrução.</div>";
+  renderPipeNow(c, fw, sg, L);
 }
-function renderPipeSig(c, fw, sg) {
-  const box = document.getElementById("pipeNowSig");
+function pSigChips(c, fw, sg) {
   const di = PIPE.br === "di";
-  let from = "vem do MEM";
-  if (di) from = "vem do DI";
-  const grp = [["BI", from, ["PCSrc"]]];
-  if (fw) grp[0][2].push("PCWrite");
-  const dk = [];
-  if (fw) dk.push("IF/IDWrite", "Bolha");
-  if (di) dk.push("BranchDI", "IF.Flush");
-  if (dk.length) grp.push(["DI", pName(c.ID), dk]);
-  const ek = ["RegDst", "ALUOp", "ALUSrc"];
-  if (fw) ek.push("Adianta.A", "Adianta.B");
-  grp.push(["EX", pName(c.EX), ek]);
-  const mk = ["MemRead", "MemWrite"];
-  if (!di) mk.unshift("Branch");
-  grp.push(["MEM", pName(c.MEM), mk]);
-  grp.push(["ER", pName(c.WB), ["RegWrite", "MemToReg"]]);
-  let html = "";
-  grp.forEach(([n, who, ks]) => {
-    html += "<div class='sigrow'><span class='sl'>" + n + "</span>" + ks.map(k => {
-      const v = sg[k];
+  const G = { IF: ["PCSrc", "PCWrite"], ID: ["IF/IDWrite", "Bolha"], EX: ["RegDst", "ALUOp", "ALUSrc", "Adianta.A", "Adianta.B"], MEM: ["MemRead", "MemWrite"], WB: ["RegWrite", "MemToReg"] };
+  if (di) G.ID.push("BranchDI", "NBranchDI", "Elimina.BI"); else G.MEM.unshift("Branch");
+  const fixed = { "Adianta.A": !fw, "Adianta.B": !fw, PCWrite: !PIPE.hdu, "IF/IDWrite": !PIPE.hdu, Bolha: !PIPE.hdu };
+  const out = {};
+  for (const k in G) {
+    out[k] = G[k].map(n => {
+      const v = sg[n];
       let cl = "sc";
       if (/1/.test(v)) cl += " one"; else if (/^X+$/.test(v)) cl += " x";
-      let nm = k;
-      if (k === "BranchDI") nm = "Branch";
-      return "<span class='" + cl + "'>" + nm + " <b>" + v + "</b></span>";
-    }).join("") + "<span class='who'>" + escapeHtml(who) + "</span></div>";
-  });
-  box.innerHTML = html;
+      let nm = n.replace("DI", "");
+      if (n === "IF/IDWrite") nm = n;
+      let extra = "";
+      if (fixed[n]) extra = " <i>fixo</i>";
+      return "<span class='" + cl + "'>" + nm + " <b>" + v + "</b>" + extra + "</span>";
+    }).join("");
+  }
+  return out;
 }
 function renderPipeChart(c) {
   const tb = document.getElementById("pipeChart");
   const n = PSIM.cycles.length;
-  const SN = { IF: "BI", ID: "DI", EX: "EX", MEM: "MEM", WB: "ER" };
   let hh = "<thead><tr><th>Instrução</th>";
   for (let t = 1; t <= n; t++) {
     let cl = "";
@@ -2872,16 +3017,18 @@ function renderPipeChart(c) {
     let rc = "";
     if (i.bub) rc = "bub";
     if (i.discarded) rc = "dis";
-    hh += "<tr class='" + rc + "'><td class='nm'>" + escapeHtml(pName(i)) + "</td>";
+    let st = "";
+    if (i.ci >= 0) st = " data-ci='" + i.ci + "' style='--c:var(--ic" + i.ci + ")'";
+    hh += "<tr class='" + rc + "'" + st + "><td class='nm'>" + escapeHtml(pName(i)) + "</td>";
     for (let t = 1; t <= n; t++) {
       const s = i.rows[t];
       let cl = "c", tx = "";
       let tip = "";
-      if (s) { tx = SN[s]; cl += " s"; if (t === c.t) cl += " now"; }
-      if (s && i.cls === "NOP") { tip = " title='" + SN[s] + "'"; tx = "0"; }
+      if (s) { tx = PSN[s]; cl += " s"; if (t === c.t) cl += " now"; }
+      if (s && i.cls === "NOP") { tip = " title='" + PSN[s] + "'"; tx = "0"; }
       if (i.discarded && t === i.discarded + 1) { tx = "✕"; cl += " x"; }
       if (t === c.t) cl += " cur";
-      hh += "<td class='" + cl + "' data-c='" + (t - 1) + "'" + tip + ">" + tx + "</td>";
+      hh += "<td class='" + cl + "' data-c='" + (t - 1) + "' data-u='" + i.uid + "' data-t='" + t + "'" + tip + ">" + tx + "</td>";
     }
     hh += "</tr>";
   });
@@ -2892,6 +3039,7 @@ function renderPipeChart(c) {
   if (PSIM.capped) cap += "<span class='bad'>Parei em 200 ciclos: o laço parece infinito.</span>";
   if (hasNop) cap += "<span>nop: 0 em cada estágio, como no quadro (não faz nada em nenhum)</span>";
   document.getElementById("pipeTcap").innerHTML = cap;
+  pipeArrows();
 }
 function pv(v) { if (v === undefined || v === null) return "?"; return fmtV(v); }
 function pDest(i) { if (i.cls === "R" || i.cls === "LW") return "$" + i.dest; return "X"; }
@@ -2948,7 +3096,7 @@ function renderPipeHaz(fw) {
   if (PIPE.br === "di") where = "no DI";
   PSIM.conf.forEach(k => {
     if (k.brdi) items.push("<li><b>CC" + k.t + ":</b> " + escapeHtml(k.who.name) + " compara no DI, mas o $" + k.reg + " só é gravado por " + escapeHtml(k.p.name) + " no CC" + k.er + ". <span class='bad'>Não coberto pelos slides:</span> eles não mostram adiantamento nem parada para o comparador do DI. O simulador usou o valor velho do banco; por software seriam " + k.need + " nop(s) antes do beq.</li>");
-    else items.push("<li><b>CC" + k.t + ":</b> " + escapeHtml(k.who.name) + " lê $" + k.reg + " no DI, mas " + escapeHtml(k.p.name) + " só grava no CC" + k.er + ". Lê o valor antigo. Por software: " + k.need + " nop(s) antes dela, ou reordenar o código. Por hardware: a UA (marque a opção acima).</li>");
+    else items.push("<li><b>CC" + k.t + ":</b> " + escapeHtml(k.who.name) + " lê $" + k.reg + " no DI, mas " + escapeHtml(k.p.name) + " só grava no CC" + k.er + ". Lê o valor antigo. Por software: " + k.need + " nop(s) antes dela, ou reordenar o código. Por hardware: a UA (ligue a UA acima).</li>");
   });
   PSIM.cycles.forEach(c => c.ev.forEach(e => {
     if (e.k === "fw" && e.used) {
@@ -2956,6 +3104,7 @@ function renderPipeHaz(fw) {
       if (e.v === "10") src = "do EX/MEM";
       items.push("<li><b>CC" + c.t + ":</b> Adianta." + e.s + " = " + e.v + " para " + escapeHtml(e.to.name) + ": $" + e.reg + " = " + fmtV(e.val) + " vem " + src + " (" + escapeHtml(e.from.name) + ").</li>");
     }
+    if (e.k === "fwlw") items.push("<li><b>CC" + c.t + ":</b> <span class='bad'>valor errado.</span> Adianta." + e.s + " = 10 entrega a " + escapeHtml(e.to.name) + " o que está no EX/MEM: o endereço " + fmtV(e.val) + " calculado por " + escapeHtml(e.from.name) + ", e não o dado da memória (slide 37). Falta a UDC, ou 1 nop depois do lw.</li>");
     if (e.k === "fw" && !e.used) items.push("<li><b>CC" + c.t + ":</b> Adianta." + e.s + " = " + e.v + " para " + escapeHtml(e.to.name) + ", mas o valor não é usado.</li>");
     if (e.k === "stall") items.push("<li><b>CC" + c.t + ":</b> conflito do lw. " + escapeHtml(e.who.name) + " usa o $" + e.reg + " que " + escapeHtml(e.lw.name) + " ainda vai ler da memória. PCWrite = 0, IF/IDWrite = 0 e os sinais que entram no DI/EX viram 0: 1 bolha.</li>");
     if (e.k === "branch") {
@@ -3005,13 +3154,14 @@ function renderPipeChips() {
   const code = document.getElementById("pipeCode").value.trim();
   PEX.forEach(ex => {
     const b = h("button", "chip", ex.n); b.type = "button";
-    b.setAttribute("aria-pressed", String(code === ex.code.trim()));
+    let same = code === ex.code.trim();
+    if (same && ex.m) same = ex.m.fw === PIPE.fw && ex.m.hdu === PIPE.hdu && ex.m.br === PIPE.br;
+    b.setAttribute("aria-pressed", String(same));
     b.onclick = () => {
       document.getElementById("pipeCode").value = ex.code;
       document.getElementById("pipeRegs").value = ex.regs;
       document.getElementById("pipeMem").value = ex.mem;
-      if (ex.fw !== undefined) PIPE.fw = ex.fw;
-      if (ex.br) PIPE.br = ex.br;
+      if (ex.m) { PIPE.fw = ex.m.fw; PIPE.hdu = ex.m.hdu; PIPE.br = ex.m.br; }
       syncPipeMode();
       onPipeInput();
     };
@@ -3020,6 +3170,8 @@ function renderPipeChips() {
 }
 function syncPipeMode() {
   document.getElementById("pipeFw").checked = PIPE.fw;
+  document.getElementById("pipeHdu").checked = PIPE.hdu;
+  document.getElementById("pipeModeNote").innerHTML = pipeModeText();
   document.querySelectorAll("#pipeBr button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.br === PIPE.br)));
 }
 function onPipeInput() { animOff(); S.pcyc = 0; runPipe(); renderPipeChips(); renderPipe(); }
@@ -3029,9 +3181,10 @@ function renderPipeSigTbl(c) {
   PSTG.forEach(([k]) => {
     if (!c || !c[k]) return;
     const i = c[k];
-    if (i.bub || i.cls === "NOP") present.BUB = 1; else present[i.cls] = 1;
+    if (i.bub || i.cls === "NOP") present.BUB = 1; else if (i.ne) present.BNE = 1; else present[i.cls] = 1;
   });
   const rows = [["Tipo-R", "R"], ["lw", "LW"], ["sw", "SW"], ["beq", "BEQ"], ["bolha / nop", "BUB"]];
+  if (PIPE.br === "di") rows.splice(4, 0, ["bne (Branch = 0, NBranch = 1)", "BNE"]);
   let html = "<thead><tr><th rowspan='2'>Instrução</th><th colspan='3'>EX</th><th colspan='3'>MEM</th><th colspan='2'>ER</th></tr><tr><th>RegDst</th><th>ALUOp</th><th>ALUSrc</th><th>Branch</th><th>MemRead</th><th>MemWrite</th><th>RegWrite</th><th>MemToReg</th></tr></thead><tbody>";
   rows.forEach(([n, k]) => {
     let cl = "";
@@ -3039,7 +3192,333 @@ function renderPipeSigTbl(c) {
     html += "<tr" + cl + "><td>" + n + "</td>" + PSIG_COLS.map(col => "<td>" + PSIG[k][col] + "</td>").join("") + "</tr>";
   });
   tb.innerHTML = html + "</tbody>";
+  let dn = "";
+  if (PIPE.br === "di") dn = "Com o desvio no DI, Branch e NBranch são usados já no DI e não seguem para o MEM (quadro de 17/11). beq: Branch = 1, NBranch = 0. bne: Branch = 0, NBranch = 1. O NBranch não está na tabela do slide 27; vale 0 para as outras instruções.";
+  document.getElementById("pipeSigDi").textContent = dn;
 }
+
+/* ---------- Pipeline: cores, foco, painel do ciclo, setas e lupa do comparador ---------- */
+const PV = { foc: null, all: false, arrows: true };
+const PREG = { IF: [0, 203], ID: [225, 593], EX: [615, 923], MEM: [945, 1131], WB: [1153, 1290] };
+function pipeColors() {
+  if (!PSIM) return;
+  let n = 0;
+  PSIM.insts.forEach(i => {
+    if (i.bub || i.cls === "NOP") { i.ci = -1; return; }
+    i.ci = n % 6;
+    n++;
+  });
+}
+function pCol(i) { if (i && i.ci >= 0) return "var(--ic" + i.ci + ")"; return "var(--faint)"; }
+function pFocus() {
+  if (typeof A !== "undefined" && A.on && PIPE.seq && A.pst) return A.pst;
+  return PV.foc;
+}
+function pipeDecor(c) {
+  const D = DP;
+  if (!D.L.band) {
+    D.L.band = E("g", { class: "pband" });
+    D.svg.insertBefore(D.L.band, D.svg.firstChild);
+    D.L.dim = E("g", { class: "pdim" }, D.svg);
+    D.bands = {}; D.dims = {};
+    for (const k in PREG) {
+      const x0 = PREG[k][0], w = PREG[k][1] - PREG[k][0];
+      D.bands[k] = { body: E("rect", { x: x0, y: 0, width: w, height: 716, class: "bb" }, D.L.band), head: E("rect", { x: x0, y: 0, width: w, height: 34, class: "bh" }, D.L.band) };
+      D.dims[k] = E("rect", { x: x0, y: 0, width: w, height: 716 }, D.L.dim);
+    }
+    for (const k in D.stg) {
+      const g = D.stg[k].parentNode;
+      g.classList.add("clk");
+      E("title", {}, g, "Focar neste estágio");
+      g.addEventListener("click", () => { if (PV.foc === k) PV.foc = null; else PV.foc = k; renderPipe(); });
+    }
+  }
+  D.svg.appendChild(D.L.dim);
+  const fs = pFocus();
+  for (const k in PREG) {
+    let i = null;
+    if (c) i = c[k];
+    let real = !!i && pReal(i);
+    if (real && i.discarded === c.t) real = false;
+    let col = "transparent";
+    if (real) col = pCol(i);
+    D.bands[k].body.style.fill = col;
+    D.bands[k].head.style.fill = col;
+    let show = "none";
+    if (fs && fs !== k) show = "";
+    D.dims[k].style.display = show;
+    let tf = "";
+    if (real) tf = col;
+    if (D.stg[k]) D.stg[k].style.fill = tf;
+  }
+}
+
+function pShort(k, c) {
+  const i = c[k], di = PIPE.br === "di";
+  if (k === "IF") {
+    let t = "nada para buscar";
+    if (c.IF) {
+      t = "busca a instrução no endereço " + c.pc;
+      if (c.ifAgain) t = "busca de novo o endereço " + c.pc;
+    }
+    if (c.pcsrc) t += " · no fim do ciclo, PC ← " + c.brI.bt;
+    else if (c.stall) t += " · PC parado";
+    return t;
+  }
+  if (!i) return "vazio";
+  if (i.bub && i.why === "desvio") return "bolha: a instrução foi descartada, sinais = 0";
+  if (i.bub) return "bolha: sinais = 0, não faz nada";
+  if (i.cls === "NOP") return "nop: não faz nada";
+  if (k === "ID") {
+    if (c.stall) return "parada: usa o $" + c.EX.p.rt + ", que o lw no EX ainda vai ler da memória";
+    if (i.cls === "BEQ" && di) {
+      let t = "compara $" + i.p.rs + " e $" + i.p.rt + ": (=) = " + i.zero;
+      if (i.taken) t += " → desvia"; else t += " → não desvia";
+      return t;
+    }
+    let t = "a U.C. gera os sinais · lê $" + i.p.rs + " = " + fmtV(i.vRs);
+    if (i.cls !== "LW") t += " e $" + i.p.rt + " = " + fmtV(i.vRt);
+    return t;
+  }
+  if (k === "EX") {
+    if (i.cls === "BEQ" && di) return "nada útil: o desvio já foi decidido no DI";
+    if (i.cls === "R") return "ULA: " + fmtV(i.A) + " " + i.p.sym + " " + fmtV(i.Bf) + " = " + fmtV(i.res);
+    if (i.cls === "LW" || i.cls === "SW") return "ULA calcula o endereço: " + fmtV(i.A) + " + " + fmtV(i.ext) + " = " + fmtV(i.res);
+    return "ULA: " + fmtV(i.A) + " − " + fmtV(i.Bf) + " → Zero = " + i.zero + " · alvo " + i.bt;
+  }
+  if (k === "MEM") {
+    if (i.cls === "LW") return "lê M.D.[" + i.res + "] = " + fmtV(i.memv);
+    if (i.cls === "SW") return "grava M.D.[" + i.res + "] ← " + fmtV(i.Bf);
+    if (i.cls === "R") return "não usa a memória, só passa o resultado adiante";
+    if (di) return "nada";
+    if (i.taken) return "Branch · Zero = 1 → desvia para " + i.bt;
+    return "Zero = 0 → não desvia";
+  }
+  if (i.sig.RegWrite === "1") {
+    if (i.dest === 0) return "destino $0: a escrita é descartada";
+    return "$" + i.dest + " ← " + fmtV(i.wbv) + " (1ª metade do ciclo)";
+  }
+  return "não escreve no banco";
+}
+function pEvents(k, c) {
+  const i = c[k], ev = [], di = PIPE.br === "di";
+  if (k === "IF") {
+    if (c.flush && c.IF) ev.push(["descartada", "bad"]);
+    if (c.stall) ev.push(["PC parado", "warn"]);
+  }
+  if (k === "ID") {
+    if (c.stall) ev.push(["bolha (UDC)", "warn"]);
+    if (c.conf.length) ev.push(["lê valor velho", "bad"]);
+    if (di && c.pcsrc && i === c.brI) ev.push(["desvia", "warn"]);
+    if (!di && c.flush && i && !i.bub) ev.push(["descartada", "bad"]);
+  }
+  if (k === "EX" && i && pReal(i)) {
+    if (c.ev.some(e => e.k === "fwlw")) ev.push(["valor errado", "bad"]);
+    else if (c.ev.some(e => e.k === "fw" && e.used)) ev.push(["adiantamento", "ok"]);
+    if (!di && c.flush && !i.bub) ev.push(["descartada", "bad"]);
+  }
+  if (k === "MEM" && !di && c.pcsrc) ev.push(["desvia", "warn"]);
+  return ev;
+}
+function renderPipeNow(c, fw, sg, L) {
+  const box = document.getElementById("pipeExplain");
+  const chips = pSigChips(c, fw, sg);
+  const fs = pFocus();
+  const n = PSTG.filter(([k]) => pReal(c[k])).length;
+  let tall = "Abrir todos";
+  if (PV.all) tall = "Fechar todos";
+  let plural = "instruções";
+  if (n === 1) plural = "instrução";
+  let h = "<div class='pnow-head'><span class='cc'>CC" + c.t + "</span><span class='hint'>" + n + " " + plural + " no pipeline. Clique num estágio (aqui ou no nome dele em cima do circuito) para abrir o detalhe e escurecer o resto.</span><button type='button' class='btn ghost' id='pnowAll'>" + tall + "</button></div>";
+  PSTG.forEach(([k, nm]) => {
+    const i = c[k];
+    const real = pReal(i);
+    const open = PV.all || fs === k;
+    let cl = "pnr";
+    if (open) cl += " open";
+    if (fs === k) cl += " foc";
+    if (!i && !(k === "IF" && c.pcsrc)) cl += " empty";
+    let col = "var(--faint)";
+    if (real) col = pCol(i);
+    const ev = pEvents(k, c).map(([t, kd]) => "<span class='evb " + kd + "'>" + t + "</span>").join("");
+    let who = "—";
+    if (i) who = pName(i);
+    let body = L[k];
+    if (!body) body = "Vazio neste ciclo.";
+    h += "<div class='" + cl + "' data-k='" + k + "' style='--c:" + col + "'>" +
+      "<button type='button' class='pnr-h' aria-expanded='" + open + "'><span class='tg'>" + nm + "</span><span class='nm'>" + escapeHtml(who) + "</span><span class='sm'>" + escapeHtml(pShort(k, c)) + "</span><span class='evs'>" + ev + "</span></button>" +
+      "<div class='pnr-b'><div>" + body + "</div><div class='sigs'>" + chips[k] + "</div></div></div>";
+  });
+  h += "<p class='note'>Cada sinal vale para a instrução que está no estágio dele: a U.C. gera todos no DI e eles andam junto com ela nos campos WB, M e EX dos registradores de pipeline (slides 26 e 27). <i>fixo</i> = a peça que gera o sinal foi tirada.</p>";
+  box.innerHTML = h;
+  box.querySelectorAll(".pnr-h").forEach(b => {
+    b.onclick = () => {
+      const k = b.parentNode.dataset.k;
+      if (PV.foc === k) PV.foc = null; else PV.foc = k;
+      if (A.on && PIPE.seq && !A.busy) A.pst = null;
+      renderPipe();
+    };
+  });
+  document.getElementById("pnowAll").onclick = () => { PV.all = !PV.all; renderPipe(); };
+}
+
+function pipeModeText() {
+  const p = [];
+  if (PIPE.fw && PIPE.hdu && PIPE.br === "di") p.push("<b>Versão final sem exceção</b> (slide 45 + quadro de 17/11). Desligue uma peça para ver o que quebra sem ela.");
+  if (!PIPE.fw) p.push("<b>Sem a UA:</b> os muxes antes da ULA ficam travados em 00, o valor lido no DI. Quem lê um registrador antes de ele ser escrito pega o valor velho (slides 30-31). Saída por software: nops ou reordenar (slides 13 e 16).");
+  if (!PIPE.hdu) p.push("<b>Sem a UDC:</b> nada para o pipeline. Um lw seguido de uso recebe o endereço no lugar do dado (slide 37). Saída por software: 1 nop depois do lw (quadro de 17/11).");
+  if (PIPE.br === "mem") p.push("<b>Desvio no MEM</b> (slide 28, versão anterior): somador no EX, AND no MEM e 3 instruções descartadas quando desvia (slide 42). Na versão final o desvio é decidido no DI e descarta só 1.");
+  p.push("Apagado = peça tirada. Mux tracejado = o do ALUSrc, que os slides 36, 40 e 45 não desenham, mas continua existindo.");
+  return p.join(" ");
+}
+function pipeSeqCtl() {
+  const l = h("label", "opt");
+  l.appendChild(document.createTextNode("Mostrar "));
+  const sel = document.createElement("select");
+  sel.id = "pseq";
+  [["seq", "um estágio por vez"], ["all", "os 5 estágios juntos"]].forEach(o => {
+    const op = document.createElement("option");
+    op.value = o[0]; op.textContent = o[1];
+    if ((o[0] === "seq") === PIPE.seq) op.selected = true;
+    sel.appendChild(op);
+  });
+  sel.onchange = () => { PIPE.seq = sel.value === "seq"; animOff(); renderPipe(); };
+  l.appendChild(sel);
+  return l;
+}
+
+/* setas de dependência no diagrama de ciclos (como nos slides 31 e 33) */
+function pipeArrows() {
+  const svg = document.getElementById("pipeArrows");
+  if (!svg) return;
+  svg.innerHTML = "";
+  if (!PSIM || !PV.arrows) return;
+  const box = svg.parentNode, tb = document.getElementById("pipeChart");
+  const br = box.getBoundingClientRect();
+  if (!br.width) return;
+  svg.innerHTML = "<defs><marker id='pa-ok' viewBox='0 0 8 8' refX='7' refY='4' markerWidth='7' markerHeight='7' orient='auto'><path d='M0,0 L8,4 L0,8 z' class='mk-ok'/></marker>" +
+    "<marker id='pa-bad' viewBox='0 0 8 8' refX='7' refY='4' markerWidth='7' markerHeight='7' orient='auto'><path d='M0,0 L8,4 L0,8 z' class='mk-bad'/></marker></defs>";
+  function cell(i, t) {
+    const el = tb.querySelector("td[data-u='" + i.uid + "'][data-t='" + t + "']");
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { l: r.left - br.left, r: r.right - br.left, t: r.top - br.top, b: r.bottom - br.top, cx: (r.left + r.right) / 2 - br.left, cy: (r.top + r.bottom) / 2 - br.top };
+  }
+  const list = {};
+  PSIM.cycles.forEach(c => c.ev.forEach(e => {
+    let kind = "";
+    if (e.k === "fwlw") kind = "bad";
+    else if (e.k === "fw" && e.used) kind = "ok";
+    if (!kind) return;
+    const key = e.from.uid + ":" + e.to.uid + ":" + c.t;
+    const old = list[key];
+    if (old && old.kind === "bad") return;
+    let lab = "$" + e.reg;
+    if (kind === "bad") lab = "end.";
+    list[key] = { p: e.from, pt: c.t - 1, q: e.to, qt: c.t, kind, lab };
+  }));
+  PSIM.conf.forEach(k => {
+    const key = "c" + k.p.uid + ":" + k.who.uid;
+    list[key] = { p: k.p, pt: k.er, q: k.who, qt: k.t, kind: "bad", lab: "$" + k.reg + " velho" };
+  });
+  for (const key in list) {
+    const a = list[key];
+    const P = cell(a.p, a.pt), Q = cell(a.q, a.qt);
+    if (!P || !Q) continue;
+    let d = "", lx = 0, ly = 0;
+    if (Q.cx > P.cx) {
+      const x1 = P.cx + 15, y1 = P.cy + 3, x2 = Q.cx - 17, y2 = Q.cy;
+      d = "M" + x1 + "," + y1 + " C" + (x1 + 22) + "," + y1 + " " + (x2 - 24) + "," + y2 + " " + x2 + "," + y2;
+      lx = (x1 + x2) / 2 + 6; ly = (y1 + y2) / 2 - 3;
+    } else {
+      const x1 = P.cx - 15, y1 = P.cy + 3, x2 = Q.cx + 17, y2 = Q.cy;
+      d = "M" + x1 + "," + y1 + " C" + (x1 - 22) + "," + (y1 + 4) + " " + (x2 + 30) + "," + (y2 - 4) + " " + x2 + "," + y2;
+      lx = (x1 + x2) / 2; ly = (y1 + y2) / 2 - 4;
+    }
+    E("path", { d, class: a.kind, "marker-end": "url(#pa-" + a.kind + ")" }, svg);
+    E("text", { x: lx, y: ly, class: a.kind }, svg, a.lab);
+  }
+}
+
+/* lupa do comparador "=" (quadro de 17/11: um XOR por bit + NOR) */
+const LZC = { a: null, b: null };
+function bin4(v) { return (v & 15).toString(2).padStart(4, "0"); }
+function renderLupaCmp(svg, notes, disc) {
+  const c = pcur();
+  let I = null;
+  if (c) I = c.ID;
+  const has = PIPE.br === "di" && pReal(I) && I.cls === "BEQ";
+  if (LZC.a === null) {
+    LZC.a = 10; LZC.b = 10;
+    if (has) { LZC.a = I.vRs & 15; LZC.b = I.vRt & 15; }
+  }
+  const A4 = LZC.a, B4 = LZC.b;
+  const bit = (v, i) => (v >> i) & 1;
+  svg.innerHTML = "";
+  svg.setAttribute("viewBox", "0 0 900 600");
+  const root = E("g", { class: "lz lzc" }, svg);
+  E("text", { x: 40, y: 34, class: "t" }, root, "A (Rs) = " + bin4(A4) + "  ·  B (Rt) = " + bin4(B4) + "  ·  4 bits, como no quadro");
+  const NY = [246, 270, 294, 318], XV = [510, 490, 490, 510];
+  let anyOne = 0;
+  for (let r = 0; r < 4; r++) {
+    const i = 3 - r, yc = 110 + r * 115;
+    const a = bit(A4, i), b = bit(B4, i), x = a ^ b;
+    if (x) anyOne = 1;
+    [["A", a, yc - 36, "a"], ["B", b, yc + 10, "b"]].forEach(([n, v, y, key]) => {
+      let cl = "bitb";
+      if (v) cl += " one";
+      const g = E("g", { class: cl, tabindex: "0", role: "button", "aria-label": "Trocar " + n + i }, root);
+      E("rect", { x: 40, y, width: 74, height: 26, rx: 5 }, g);
+      E("text", { x: 77, y: y + 17.5, "text-anchor": "middle" }, g, n + i + " = " + v);
+      const flip = () => { LZC[key] = LZC[key] ^ (1 << i); renderLupaCmp(svg, notes, disc); };
+      g.addEventListener("click", flip);
+      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    });
+    let ca = "w", cb = "w", cx = "w";
+    if (a) ca = "w on";
+    if (b) cb = "w on";
+    if (x) cx = "w on";
+    E("path", { d: "M114," + (yc - 23) + " H260 V" + (yc - 11) + " H318", class: ca }, root);
+    E("path", { d: "M114," + (yc + 23) + " H260 V" + (yc + 11) + " H318", class: cb }, root);
+    E("path", { d: "M306," + (yc - 22) + " Q318," + yc + " 306," + (yc + 22), class: "w gate" }, root);
+    E("path", { d: "M312," + (yc - 22) + " Q348," + (yc - 22) + " 372," + yc + " Q348," + (yc + 22) + " 312," + (yc + 22) + " Q324," + yc + " 312," + (yc - 22) + " Z", class: "sh" }, root);
+    E("text", { x: 340, y: yc + 4, "text-anchor": "middle", class: "gl" }, root, "XOR");
+    E("path", { d: "M372," + yc + " H" + XV[r] + " V" + NY[r] + " H568", class: cx }, root);
+    let vc = "rq";
+    if (x) vc = "vOn";
+    E("text", { x: 384, y: yc - 7, class: vc }, root, a + " ⊕ " + b + " = " + x);
+  }
+  const S1 = 1 - anyOne;
+  E("path", { d: "M560,230 Q620,230 650,282 Q620,334 560,334 Q578,282 560,230 Z", class: "sh" }, root);
+  E("circle", { cx: 657, cy: 282, r: 6, class: "sh" }, root);
+  E("text", { x: 598, y: 286, "text-anchor": "middle", class: "gl" }, root, "NOR");
+  let so = "w";
+  if (S1) so = "w on";
+  E("path", { d: "M663,282 H760", class: so }, root);
+  E("text", { x: 770, y: 290, class: "big" }, root, "S = " + S1);
+  let eqt = "A ≠ B";
+  if (S1) eqt = "A = B";
+  E("text", { x: 770, y: 312, class: "t" }, root, eqt);
+  E("text", { x: 560, y: 362, class: "gl" }, root, "NOR: dá 1 só quando todas as entradas são 0");
+  E("text", { x: 40, y: 580, class: "gl" }, root, "XOR: 0⊕0 = 0 · 0⊕1 = 1 · 1⊕0 = 1 · 1⊕1 = 0 (dá 1 quando os dois bits são diferentes)");
+  const li = [
+    "Cada XOR compara um bit: Aᵢ ⊕ Bᵢ = 1 quando os bits são diferentes.",
+    "O NOR junta os XORs: S = 1 só se todos derem 0, ou seja, só se A = B. Esse S é a saída do bloco \"=\" do slide 45.",
+    "No MIPS são 32 XORs, um por bit, e um NOR de 32 entradas. No quadro de 17/11 o professor desenhou com 4 bits (A₃…A₀, B₃…B₀).",
+    "Depois do \"=\": S entra numa AND com o Branch (beq) e, passando pela bolinha (NOT), numa AND com o NBranch (bne). Um OR junta as duas e gera o PCSrc e o Elimina.BI."
+  ];
+  if (has) li.push("Neste ciclo: " + escapeHtml(I.name) + " compara $" + I.p.rs + " = " + fmtV(I.vRs) + " com $" + I.p.rt + " = " + fmtV(I.vRt) + " → (=) = " + I.zero + ". Os bits acima começaram com os 4 bits mais baixos desses valores.");
+  else li.push("Neste ciclo não há beq nem bne no DI; os bits começaram em 1010 e 1010.");
+  notes.innerHTML = li.map(t => "<li>" + t + "</li>").join("");
+  disc.textContent = "Clique nos bits de A e B para trocar 0 ↔ 1.";
+}
+LUPA.CMP = { title: "Dentro do comparador (=)", render: (svg, notes, disc) => { LZC.a = null; renderLupaCmp(svg, notes, disc); } };
+lupaBtn(DP, "CMP", 452, 330);
+DP.L.badges.lastChild.setAttribute("data-br", "di");
+
+document.getElementById("pipeHdu").addEventListener("change", e => { PIPE.hdu = e.target.checked; onPipeInput(); });
+document.getElementById("pipeArrowsOn").addEventListener("change", e => { PV.arrows = e.target.checked; pipeArrows(); });
+if (window.ResizeObserver) new ResizeObserver(() => pipeArrows()).observe(document.querySelector(".pchart-box"));
 
 /* ---------- estado e render ---------- */
 const S = { tab: "mono", p: parse("add $t0, $t1, $t2"), ph: 0, step: 0, timer: null, pcyc: 0 };
@@ -3758,7 +4237,7 @@ function renderCur() { if (S.tab === "multi") renderMulti(); else if (S.tab === 
 function stepWait(st) { if (!st.wait) return 0; if (st.wait === "C") return Math.max(T.M, T.R, T.A); return tv(st.wait); }
 function buildSteps() { if (S.tab === "multi") A.steps = multiAnimSteps(S.p); else if (S.tab === "pipe") A.steps = pipeAnimSteps(); else A.steps = monoAnimSteps(S.p); }
 function animOff() {
-  A.token++; A.on = false; A.playing = false; A.busy = false; A.k = 0; A.lit = {}; A.now = {}; A.act = {}; A.pi = -1; A.flying = {};
+  A.token++; A.on = false; A.playing = false; A.busy = false; A.k = 0; A.lit = {}; A.now = {}; A.act = {}; A.pi = -1; A.flying = {}; A.pst = null;
   clearOrbs(DM); clearOrbs(DX); clearOrbs(DP); updateBars();
 }
 function clearOrbs(D) { if (D.L.anim) D.L.anim.innerHTML = ""; }
@@ -3772,7 +4251,7 @@ function syncPanels(k) {
   if (k <= 0) return;
   const st = A.steps[k - 1];
   if (S.tab === "multi") S.step = st.idx;
-  else if (S.tab === "pipe") S.pcyc = st.idx;
+  else if (S.tab === "pipe") { S.pcyc = st.idx; A.pst = st.stage || null; }
   else { let ph = st.ph; if (ph === 9) { const ps = MPHASES[group(S.p.cls)]; ph = ps[ps.length - 1]; } S.ph = ph; }
 }
 function snapTo(k) {
@@ -3782,11 +4261,13 @@ function snapTo(k) {
   if (k > 0) {
     const st = A.steps[k - 1];
     (st.waves || []).forEach(w => w.forEach(id => { A.lit[id] = 1; A.now[id] = 1; }));
+    (st.pre || []).forEach(id => { A.lit[id] = 1; });
     (st.units || []).forEach(u => { A.act[u] = 1; });
   }
   A.clock = 0;
   for (let i = 0; i < k; i++) A.clock += stepWait(A.steps[i]);
-  if (cycTab()) A.clock = k * Math.max(T.M, T.R, T.A);
+  if (cycTab() && !(S.tab === "pipe" && PIPE.seq)) A.clock = k * Math.max(T.M, T.R, T.A);
+  A.pst = null;
   syncPanels(k);
   clearOrbs(curD());
   renderCur();
@@ -3852,14 +4333,19 @@ async function runStep(i) {
   A.busy = true; A.on = true; A.edge = false;
   A.vals = calcVals(S.p);
   A.k = i;
+  A.clock = 0;
+  for (let j = 0; j < i; j++) A.clock += stepWait(A.steps[j]);
+  if (cycTab() && !(S.tab === "pipe" && PIPE.seq)) A.clock = i * Math.max(T.M, T.R, T.A);
   A.lit = baseLit(i); A.now = {}; A.act = {};
   const st = A.steps[i];
   syncPanels(i + 1);
   renderCur();
   A.lit = baseLit(i); A.now = {};
+  (st.pre || []).forEach(id => { A.lit[id] = 1; });
   overlayAnim();
   updateBars(i);
   for (const w of (st.waves || [])) { if (A.token !== token) break; await animateWave(D, w, token, st); }
+  if (st.hold && A.playing && A.token === token) await wait(st.hold / A.speed, token);
   if (A.token === token && st.flash) flashBadges(D);
   if (A.token === token && (st.units || []).length) {
     A.edge = true;
@@ -3903,7 +4389,7 @@ function loadInstr(pi) {
   updateBars();
 }
 async function animNext() {
-  if (A.busy) { A.token++; A.playing = false; updateBars(); return; }
+  if (A.busy) { A.token++; A.playing = false; A.busy = false; snapTo(Math.min(A.k + 1, A.steps.length)); return; }
   if (!A.on) { A.on = true; buildSteps(); if (A.prog && SIM && A.pi < 0) loadInstr(0); }
   if (A.k >= A.steps.length) { if (haveNextInstr()) loadInstr(A.pi + 1); else return; }
   await runStep(A.k);
@@ -3941,9 +4427,13 @@ function updateClock() {
     let txt = "";
     if (A.on) {
       if (S.tab === "pipe") {
-        let n = A.k;
-        if (A.busy) n = A.k + 1;
-        txt = "ciclo " + n + " de " + A.steps.length + " · t = " + fmt(A.clock) + " ns";
+        let j = A.k - 1;
+        if (A.busy) j = A.k;
+        let n = 0;
+        if (j >= 0 && A.steps[j]) n = A.steps[j].idx + 1;
+        let tot = 0;
+        if (PSIM) tot = PSIM.cycles.length;
+        txt = "ciclo " + n + " de " + tot + " · t = " + fmt(A.clock) + " ns";
       } else if (S.tab === "multi") {
         const Tc = Math.max(T.M, T.R, T.A);
         txt = "ciclo " + Math.max(A.k, A.busy ? A.k + 1 : A.k) + " de " + A.steps.length + " · t = " + fmt(A.clock) + " ns";
@@ -3987,7 +4477,7 @@ function buildBar(cardId, tab) {
   const reset = h("button", "btn ghost", "Reiniciar"); reset.type = "button";
   const spl = h("label", "opt"); spl.textContent = "Velocidade ";
   const sel = document.createElement("select"); sel.id = "spd-" + tab;
-  [["0.5", "0,5×"], ["1", "1×"], ["2", "2×"]].forEach(o => { const op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; if (o[0] === "1") op.selected = true; sel.appendChild(op); });
+  [["0.25", "0,25×"], ["0.5", "0,5×"], ["1", "1×"], ["2", "2×"]].forEach(o => { const op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; if (o[0] === "1") op.selected = true; sel.appendChild(op); });
   spl.appendChild(sel);
   const lbl2 = h("label", "opt"); const lb = document.createElement("input"); lb.type = "checkbox"; lb.checked = true; lb.id = "lbl-" + tab; lbl2.appendChild(lb); lbl2.appendChild(document.createTextNode(" valores na esfera"));
   const pl = h("label", "opt"); const pc = document.createElement("input"); pc.type = "checkbox"; pc.id = "prog-" + tab; pl.appendChild(pc); pl.appendChild(document.createTextNode(" seguir o programa do simulador"));
@@ -4012,9 +4502,11 @@ function buildBar(cardId, tab) {
   const opts = document.createElement("details"); opts.className = "opts";
   const sm = document.createElement("summary"); sm.textContent = "Opções";
   const ob = h("div", "opts-body");
-  items.slice(4).forEach(x => ob.appendChild(x));
+  items.slice(5).forEach(x => ob.appendChild(x));
   opts.appendChild(sm); opts.appendChild(ob);
-  [play, next, prev, reset, opts, clock, msg].forEach(x => bar.appendChild(x));
+  const main = [play, next, prev, reset, spl];
+  if (tab === "pipe") main.push(pipeSeqCtl());
+  main.concat([opts, clock, msg]).forEach(x => bar.appendChild(x));
   const host = document.querySelector("#" + cardId + " .ctrlbar");
   host.insertBefore(bar, host.firstChild);
   play.onclick = () => { stopPlay(); animPlay(); };

@@ -5,13 +5,17 @@
 
 Material de estudo de **Arquitetura e Organização de Computadores** (UNICAP): MIPS, tradução de C para MIPS e caminho de dados monociclo, multiciclo e pipeline.
 
+**Acessar online, sem instalar nada:** https://rafaelsampa.github.io/arq-org-comp-documents/
+
+O site é publicado pelo GitHub Pages a partir da pasta `src/` a cada push na `main` (`.github/workflows/pages.yml`). As páginas têm `noindex`, então não aparecem em buscadores: quem chega é pelo link ou por este repositório.
+
 ## O que tem aqui
 
 | Arquivo | Conteúdo |
 | --- | --- |
 | `src/index.html` | Página inicial com a lista de materiais |
 | `src/mips-do-zero.html` | **01.** Registradores, formatos de instrução, tradução de C para MIPS, pilha e exercícios |
-| `src/caminho-de-dados.html` | **02.** Circuitos interativos do monociclo, do multiciclo e do pipeline (tradicional, UA no EX e desvio no DI), sinais de controle, animação ciclo a ciclo e simulador de programa |
+| `src/caminho-de-dados.html` | **02.** Circuitos interativos do monociclo, do multiciclo e do pipeline (circuito final do slide 45, com chaves para tirar a UA, tirar a UDC ou voltar o desvio para o MEM), sinais de controle, animação ciclo a ciclo ou estágio por estágio e simulador de programa |
 | `src/manual-mono-multi.html` | **03. Conteúdo extra.** Manual de monociclo e multiciclo, máquina de estados, exercícios resolvidos e autoteste |
 | `src/nav.js` | Menu lateral compartilhado entre as páginas |
 | `class-notes/` | Rascunhos das aulas |
