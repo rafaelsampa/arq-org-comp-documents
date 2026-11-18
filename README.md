@@ -3,7 +3,7 @@
 > [!WARNING]
 > **Pode conter informações erradas.** Todo o conteúdo foi montado a partir de mais de 10 arquivos .md de anotações feitas em sala de aula, de provas antigas, do livro *Organização e Projeto de Computadores* (Patterson e Hennessy, 2ª edição), dos slides antigos e dos materiais de estudo da disciplina. **Na dúvida, vale o que o professor ensinou em sala.**
 
-Material de estudo de **Arquitetura e Organização de Computadores** (UNICAP): MIPS, tradução de C para MIPS e caminho de dados monociclo e multiciclo.
+Material de estudo de **Arquitetura e Organização de Computadores** (UNICAP): MIPS, tradução de C para MIPS e caminho de dados monociclo, multiciclo e pipeline.
 
 ## O que tem aqui
 
@@ -11,7 +11,7 @@ Material de estudo de **Arquitetura e Organização de Computadores** (UNICAP): 
 | --- | --- |
 | `src/index.html` | Página inicial com a lista de materiais |
 | `src/mips-do-zero.html` | **01.** Registradores, formatos de instrução, tradução de C para MIPS, pilha e exercícios |
-| `src/caminho-de-dados.html` | **02.** Circuitos interativos do monociclo e do multiciclo, sinais de controle, animação ciclo a ciclo e simulador de programa |
+| `src/caminho-de-dados.html` | **02.** Circuitos interativos do monociclo, do multiciclo e do pipeline (tradicional, UA no EX e desvio no DI), sinais de controle, animação ciclo a ciclo e simulador de programa |
 | `src/manual-mono-multi.html` | **03. Conteúdo extra.** Manual de monociclo e multiciclo, máquina de estados, exercícios resolvidos e autoteste |
 | `src/nav.js` | Menu lateral compartilhado entre as páginas |
 | `class-notes/` | Rascunhos das aulas |
